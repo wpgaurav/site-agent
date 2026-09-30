@@ -1,0 +1,9 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "site-agent": {
+      "type": "streamable-http",
+      "url": "https://gauravtiwari.org/wp-json/site-agent/v1/mcp"
+    }
+  }
+}
