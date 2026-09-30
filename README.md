@@ -1,6 +1,6 @@
 # Site Agent
 
-![Site Agent for WordPress](site/assets/site-agent-social.png)
+![Site Agent for WordPress](site/assets/site-agent-social-centered-1200x630.png)
 
 [Get Site Agent](https://gauravtiwari.org/product/site-agent/) · [Releases](https://github.com/wpgaurav/site-agent/releases) · [Security](SECURITY.md)
 

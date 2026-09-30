@@ -5,7 +5,7 @@ import json,re,sys,shutil
 root=Path(__file__).resolve().parents[1]
 site=root/'site'
 manifest=json.loads((site/'product.json').read_text()) if (site/'product.json').exists() else {'id':1180328,'variation_id':131,'checkout':'https://gauravtiwari.org/?fluent-cart=instant_checkout&item_id=131&quantity=1'}
-media=json.loads((site/'assets/media.json').read_text()) if (site/'assets/media.json').exists() else {'icon':{'url':'assets/site-agent-icon.png'}}
+media=json.loads((site/'assets/media.json').read_text()) if (site/'assets/media.json').exists() else {'icon':{'url':'assets/site-agent-icon-approved-512.png'}}
 html=(site/'content.html').read_text().replace('{{CHECKOUT}}',manifest['checkout']).replace('{{GITHUB}}','https://github.com/wpgaurav/site-agent').replace('{{ICON}}',media['icon']['url'])
 css=(site/'style.css').read_text();js=(site/'script.js').read_text()
 assert not re.search(r'letter-spacing\s*:',css)
@@ -32,7 +32,7 @@ content='<!-- wp:group {"tagName":"main","className":"sa"} -->\n<main class="wp-
 (site/'product-content.html').write_text(content)
 payload={'id':manifest['id'],'content':content,'template':'pbb-template.php','title':'Site Agent','slug':'site-agent','excerpt':'An open-source WordPress MCP plugin for content, source inspection, file editing, PHP execution and WP-CLI. Free checkout includes an update license.','meta':{'rank_math_title':'Site Agent: WordPress MCP Developer Tools %sep% %sitename%','rank_math_description':'Connect your coding agent to WordPress with Site Agent. Control content, source, PHP and WP-CLI access. Free download with a free automatic-update license.','rank_math_focus_keyword':'Site Agent WordPress MCP'}}
 (site/'product-payload.json').write_text(json.dumps(payload,ensure_ascii=False,indent=2))
-preview=html.replace(media['icon']['url'],'assets/site-agent-icon.png')
+preview=html.replace(media['icon']['url'],'assets/site-agent-icon-approved-512.png')
 preview_fonts='@font-face{font-family:FinlandicaPreview;src:url(.preview/FinlandicaTextVF-latin.otf)}@font-face{font-family:GTPreview;src:url(.preview/ReallySansLarge-Black.otf);font-weight:800}body{margin:0;font-family:FinlandicaPreview,sans-serif}.sa h1,.sa h2{font-family:GTPreview,sans-serif}body>.preview-theme{position:fixed;right:16px;top:16px;z-index:1000;background:#fffffc;color:#212121;border:1px solid #ddd;border-radius:4px;padding:10px 14px;font:inherit;cursor:pointer}'
 (site/'index.html').write_text('<!doctype html><html lang="en" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Site Agent Product Preview</title><style>'+preview_fonts+css+'</style></head><body><button class="preview-theme" aria-label="Toggle preview theme">Toggle Theme</button><main class="sa">'+preview+'</main><script>'+js+"document.querySelector('.preview-theme').addEventListener('click',()=>document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark');"+'</script></body></html>')
 fonts=site/'.preview';fonts.mkdir(exist_ok=True)

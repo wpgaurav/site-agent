@@ -1,17 +1,17 @@
 {
-    "icon": {
-        "id": 1180329,
-        "url": "https://r2.gauravtiwari.org/wp-content/uploads/2026/09/site-agent-icon.png",
-        "alt": "Site Agent access symbol"
-    },
-    "social": {
-        "id": 1180330,
-        "url": "https://r2.gauravtiwari.org/wp-content/uploads/2026/09/site-agent-social.png",
-        "alt": "Site Agent for WordPress with content, source, PHP and WP-CLI tools"
-    },
-    "banner": {
-        "id": 1180331,
-        "url": "https://r2.gauravtiwari.org/wp-content/uploads/2026/09/site-agent-banner.png",
-        "alt": "Site Agent WordPress MCP developer tools"
-    }
+  "icon": {
+    "id": 1180339,
+    "url": "https://r2.gauravtiwari.org/wp-content/uploads/2026/09/site-agent-icon-approved-512.png",
+    "alt": "Site Agent bracket and connected A icon"
+  },
+  "banner": {
+    "id": 1180340,
+    "url": "https://r2.gauravtiwari.org/wp-content/uploads/2026/09/site-agent-banner-centered-1544x500-1.png",
+    "alt": "Site Agent icon centered between the product name and WordPress MCP Tools on a dark blue background"
+  },
+  "social": {
+    "id": 1180341,
+    "url": "https://r2.gauravtiwari.org/wp-content/uploads/2026/09/site-agent-social-centered-1200x630-1.png",
+    "alt": "Site Agent icon and wordmark with WordPress MCP Tools on a dark blue background"
+  }
 }
