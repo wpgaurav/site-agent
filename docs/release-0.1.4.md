@@ -1,0 +1,13 @@
+# Site Agent 0.1.4
+
+Adds opt-in URL authentication to the MCP endpoint. A dedicated WordPress username and Application Password are supplied as Base64 in the `auth` query parameter. The converter's new Copy authenticated endpoint action percent-encodes the value and preserves plain-permalink parameters. Authentication is restricted to the MCP route and validated through WordPress on every request; administrator, HTTPS, emergency-disable and enabled-tool checks remain in effect.
+
+The mode defaults off for new installations and is enabled on gauravtiwari.org as requested. Other access settings, update credentials, commerce records and product content were preserved. URL credentials can appear in client history or server/proxy logs and must be treated as secrets. The feature is not OAuth, and client compatibility depends on supported MCP/HTTP behavior and retaining query parameters on every request.
+
+The WordPress ZIP is 378404 bytes, SHA-256 `66cff32dd42911554392bcc1e0b31a33b105f0d27ff0e87e47b364259fccd2cb`, delivered through FluentCart download 328. All 283 installed files match the published package. The companion ZIP is 19594 bytes, SHA-256 `7a866ba131d0fa3aa575c076af3796b5c1a5eed073a0dd70e837ffe974c31401`. Prior WordPress version 0.1.3 remains as rollback download 326 and a private production archive.
+
+Verification passed 33 integration tests / 144 assertions, 7 converter tests, local headerless HTTP initialization/discovery, route isolation, invalid-credential rejection and session termination. CI passed PHP 8.0, 8.3 and 8.5. Live HTTPS verification passed 11 URL-auth checks, including initialization without Authorization headers, configured tool discovery, reads, standard/URL-safe credentials, stateless protocol support, unrelated core REST denial, termination and password revocation. Browser verification used only dummy inputs and confirmed the generated endpoint and auth value. Temporary credentials and test sessions were removed.
+
+Live MCP responses retain private/no-store cache headers. The plugin sets no-referrer at the WordPress response layer, verified locally; the public response replaces this with the site-wide strict-origin-when-cross-origin policy. That host-level header was not changed and no claim is made that URLs cannot be logged or exposed through history.
+
+GitHub, R2 readback and the licensed download matched in size and checksum. Valid activation received the off-site package; invalid activation did not. WordPress downloaded the package while maintenance was active, then maintenance cleared. The synthetic activation disconnected and its verification license was disabled. All 4 Site Agent R2 packages remain referenced by download rows; no scoped orphan was found.
