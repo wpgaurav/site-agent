@@ -19,7 +19,7 @@
     "termsOfServiceURL": "https://gauravtiwari.org/tos/"
   },
   "name": "site-agent",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "description": "A WordPress assistant for site inspection, content audits, draft creation, and hash-checked edits through Site Agent's MCP tools.",
   "author": {
     "name": "Gaurav Tiwari",
@@ -33,7 +33,7 @@
     "developer-tools"
   ],
   "skills": "./skills",
-  "mcpServers": "./.mcp.json",
+  "mcpServers": "./mcp.json",
   "homepage": "https://gauravtiwari.org/product/site-agent/",
   "repository": "https://github.com/wpgaurav/site-agent",
   "license": "GPL-2.0-or-later"

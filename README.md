@@ -8,6 +8,14 @@ Site Agent connects an MCP client directly to WordPress. It provides site contex
 
 Site Agent is free and open source. The complete release ZIP and a free automatic-update license are available from [gauravtiwari.org](https://gauravtiwari.org/product/site-agent/). It runs independently of Functionalities. This repository is the public source; install the release ZIP, which includes the official scoped MCP runtime.
 
+## Companion Package
+
+Release 0.1.3 also includes `site-agent-companion-0.1.3.zip`, built from `companion/site-agent/`. It supplies the approved icon, a credential-free MCP connection and a WordPress workflow skill for compatible ChatGPT/Codex hosts. The skill covers site inspection, raw-content audits, draft preparation, hash-checked edits and enabled developer tools.
+
+This companion archive is separate from the WordPress installable ZIP. Authentication must be configured privately through a compatible host. It does not implement OAuth or establish authenticated ChatGPT web connectivity. The server still requires a WordPress Application Password and a Basic Authorization header; ChatGPT web needs an OAuth-compatible connection layer.
+
+Build and validate the companion with `python3 bin/build-companion.py`. Never include credentials in its manifests or archive.
+
 ## Requirements and Installation
 
 - WordPress 6.9 or newer; PHP 8.0 or newer.
@@ -90,7 +98,7 @@ SITE_AGENT_WP_DIR=/path/to/disposable/wordpress vendor/bin/phpunit
 bash bin/build.sh
 ```
 
-Tests refuse to load an installation without a `.site-agent-test-install` marker. Never place that marker on a real site. Integration tests modify disposable options, users, posts, and fixture files. The build uses a runtime allowlist and excludes tests, development dependencies, Composer metadata, docs, and screenshots. Ship `dist/site-agent-0.1.2.zip`, not a GitHub source archive.
+Tests refuse to load an installation without a `.site-agent-test-install` marker. Never place that marker on a real site. Integration tests modify disposable options, users, posts, and fixture files. The build uses a runtime allowlist and excludes tests, development dependencies, Composer metadata, docs, and screenshots. Ship `dist/site-agent-0.1.3.zip`, not a GitHub source archive.
 
 ## License and Contributions
 
