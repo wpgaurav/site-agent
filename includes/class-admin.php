@@ -69,6 +69,7 @@ final class Admin {
 		$config     = Config::get();
 		$controls   = array(
 			'enabled'       => array( __( 'Enable Site Agent', 'site-agent' ), __( 'Allow authenticated administrators to connect and use the tools selected below.', 'site-agent' ) ),
+			'url_auth'      => array( __( 'URL authentication', 'site-agent' ), __( 'Allow Base64-encoded username and Application Password credentials in the MCP endpoint auth query parameter. URLs may be recorded in client history and server logs. Use a dedicated, revocable Application Password.', 'site-agent' ) ),
 			'content_write' => array( __( 'Content writes', 'site-agent' ), __( 'Create drafts and edit posts or pages. Publishing requires an explicit tool argument.', 'site-agent' ) ),
 			'file_read'     => array( __( 'Source inspection', 'site-agent' ), __( 'Read plugin and theme source files. Source files can contain sensitive data.', 'site-agent' ) ),
 			'file_write'    => array( __( 'Source editing', 'site-agent' ), __( 'Create or overwrite plugin and theme files, including PHP. Incorrect code can break the site.', 'site-agent' ) ),
@@ -148,8 +149,9 @@ final class Admin {
 				<div id="site-agent-auth-result" hidden>
 					<p><label for="site-agent-auth-token"><strong><?php esc_html_e( 'Base64 token', 'site-agent' ); ?></strong></label></p>
 					<input id="site-agent-auth-token" type="password" readonly autocomplete="off" spellcheck="false" class="large-text" aria-describedby="site-agent-auth-help" style="width:100%;max-width:640px;">
-					<p><button type="button" id="site-agent-auth-show" class="button" aria-pressed="false"><?php esc_html_e( 'Show token', 'site-agent' ); ?></button> <button type="button" class="button" data-site-agent-copy="token"><?php esc_html_e( 'Copy Base64 token', 'site-agent' ); ?></button> <button type="button" class="button" data-site-agent-copy="authorization"><?php esc_html_e( 'Copy Authorization value', 'site-agent' ); ?></button> <button type="button" class="button" data-site-agent-copy="configuration"><?php esc_html_e( 'Copy MCP configuration', 'site-agent' ); ?></button></p>
+					<p><button type="button" id="site-agent-auth-show" class="button" aria-pressed="false"><?php esc_html_e( 'Show token', 'site-agent' ); ?></button> <button type="button" class="button" data-site-agent-copy="token"><?php esc_html_e( 'Copy Base64 token', 'site-agent' ); ?></button> <button type="button" class="button" data-site-agent-copy="authorization"><?php esc_html_e( 'Copy Authorization value', 'site-agent' ); ?></button> <button type="button" class="button" data-site-agent-copy="configuration"><?php esc_html_e( 'Copy MCP configuration', 'site-agent' ); ?></button> <button type="button" class="button" data-site-agent-copy="endpoint" <?php disabled( ! Config::get()['url_auth'] ); ?>><?php esc_html_e( 'Copy authenticated endpoint', 'site-agent' ); ?></button></p>
 					<p id="site-agent-auth-help" class="description"><?php esc_html_e( 'The Authorization value includes the Basic prefix. The MCP configuration includes your endpoint and generated value. Base64 is reversible, so keep the token and configuration private.', 'site-agent' ); ?></p>
+					<p class="description"><?php esc_html_e( 'For clients without custom headers, enable URL authentication above and save first. Copy authenticated endpoint adds the auth query parameter. This URL contains your credentials and may appear in history or logs; keep it private. A compatible Streamable HTTP MCP client is still required.', 'site-agent' ); ?></p>
 				</div>
 				<p id="site-agent-auth-status" role="status" aria-live="polite"></p>
 				<noscript><p><?php esc_html_e( 'Enable JavaScript to use the credential converter.', 'site-agent' ); ?></p></noscript>

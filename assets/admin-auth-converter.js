@@ -54,8 +54,14 @@
 			if (!token.value) return;
 			const current = revision;
 			let value = token.value;
-			if (button.dataset.siteAgentCopy !== 'token') value = `Basic ${value}`;
+			if (['authorization', 'configuration'].includes(button.dataset.siteAgentCopy)) value = `Basic ${value}`;
 			try {
+				if (button.dataset.siteAgentCopy === 'endpoint') {
+					const config = JSON.parse(configuration.textContent);
+					const url = new URL(config.mcpServers['site-agent'].url);
+					url.searchParams.set('auth', value);
+					value = url.href;
+				}
 				if (button.dataset.siteAgentCopy === 'configuration') {
 					const config = JSON.parse(configuration.textContent);
 					config.mcpServers['site-agent'].headers.Authorization = value;

@@ -16,8 +16,16 @@ final class Permissions {
 			&& ( ! is_multisite() || is_super_admin() );
 	}
 
-	public static function transport(): bool {
-		return self::allowed() && ( is_ssl() || 'local' === wp_get_environment_type() );
+	public static function transport( $request = null ): bool {
+		if ( Config::locked() || ! Config::get()['enabled'] || ( ! is_ssl() && 'local' !== wp_get_environment_type() ) ) {
+			return false;
+		}
+		if ( $request instanceof \WP_REST_Request && array_key_exists( 'auth', $request->get_query_params() ) ) {
+			if ( ! Url_Auth::authenticate( $request ) ) {
+				return false;
+			}
+		}
+		return self::allowed();
 	}
 
 	public static function allowed( string $group = '' ): bool {

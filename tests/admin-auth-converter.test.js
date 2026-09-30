@@ -20,7 +20,7 @@ function fixture() {
 	['converter', 'username', 'password', 'token', 'result', 'status', 'show', 'clear'].forEach((key) => element('site-agent-auth-' + key));
 	const config = element('site-agent-connection-config');
 	config.textContent = JSON.stringify({ mcpServers: { 'site-agent': { url: 'https://example.test/wp-json/site-agent/v1/mcp', headers: { Authorization: 'Basic PLACEHOLDER' } } } });
-	const buttons = ['token', 'authorization', 'configuration'].map((kind) => {
+	const buttons = ['token', 'authorization', 'configuration', 'endpoint'].map((kind) => {
 		const button = element(kind); button.dataset.siteAgentCopy = kind; return button;
 	});
 	elements.get('site-agent-auth-converter').querySelectorAll = () => buttons;
@@ -32,7 +32,7 @@ function fixture() {
 		addEventListener(name, handler) { events[name] = handler; },
 	};
 	vm.runInNewContext(readFileSync('assets/admin-auth-converter.js', 'utf8'), {
-		window, document: { getElementById: (id) => elements.get(id) }, TextEncoder,
+		window, document: { getElementById: (id) => elements.get(id) }, TextEncoder, URL,
 		btoa: (value) => Buffer.from(value, 'binary').toString('base64'),
 		navigator: { clipboard: { writeText: (value) => clipboardWrite(value) } },
 	});
@@ -66,7 +66,19 @@ test('copy actions produce a token, complete header and site-specific MCP config
 	const configuration = JSON.parse(ui.clipboard[2]).mcpServers['site-agent'];
 	assert.equal(configuration.url, 'https://example.test/wp-json/site-agent/v1/mcp');
 	assert.equal(configuration.headers.Authorization, 'Basic ' + token);
+	const endpoint = new URL(ui.clipboard[3]);
+	assert.equal(endpoint.searchParams.get('auth'), token);
+	assert.equal(endpoint.pathname, '/wp-json/site-agent/v1/mcp');
 	assert.equal(JSON.parse(ui.config.textContent).mcpServers['site-agent'].headers.Authorization, 'Basic PLACEHOLDER');
+});
+
+test('authenticated endpoint preserves plain-permalink query parameters', async () => {
+	const ui = fixture();
+	ui.config.textContent = JSON.stringify({mcpServers:{'site-agent':{url:'https://example.test/index.php?rest_route=/site-agent/v1/mcp',headers:{}}}});
+	ui.generate('demo', 'abcd'); await ui.buttons[3].fire('click');
+	const endpoint = new URL(ui.clipboard[0]);
+	assert.equal(endpoint.searchParams.get('rest_route'), '/site-agent/v1/mcp');
+	assert.equal(endpoint.searchParams.get('auth'), Buffer.from('demo:abcd').toString('base64'));
 });
 
 test('edited or cleared credentials invalidate previous tokens and reset visible secrets', () => {

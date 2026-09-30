@@ -19,7 +19,7 @@
     "termsOfServiceURL": "https://gauravtiwari.org/tos/"
   },
   "name": "site-agent",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "A WordPress assistant for site inspection, content audits, draft creation, and hash-checked edits through Site Agent's MCP tools.",
   "author": {
     "name": "Gaurav Tiwari",

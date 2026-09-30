@@ -16,6 +16,7 @@ final class Config {
 	public static function defaults(): array {
 		return array(
 			'enabled'       => false,
+			'url_auth'      => false,
 			'content_write' => false,
 			'file_read'     => false,
 			'file_write'    => false,
