@@ -1,0 +1,18 @@
+{
+    "wordpress/mcp-adapter": {
+        "version": "dev-trunk",
+        "commit": "ef6492880f0be9ec501881700a25a18f11953758",
+        "source": "https://github.com/WordPress/mcp-adapter.git",
+        "license": [
+            "GPL-2.0-or-later"
+        ]
+    },
+    "wordpress/php-mcp-schema": {
+        "version": "v0.2.0",
+        "commit": "f6119d9520e462afd0e42d431c9815b55c6b8d28",
+        "source": "https://github.com/WordPress/php-mcp-schema",
+        "license": [
+            "GPL-2.0-or-later"
+        ]
+    }
+}

@@ -1,0 +1,88 @@
+<section class="sa-hero sa-deep" aria-labelledby="sa-title">
+  <div class="sa-wrap sa-hero-grid">
+    <div class="sa-intro">
+      <h1 id="sa-title">Site Agent<br><span>for WordPress</span></h1>
+      <p class="sa-lead">Let your coding agent work inside WordPress. Inspect content and source, edit files, run PHP and use WP-CLI through one MCP connection.</p>
+      <p class="sa-intro-note">You choose the tools it can reach. Every connection uses WordPress authentication, with access disabled until you enable it.</p>
+      <div class="sa-actions"><a class="sa-button sa-button-primary" href="{{CHECKOUT}}" data-sa-cta="hero">Get Site Agent <span aria-hidden="true">↗</span></a><a class="sa-button sa-button-ghost" href="#sa-tools">Explore the Tools <span aria-hidden="true">↓</span></a></div>
+      <p class="sa-meta">Free download and update license. Open-source code.</p>
+    </div>
+    <div class="sa-connection" aria-label="Site Agent connection model">
+      <div class="sa-connection-top"><span>MCP client</span><span class="sa-line-label">Your site</span></div>
+      <div class="sa-diagram">
+        <div class="sa-client"><span class="sa-terminal-sign" aria-hidden="true">&gt;_</span><span>Your coding agent</span></div>
+        <div class="sa-wire"><span>HTTPS + Application Password</span><i aria-hidden="true"></i></div>
+        <div class="sa-agent-node"><img src="{{ICON}}" alt="Site Agent" width="88" height="88"><div><strong>Site Agent</strong><span>WordPress MCP server</span></div></div>
+        <div class="sa-tool-ports"><span>Content</span><span>Source</span><span>PHP</span><span>WP-CLI</span></div>
+      </div>
+      <div class="sa-connection-foot"><span class="sa-dot" aria-hidden="true"></span><span>Direct client-to-site connection</span><span>No hosted proxy</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="sa-mechanism" aria-labelledby="sa-mechanism-title">
+  <div class="sa-wrap sa-section-grid">
+    <div><h2 id="sa-mechanism-title">Work With Your Site's Context</h2><p class="sa-section-lead">Your agent can inspect the active theme, plugins, post types and raw Gutenberg content before it changes anything.</p></div>
+    <div class="sa-mechanism-detail"><p>Site Agent runs its named tools inside the WordPress installation you connect. Content changes go through WordPress APIs. Developer tools reach the loaded PHP environment and the site's source files.</p><p>The official WordPress MCP Adapter supplies the protocol. Site Agent adds the tools and access controls.</p></div>
+  </div>
+  <div class="sa-wrap sa-fact-strip"><div><strong>10</strong><span>Named MCP tools</span></div><div><strong>5</strong><span>Separate tool-group opt-ins</span></div><div><strong>0</strong><span>Enabled connections on install</span></div><div><strong>1</strong><span>Direct WordPress connection</span></div></div>
+</section>
+
+<section class="sa-workbench sa-alt" id="sa-tools" aria-labelledby="sa-tools-title">
+  <div class="sa-wrap">
+    <div class="sa-section-grid sa-tools-heading"><div><h2 id="sa-tools-title">Choose a Tool. See Its Reach.</h2><p class="sa-section-lead">Read first, then grant the level of access the task needs.</p></div><p>These examples show the plugin's actual tool names and inputs. They don't execute anything or connect to a site.</p></div>
+    <div class="sa-console" data-sa-console>
+      <div class="sa-console-tabs" role="tablist" aria-label="Tool examples">
+        <button id="sa-tab-content" role="tab" aria-selected="true" aria-controls="sa-example" data-sa-example="content" tabindex="0">Content</button>
+        <button id="sa-tab-source" role="tab" aria-selected="false" aria-controls="sa-example" data-sa-example="source" tabindex="-1">Source</button>
+        <button id="sa-tab-php" role="tab" aria-selected="false" aria-controls="sa-example" data-sa-example="php" tabindex="-1">PHP</button>
+        <button id="sa-tab-cli" role="tab" aria-selected="false" aria-controls="sa-example" data-sa-example="cli" tabindex="-1">WP-CLI</button>
+      </div>
+      <div class="sa-example-grid" id="sa-example" role="tabpanel" aria-labelledby="sa-tab-content" tabindex="0">
+        <div class="sa-example-description"><h3 data-sa-example-title>Read a Post Before Editing</h3><p data-sa-example-copy>Get the stored content and its SHA-256 hash. Updates must supply the current hash, so a changed draft can be detected before saving.</p><span class="sa-access-label" data-sa-example-access>Read access</span><p class="sa-small" data-sa-example-limit>Publishing is a separate, explicit input to the content-write tool.</p></div>
+        <div class="sa-example-code"><span class="sa-code-label">MCP tool call</span><pre><code data-sa-example-code>{
+  "name": "site-agent-get-content",
+  "arguments": {
+    "post_id": 42
+  }
+}</code></pre><button type="button" class="sa-copy" data-sa-copy>Copy Example</button><span class="sa-copy-status" role="status" data-sa-copy-status></span></div>
+      </div>
+    </div>
+    <div class="sa-tool-index" aria-label="All Site Agent tools">
+      <div><h3>Read WordPress</h3><ul><li>Site context</li><li>Content search</li><li>Raw content</li><li>Media discovery</li></ul></div>
+      <div><h3>Change Content</h3><ul><li>Create drafts</li><li>Update accessible posts and pages</li><li>Preserve omitted fields and block markup</li></ul></div>
+      <div><h3>Use Developer Tools</h3><ul><li>Browse and read source</li><li>Edit theme and plugin files</li><li>Execute PHP</li><li>Run foreground WP-CLI</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section class="sa-boundaries sa-deep" aria-labelledby="sa-boundaries-title">
+  <div class="sa-wrap sa-boundary-grid">
+    <div><h2 id="sa-boundaries-title">Access You Can Inspect and Revoke</h2><p class="sa-section-lead">The plugin checks the current user's permissions and enabled tools again for every call.</p><p>Enable Site Agent for basic site and content reads. Turn on each additional tool group separately. Revoke the Application Password or disable Site Agent to stop access.</p><a class="sa-text-link" href="{{GITHUB}}#security-and-access" target="_blank" rel="noopener nofollow">Read the Access Model <span aria-hidden="true">↗</span></a></div>
+    <div class="sa-permission-matrix"><div class="sa-matrix-head"><span>Entry point</span><span>Default</span></div><div><span>Content writes</span><span>Off</span></div><div><span>Source inspection</span><span>Off</span></div><div><span>Source editing</span><span>Off</span></div><div><span>PHP execution</span><span>Off</span></div><div><span>WP-CLI execution</span><span>Off</span></div><div class="sa-matrix-note">Connections are also off until enabled.</div></div>
+  </div>
+  <div class="sa-wrap sa-privilege-note"><h3>Developer Access Is Full Access</h3><p>PHP execution, executable file editing and WP-CLI can change the database, files or other settings. The switches control entry points; they aren't a sandbox. Use these tools with trusted clients on a backed-up development or staging site.</p></div>
+</section>
+
+<section class="sa-setup" id="sa-setup" aria-labelledby="sa-setup-title">
+  <div class="sa-wrap sa-section-grid"><div><h2 id="sa-setup-title">Connect Your WordPress Site</h2><p class="sa-section-lead">Use an MCP client that supports Streamable HTTP and an Authorization header.</p></div><ul class="sa-requirements"><li>WordPress 6.9 or newer</li><li>PHP 8.0 or newer</li><li>HTTPS for remote connections</li><li>Administrator access; super administrator on multisite</li></ul></div>
+  <div class="sa-wrap sa-steps"><div><span>1</span><h3>Install the Plugin</h3><p>Upload the complete ZIP in WordPress. Open Tools → Site Agent.</p></div><div><span>2</span><h3>Select the Tools</h3><p>Enable access and the groups your task needs. Save the settings.</p></div><div><span>3</span><h3>Create a Password</h3><p>Create a dedicated Application Password in your WordPress profile.</p></div><div><span>4</span><h3>Connect the Client</h3><p>Use the endpoint and authentication template shown in Site Agent.</p></div></div>
+  <div class="sa-wrap sa-endpoint"><span>Endpoint</span><code>https://your-site.com/wp-json/site-agent/v1/mcp</code><span>Use the exact URL shown on your site.</span></div>
+</section>
+
+<section class="sa-offer sa-alt" id="sa-download" aria-labelledby="sa-download-title">
+  <div class="sa-wrap sa-offer-grid"><div><h2 id="sa-download-title">Site Agent Is Free</h2><p class="sa-section-lead">Get the complete plugin and a free license for automatic updates.</p><p>The code is public and GPL-licensed. License activation controls update delivery; it doesn't switch off your tools or block access to your site.</p></div><div class="sa-offer-action"><div class="sa-price"><strong>$0</strong><span>Free plugin + update license</span></div><a class="sa-button sa-button-primary" href="{{CHECKOUT}}" data-sa-cta="offer">Get Site Agent <span aria-hidden="true">↗</span></a><p class="sa-small">Free checkout gives you the download and license key in your account.</p><a class="sa-text-link" href="{{GITHUB}}" target="_blank" rel="noopener nofollow">Browse the Source on GitHub <span aria-hidden="true">↗</span></a></div></div>
+</section>
+
+<section class="sa-faq" aria-labelledby="sa-faq-title">
+  <div class="sa-wrap sa-section-grid"><div><h2 id="sa-faq-title">Before You Connect</h2><p class="sa-section-lead">Check the client, privacy and developer-access boundaries before enabling tools.</p></div><div class="sa-questions">
+    <details><summary>Which AI clients can connect?<span aria-hidden="true">+</span></summary><p>Use a client with Streamable HTTP and custom Authorization headers, or a compatible Application Password bridge. Site Agent doesn't include OAuth. Clients that require an OAuth-only connection need a bridge.</p></details>
+    <details><summary>Does my data pass through a hosted service?<span aria-hidden="true">+</span></summary><p>Site Agent has no hosted proxy or telemetry. Your chosen client connects directly to WordPress. The client's handling of tool results depends on that client or AI provider's policy. PHP and WP-CLI can make outbound requests when instructed.</p></details>
+    <details><summary>Can I use developer tools on production?<span aria-hidden="true">+</span></summary><p>Use a backed-up development or staging site for PHP execution, file editing and WP-CLI. These tools run with server privileges and can break a site. Syntax checks and access switches don't contain arbitrary code or replace backups.</p></details>
+    <details><summary>What can the file tools reach?<span aria-hidden="true">+</span></summary><p>File tools are limited to theme and plugin directories. Hidden, configuration, credential and symlink paths are blocked. Source files can still contain sensitive data. Writes require the current file hash, or an explicit new-file value, and PHP syntax is checked before a write.</p></details>
+    <details><summary>How do automatic updates work?<span aria-hidden="true">+</span></summary><p>Complete the free checkout, then activate the license in Site Agent. FluentCart supplies update metadata and the protected download. The license affects automatic updates only. You can also install a complete release ZIP manually.</p></details>
+    <details><summary>What isn't included?<span aria-hidden="true">+</span></summary><p>This version doesn't include OAuth, an AI chat interface, background WP-CLI jobs or a recoverable PHP sandbox. The bundled official MCP Adapter is a pinned 0.7.0 prerelease. PHP runs in the WordPress request and isn't isolated from the site.</p></details>
+  </div></div>
+</section>
+
+<section class="sa-close sa-deep" aria-labelledby="sa-close-title"><div class="sa-wrap"><h2 id="sa-close-title">Put Your Agent in Context</h2><p>Connect a development site, start with reads and enable more tools when the task calls for them.</p><div class="sa-actions"><a class="sa-button sa-button-primary" href="{{CHECKOUT}}" data-sa-cta="close">Get Site Agent <span aria-hidden="true">↗</span></a><a class="sa-button sa-button-ghost" href="{{GITHUB}}" target="_blank" rel="noopener nofollow">View the Source <span aria-hidden="true">↗</span></a></div><p class="sa-meta">Free. Open source. Access starts disabled.</p></div></section>

@@ -1,0 +1,60 @@
+name: Quality
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  wordpress:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['8.0', '8.3', '8.5']
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: disposable-tests
+          MYSQL_DATABASE: site_agent
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping --password=disposable-tests"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mysqli, sodium, mbstring, dom, xml, xmlwriter
+          tools: composer:v2, wp-cli
+          coverage: none
+      - run: composer install --no-interaction --prefer-dist
+      - run: composer validate --strict
+      - run: composer runtime
+      - run: git diff --exit-code -- runtime
+      - run: composer lint
+      - run: vendor/bin/phpcs
+      - name: Install disposable WordPress
+        run: |
+          wp core download --path=/tmp/site-agent-ci --version=6.9
+          wp config create --path=/tmp/site-agent-ci --dbname=site_agent --dbuser=root --dbpass=disposable-tests --dbhost=127.0.0.1 --skip-check
+          wp config set WP_ENVIRONMENT_TYPE local --path=/tmp/site-agent-ci
+          wp config set DISABLE_WP_CRON true --raw --path=/tmp/site-agent-ci
+          wp config set AUTOMATIC_UPDATER_DISABLED true --raw --path=/tmp/site-agent-ci
+          wp core install --path=/tmp/site-agent-ci --url=http://localhost:8943 --title='Site Agent Tests' --admin_user=site_agent_admin --admin_password=disposable-tests --admin_email=site-agent@example.test --skip-email
+          touch /tmp/site-agent-ci/.site-agent-test-install
+          ln -s "$GITHUB_WORKSPACE" /tmp/site-agent-ci/wp-content/plugins/site-agent
+          wp plugin activate site-agent --path=/tmp/site-agent-ci
+      - run: composer test
+        env:
+          SITE_AGENT_WP_DIR: /tmp/site-agent-ci
+      - name: Translation template
+        run: |
+          wp i18n make-pot . /tmp/site-agent.pot --slug=site-agent --domain=site-agent --exclude=vendor,runtime,tests,bin,docs,dist,site
+          diff <(grep -v POT-Creation-Date languages/site-agent.pot) <(grep -v POT-Creation-Date /tmp/site-agent.pot)
+      - run: bash bin/build.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site-agent-php-${{ matrix.php }}
+          path: dist/*.zip

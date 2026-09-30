@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<ruleset name="Site Agent">
+  <file>site-agent.php</file><file>uninstall.php</file><file>includes</file>
+  <arg value="s"/>
+  <rule ref="WordPress">
+    <exclude name="WordPress.PHP.YodaConditions"/>
+    <exclude name="WordPress.NamingConventions.ValidVariableName"/>
+    <exclude name="Squiz.Commenting.FunctionComment"/>
+  </rule>
+</ruleset>

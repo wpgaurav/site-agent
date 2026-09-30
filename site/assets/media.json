@@ -1,0 +1,17 @@
+{
+    "icon": {
+        "id": 1180329,
+        "url": "https://r2.gauravtiwari.org/wp-content/uploads/2026/09/site-agent-icon.png",
+        "alt": "Site Agent access symbol"
+    },
+    "social": {
+        "id": 1180330,
+        "url": "https://r2.gauravtiwari.org/wp-content/uploads/2026/09/site-agent-social.png",
+        "alt": "Site Agent for WordPress with content, source, PHP and WP-CLI tools"
+    },
+    "banner": {
+        "id": 1180331,
+        "url": "https://r2.gauravtiwari.org/wp-content/uploads/2026/09/site-agent-banner.png",
+        "alt": "Site Agent WordPress MCP developer tools"
+    }
+}

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1544 500" role="img" aria-labelledby="sa-banner-title sa-banner-desc">
+  <title id="sa-banner-title">Site Agent</title><desc id="sa-banner-desc">MCP access to WordPress, with selectable developer tools.</desc>
+  <rect width="1544" height="500" fill="#0f0f0f"/>
+  <g id="sa-banner-wordmark" fill="#fffffc" font-family="GTReallySans, sans-serif" font-weight="800"><text x="80" y="218" font-size="112">Site Agent</text></g>
+  <g id="sa-banner-copy" font-family="Finlandica Text, sans-serif" font-weight="400" font-size="48"><text x="84" y="312" fill="#e4e4e4">MCP Access to WordPress</text><text x="84" y="392" fill="#e8836f">Content. Source. PHP. WP-CLI.</text></g>
+  <g id="sa-banner-brackets" fill="none" stroke="#fffffc" stroke-width="12"><path d="M1150 98H1110V410H1150M1420 98H1460V410H1420"/></g>
+  <g id="sa-banner-agent" fill="none" stroke="#e8836f" stroke-width="12"><path d="M1188 356L1285 152L1382 356M1223 282H1347"/></g>
+  <g id="sa-banner-nodes" fill="#2dd4bf"><circle cx="1188" cy="356" r="10"/><circle cx="1285" cy="152" r="10"/><circle cx="1382" cy="356" r="10"/></g>
+</svg>

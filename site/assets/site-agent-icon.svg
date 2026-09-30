@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="sa-icon-title sa-icon-desc">
+  <title id="sa-icon-title">Site Agent</title>
+  <desc id="sa-icon-desc">An agent access symbol formed by two brackets, an angular A and connected nodes.</desc>
+  <g id="sa-icon-canvas"><rect width="512" height="512" rx="48" fill="#0f0f0f"/></g>
+  <g id="sa-icon-brackets" fill="none" stroke="#fffffc" stroke-width="24" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M144 120H96V392H144M368 120H416V392H368"/>
+  </g>
+  <g id="sa-icon-agent" fill="none" stroke="#e8836f" stroke-width="22" stroke-linejoin="miter">
+    <path d="M176 344L256 168L336 344M207 280H305"/>
+  </g>
+  <g id="sa-icon-nodes" fill="#2dd4bf"><circle cx="176" cy="344" r="15"/><circle cx="256" cy="168" r="15"/><circle cx="336" cy="344" r="15"/></g>
+</svg>
