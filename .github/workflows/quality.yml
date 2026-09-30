@@ -35,6 +35,10 @@ jobs:
       - run: git diff --exit-code -- runtime
       - run: composer lint
       - run: vendor/bin/phpcs
+      - name: Credential converter
+        run: |
+          node --check assets/admin-auth-converter.js
+          node --test tests/admin-auth-converter.test.js
       - name: Install disposable WordPress
         run: |
           wp core download --path=/tmp/site-agent-ci --version=6.9

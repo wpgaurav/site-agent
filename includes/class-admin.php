@@ -14,12 +14,34 @@ final class Admin {
 	public static function init(): void {
 		add_action( 'admin_menu', array( self::class, 'menu' ) );
 		add_action( 'admin_init', array( self::class, 'settings' ) );
+		add_action( 'admin_enqueue_scripts', array( self::class, 'assets' ) );
 		add_action( 'admin_post_site_agent_license', array( self::class, 'license_action' ) );
 		add_filter(
 			'option_page_capability_site_agent',
 			static function () {
 				return is_multisite() ? 'manage_network_options' : 'manage_options';
 			}
+		);
+	}
+
+	public static function assets( string $hook ): void {
+		if ( 'tools_page_site-agent' !== $hook || ! Permissions::administrator() ) {
+			return;
+		}
+		wp_enqueue_script( 'site-agent-auth-converter', plugins_url( 'assets/admin-auth-converter.js', SITE_AGENT_FILE ), array(), SITE_AGENT_VERSION, true );
+		wp_localize_script(
+			'site-agent-auth-converter',
+			'SiteAgentAuthConverter',
+			array(
+				'generated'   => __( 'Token generated. Copy the value you need into your MCP client.', 'site-agent' ),
+				'required'    => __( 'Enter your WordPress username and Application Password.', 'site-agent' ),
+				'username'    => __( 'A Basic authentication username cannot contain a colon.', 'site-agent' ),
+				'copied'      => __( 'Copied to clipboard.', 'site-agent' ),
+				'copy_failed' => __( 'Clipboard access is unavailable. Show the token, select it and copy it manually.', 'site-agent' ),
+				'cleared'     => __( 'Credentials and generated token cleared.', 'site-agent' ),
+				'show'        => __( 'Show token', 'site-agent' ),
+				'hide'        => __( 'Hide token', 'site-agent' ),
+			)
 		);
 	}
 
@@ -98,7 +120,8 @@ final class Admin {
 			</ol>
 			<p><strong><?php esc_html_e( 'Endpoint', 'site-agent' ); ?>:</strong> <code><?php echo esc_html( $endpoint ); ?></code></p>
 			<p><?php esc_html_e( 'Remote connections require HTTPS. Plain HTTP is accepted only when WordPress identifies the installation as local. Clients that require OAuth need a compatible Application Password bridge; Site Agent does not provide OAuth.', 'site-agent' ); ?></p>
-			<pre style="padding:16px;background:#fff;border:1px solid #c3c4c7;overflow:auto;"><?php echo esc_html( wp_json_encode( $connection, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) ); ?></pre>
+			<?php self::auth_converter(); ?>
+			<pre id="site-agent-connection-config" style="padding:16px;background:#fff;border:1px solid #c3c4c7;overflow:auto;"><?php echo esc_html( wp_json_encode( $connection, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) ); ?></pre>
 			<p><?php esc_html_e( 'Each tool switch controls that entry point. PHP execution, executable source editing, and WP-CLI can change other settings or files, so these switches are not isolation boundaries. Use a backed-up development or staging site for developer tools.', 'site-agent' ); ?></p>
 			<p><?php esc_html_e( 'To revoke remote access, disable Site Agent or revoke its Application Password in your profile. For an emergency stop, set SITE_AGENT_DISABLED to true in wp-config.php. Deactivation also disables access until you enable it again.', 'site-agent' ); ?></p>
 			<h2><?php esc_html_e( 'Recent tool calls', 'site-agent' ); ?></h2>
@@ -108,6 +131,30 @@ final class Admin {
 				<?php endforeach; ?>
 			</tbody></table>
 		</div>
+		<?php
+	}
+
+	private static function auth_converter(): void {
+		?>
+		<section style="margin-block:24px;padding:24px;background:#fff;border:1px solid #c3c4c7;">
+			<h3><?php esc_html_e( 'Create your Authorization value', 'site-agent' ); ?></h3>
+			<p><?php esc_html_e( 'Enter a dedicated WordPress Application Password, not your account password. Conversion happens in this browser. Site Agent does not submit or store these credentials.', 'site-agent' ); ?></p>
+			<form id="site-agent-auth-converter" autocomplete="off">
+				<table class="form-table" role="presentation">
+					<tr><th><label for="site-agent-auth-username"><?php esc_html_e( 'WordPress username', 'site-agent' ); ?></label></th><td><input id="site-agent-auth-username" type="text" value="<?php echo esc_attr( wp_get_current_user()->user_login ); ?>" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="60" required class="regular-text" style="width:100%;max-width:480px;"></td></tr>
+					<tr><th><label for="site-agent-auth-password"><?php esc_html_e( 'Application Password', 'site-agent' ); ?></label></th><td><input id="site-agent-auth-password" type="password" autocomplete="new-password" spellcheck="false" maxlength="256" required class="regular-text" style="width:100%;max-width:480px;"><p class="description"><?php esc_html_e( 'You can paste the password with its spaces. The converter removes them.', 'site-agent' ); ?></p></td></tr>
+				</table>
+				<p><button type="submit" class="button button-primary"><?php esc_html_e( 'Generate token', 'site-agent' ); ?></button> <button type="button" id="site-agent-auth-clear" class="button"><?php esc_html_e( 'Clear credentials', 'site-agent' ); ?></button></p>
+				<div id="site-agent-auth-result" hidden>
+					<p><label for="site-agent-auth-token"><strong><?php esc_html_e( 'Base64 token', 'site-agent' ); ?></strong></label></p>
+					<input id="site-agent-auth-token" type="password" readonly autocomplete="off" spellcheck="false" class="large-text" aria-describedby="site-agent-auth-help" style="width:100%;max-width:640px;">
+					<p><button type="button" id="site-agent-auth-show" class="button" aria-pressed="false"><?php esc_html_e( 'Show token', 'site-agent' ); ?></button> <button type="button" class="button" data-site-agent-copy="token"><?php esc_html_e( 'Copy Base64 token', 'site-agent' ); ?></button> <button type="button" class="button" data-site-agent-copy="authorization"><?php esc_html_e( 'Copy Authorization value', 'site-agent' ); ?></button> <button type="button" class="button" data-site-agent-copy="configuration"><?php esc_html_e( 'Copy MCP configuration', 'site-agent' ); ?></button></p>
+					<p id="site-agent-auth-help" class="description"><?php esc_html_e( 'The Authorization value includes the Basic prefix. The MCP configuration includes your endpoint and generated value. Base64 is reversible, so keep the token and configuration private.', 'site-agent' ); ?></p>
+				</div>
+				<p id="site-agent-auth-status" role="status" aria-live="polite"></p>
+				<noscript><p><?php esc_html_e( 'Enable JavaScript to use the credential converter.', 'site-agent' ); ?></p></noscript>
+			</form>
+		</section>
 		<?php
 	}
 

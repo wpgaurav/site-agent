@@ -18,6 +18,8 @@ Site Agent is free and open source. The complete release ZIP and a free automati
 
 Upload the complete ZIP through Plugins → Add New → Upload Plugin. Open Tools → Site Agent. Enable access and select each tool group. Create a dedicated WordPress Application Password in the administrator's profile. Use the endpoint and connection template shown on the settings page.
 
+The settings page includes a browser-only credential converter. Enter your WordPress username and a dedicated Application Password, then copy the Base64 token, complete Authorization value or MCP configuration. Spaced passwords and UTF-8 usernames are supported. Inputs have no form names and are not submitted or stored by Site Agent. Clear credentials after copying; generated values are also cleared when you edit the inputs or navigate away. Your system clipboard retains what you copy until you replace it.
+
 The usual endpoint is `/wp-json/site-agent/v1/mcp`. Sites with plain permalinks use the equivalent `?rest_route=/site-agent/v1/mcp` URL shown in the settings. Encode `username:application-password` as Base64 and pass it in `Authorization: Basic …`. Base64 is not encryption; remote transport requires HTTPS.
 
 All access and write/execution tool groups are off on installation. Deactivation also disables access. Revoke access by disabling Site Agent or deleting the dedicated Application Password. An emergency stop is available in `wp-config.php`:
@@ -88,7 +90,7 @@ SITE_AGENT_WP_DIR=/path/to/disposable/wordpress vendor/bin/phpunit
 bash bin/build.sh
 ```
 
-Tests refuse to load an installation without a `.site-agent-test-install` marker. Never place that marker on a real site. Integration tests modify disposable options, users, posts, and fixture files. The build uses a runtime allowlist and excludes tests, development dependencies, Composer metadata, docs, and screenshots. Ship `dist/site-agent-0.1.1.zip`, not a GitHub source archive.
+Tests refuse to load an installation without a `.site-agent-test-install` marker. Never place that marker on a real site. Integration tests modify disposable options, users, posts, and fixture files. The build uses a runtime allowlist and excludes tests, development dependencies, Composer metadata, docs, and screenshots. Ship `dist/site-agent-0.1.2.zip`, not a GitHub source archive.
 
 ## License and Contributions
 

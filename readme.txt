@@ -3,7 +3,7 @@ Contributors: wpgaurav
 Tags: mcp, developer-tools, ai, automation
 Requires at least: 6.9
 Requires PHP: 8.0
-Stable tag: 0.1.1
+Stable tag: 0.1.2
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -50,6 +50,11 @@ Disable Site Agent or revoke its Application Password. An emergency SITE_AGENT_D
 Get the free checkout license from https://gauravtiwari.org/product/site-agent/ and activate it under Tools > Site Agent. FluentCart supplies automatic updates through protected HTTPS packages. The Update URI protects against unrelated WordPress.org slug matches. Manual release ZIP updates remain available. Licensing never disables the developer tools.
 
 == Changelog ==
+
+= 0.1.2 =
+* Add a browser-only username and Application Password converter to the connection instructions.
+* Copy the Base64 token, complete Authorization value or ready-to-use MCP configuration.
+* Keep credentials out of submitted settings and clear generated values on edits or navigation.
 
 = 0.1.1 =
 * Add free FluentCart license activation, encrypted site-bound credentials, and native automatic updates.

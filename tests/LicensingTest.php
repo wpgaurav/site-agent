@@ -26,7 +26,7 @@ final class LicensingTest extends TestCase {
 	private function activate(): void {
 		$this->assertTrue(License::activate('test-license-secret'));
 	}
-	private function metadata(string $version='0.1.2',string $status='valid'): void {
+	private function metadata(string $version='0.2.0',string $status='valid'): void {
 		$this->response=array('slug'=>'site-agent','product_id'=>License::PRODUCT_ID,'new_version'=>$version,'license_status'=>$status,'package'=>'https://gauravtiwari-org-fluentcart.'.str_repeat('a',32).'.r2.cloudflarestorage.com/site-agent-'.$version.'.zip?signature=test','sections'=>array('changelog'=>'<p>Update</p>'));
 	}
 	public function test_no_license_means_no_outbound_update_request(): void {
@@ -68,19 +68,19 @@ final class LicensingTest extends TestCase {
 		foreach(array('http://gauravtiwari.org/a','https://attacker.test/a','https://gauravtiwari.org.attacker.test/a','https://user@gauravtiwari.org/a','https://gauravtiwari.org:8443/a','https://gauravtiwari.org/a#fragment') as $url){$this->assertFalse(Updater::package_allowed($url));}
 	}
 	public function test_updates_reject_invalid_entitlement_and_downgrades(): void {
-		$this->activate();$this->metadata('0.1.2','invalid');$file=plugin_basename(SITE_AGENT_FILE);
+		$this->activate();$this->metadata('0.2.0','invalid');$file=plugin_basename(SITE_AGENT_FILE);
 		$result=Updater::updates((object)array('checked'=>array($file=>SITE_AGENT_VERSION),'response'=>array()));
 		$this->assertArrayNotHasKey($file,$result->response);$this->assertSame('',$result->no_update[$file]->package);
 		Updater::clear_cache();$this->metadata('0.1.0');$result=Updater::updates((object)array('checked'=>array($file=>SITE_AGENT_VERSION),'response'=>array()));
 		$this->assertArrayNotHasKey($file,$result->response);
 		Updater::clear_cache();$this->metadata();$result=Updater::updates((object)array('checked'=>array($file=>SITE_AGENT_VERSION),'response'=>array()));
-		$this->assertSame('0.1.2',$result->response[$file]->new_version);
+		$this->assertSame('0.2.0',$result->response[$file]->new_version);
 	}
 	public function test_wrong_update_identity_and_wrong_extracted_plugin_are_rejected(): void {
 		$this->activate();$this->metadata();$this->response['slug']='another-plugin';
 		$this->assertInstanceOf(WP_Error::class,Updater::metadata());Updater::clear_cache();$this->metadata();
 		$folder=sys_get_temp_dir().'/site-agent-updater-test-'.uniqid();mkdir($folder);
-		file_put_contents($folder.'/site-agent.php',"<?php\n/* Plugin Name: Another Plugin\nVersion: 0.1.2 */");
+		file_put_contents($folder.'/site-agent.php',"<?php\n/* Plugin Name: Another Plugin\nVersion: 0.2.0 */");
 		$this->assertInstanceOf(WP_Error::class,Updater::source($folder,'',(object)array(),array('plugin'=>plugin_basename(SITE_AGENT_FILE))));
 		unlink($folder.'/site-agent.php');rmdir($folder);
 	}
