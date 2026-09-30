@@ -50,9 +50,7 @@ jobs:
         env:
           SITE_AGENT_WP_DIR: /tmp/site-agent-ci
       - name: Translation template
-        run: |
-          wp i18n make-pot . /tmp/site-agent.pot --slug=site-agent --domain=site-agent --exclude=vendor,runtime,tests,bin,docs,dist,site
-          diff <(grep -v POT-Creation-Date languages/site-agent.pot) <(grep -v POT-Creation-Date /tmp/site-agent.pot)
+        run: bash bin/make-pot.sh --check
       - run: bash bin/build.sh
       - uses: actions/upload-artifact@v4
         with:
