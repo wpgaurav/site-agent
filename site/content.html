@@ -1,37 +1,12 @@
-<section class="sa-hero sa-deep" aria-labelledby="sa-title">
-  <div class="sa-wrap sa-hero-grid">
-    <div class="sa-intro">
-      <h1 id="sa-title">Site Agent<br><span>for WordPress</span></h1>
-      <p class="sa-lead">Let your coding agent work inside WordPress. Inspect content and source, edit files, run PHP and use WP-CLI through one MCP connection.</p>
-      <p class="sa-intro-note">You choose the tools it can reach. Every connection uses WordPress authentication, with access disabled until you enable it.</p>
-      <div class="sa-actions"><a class="sa-button sa-button-primary" href="{{CHECKOUT}}" data-sa-cta="hero">Get Site Agent <span aria-hidden="true">↗</span></a><a class="sa-button sa-button-ghost" href="#sa-tools">Explore the Tools <span aria-hidden="true">↓</span></a></div>
-      <p class="sa-meta">Free download and update license. Open-source code.</p>
-    </div>
-    <div class="sa-connection" aria-label="Site Agent connection model">
-      <div class="sa-connection-top"><span>MCP client</span><span class="sa-line-label">Your site</span></div>
-      <div class="sa-diagram">
-        <div class="sa-client"><span class="sa-terminal-sign" aria-hidden="true">&gt;_</span><span>Your coding agent</span></div>
-        <div class="sa-wire"><span>HTTPS + Application Password</span><i aria-hidden="true"></i></div>
-        <div class="sa-agent-node"><img src="{{ICON}}" alt="Site Agent" width="88" height="88"><div><strong>Site Agent</strong><span>WordPress MCP server</span></div></div>
-        <div class="sa-tool-ports"><span>Content</span><span>Source</span><span>PHP</span><span>WP-CLI</span></div>
-      </div>
-      <div class="sa-connection-foot"><span class="sa-dot" aria-hidden="true"></span><span>Direct client-to-site connection</span><span>No hosted proxy</span></div>
-    </div>
-  </div>
-</section>
-
-<section class="sa-mechanism" aria-labelledby="sa-mechanism-title">
-  <div class="sa-wrap sa-section-grid">
-    <div><h2 id="sa-mechanism-title">Work With Your Site's Context</h2><p class="sa-section-lead">Your agent can inspect the active theme, plugins, post types and raw Gutenberg content before it changes anything.</p></div>
-    <div class="sa-mechanism-detail"><p>Site Agent runs its named tools inside the WordPress installation you connect. Content changes go through WordPress APIs. Developer tools reach the loaded PHP environment and the site's source files.</p><p>The official WordPress MCP Adapter supplies the protocol. Site Agent adds the tools and access controls.</p></div>
-  </div>
-  <div class="sa-wrap sa-fact-strip"><div><strong>10</strong><span>Named MCP tools</span></div><div><strong>5</strong><span>Separate tool-group opt-ins</span></div><div><strong>0</strong><span>Enabled connections on install</span></div><div><strong>1</strong><span>Direct WordPress connection</span></div></div>
-</section>
-
-<section class="sa-workbench sa-alt" id="sa-tools" aria-labelledby="sa-tools-title">
-  <div class="sa-wrap">
-    <div class="sa-section-grid sa-tools-heading"><div><h2 id="sa-tools-title">Choose a Tool. See Its Reach.</h2><p class="sa-section-lead">Read first, then grant the level of access the task needs.</p></div><p>These examples show the plugin's actual tool names and inputs. They don't execute anything or connect to a site.</p></div>
-    <div class="sa-console" data-sa-console>
+<section class="sa-hero" aria-labelledby="sa-title">
+  <div class="sa-hero-grid-art" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <div class="sa-wrap sa-hero-inner">
+    <h1 id="sa-title">Site Agent <img src="{{ICON}}" alt="" width="72" height="72"><br>Inside WordPress.</h1>
+    <p class="sa-lead">Give your coding agent the site's context and the tools to work with it. Site Agent connects content, source, PHP and WP-CLI through MCP.</p>
+    <p class="sa-intro-note">You choose the access. Every tool checks WordPress permissions.</p>
+    <div class="sa-actions"><a class="sa-button sa-button-primary" href="{{CHECKOUT}}" data-sa-cta="hero">Get Site Agent <span aria-hidden="true">↗</span></a><a class="sa-button sa-button-ghost" href="#sa-tools">Explore the Tools <span aria-hidden="true">↓</span></a></div>
+    <p class="sa-meta">Free and open source. Connections start disabled.</p>
+    <div class="sa-hero-window">    <div class="sa-console" data-sa-console><div class="sa-window-bar"><div><span class="sa-window-logo" aria-hidden="true">[A]</span><strong>Site Agent</strong><span>Example MCP Session</span></div><span class="sa-window-state">Direct to WordPress</span></div>
       <div class="sa-console-tabs" role="tablist" aria-label="Tool examples">
         <button id="sa-tab-content" role="tab" aria-selected="true" aria-controls="sa-example" data-sa-example="content" tabindex="0">Content</button>
         <button id="sa-tab-source" role="tab" aria-selected="false" aria-controls="sa-example" data-sa-example="source" tabindex="-1">Source</button>
@@ -48,6 +23,23 @@
 }</code></pre><button type="button" class="sa-copy" data-sa-copy>Copy Example</button><span class="sa-copy-status" role="status" data-sa-copy-status></span></div>
       </div>
     </div>
+<p class="sa-window-caption">Interactive tool examples. No code executes and no site is connected.</p></div>
+  </div>
+</section>
+
+<section class="sa-mechanism" aria-labelledby="sa-mechanism-title">
+  <div class="sa-wrap sa-centered"><h2 id="sa-mechanism-title">Give Your Agent the Whole Picture</h2><p class="sa-section-lead">Start with the active theme, plugins, post types and raw content. Then enable the tools your task needs.</p></div>
+  <div class="sa-wrap sa-bento-grid">
+    <article class="sa-bento sa-bento-lavender"><div class="sa-bento-visual sa-code-stack" aria-hidden="true"><span>site-agent-site-context</span><div><b>WordPress</b><em>Theme + plugins</em></div><div><b>Content</b><em>Raw block markup</em></div><div><b>Tools</b><em>Explicit access</em></div></div><h3>Understand the Site</h3><p>Inspect the environment your code will run in, including the installed theme and plugins.</p></article>
+    <article class="sa-bento sa-bento-mint"><div class="sa-bento-visual sa-file-visual" aria-hidden="true"><span>your-theme / style.css</span><div><i></i><i></i><i></i><i></i></div><strong>Read → Hash → Write</strong></div><h3>Work With Source</h3><p>Browse theme and plugin files. Writes check the current hash, and PHP syntax is checked first.</p></article>
+    <article class="sa-bento sa-bento-peach"><div class="sa-bento-visual sa-terminal-visual" aria-hidden="true"><span>&gt;_</span><code>wp plugin list</code><div><b>PHP</b><b>WP-CLI</b></div></div><h3>Use Developer Tools</h3><p>Run PHP in the loaded WordPress request or use foreground WP-CLI with explicit opt-in.</p></article>
+  </div>
+  <div class="sa-wrap sa-fact-strip"><div><strong>WordPress Abilities</strong><span>Named operations</span></div><div><strong>Streamable HTTP</strong><span>Direct MCP connection</span></div><div><strong>Application Passwords</strong><span>Native authentication</span></div><div><strong>Public Source</strong><span>GPL-licensed</span></div></div>
+</section>
+
+<section class="sa-workbench sa-alt" id="sa-tools" aria-labelledby="sa-tools-title">
+  <div class="sa-wrap">
+    <div class="sa-section-grid sa-tools-heading"><div><h2 id="sa-tools-title">Ten Tools, Clear Boundaries</h2><p class="sa-section-lead">Read content, discover media and work on the actual source. More powerful entry points stay off until you enable them.</p></div><p>The interactive examples above use Site Agent's actual tool names. Content writes, source inspection, source editing, PHP and WP-CLI each have a separate opt-in.</p></div>
     <div class="sa-tool-index" aria-label="All Site Agent tools">
       <div><h3>Read WordPress</h3><ul><li>Site context</li><li>Content search</li><li>Raw content</li><li>Media discovery</li></ul></div>
       <div><h3>Change Content</h3><ul><li>Create drafts</li><li>Update accessible posts and pages</li><li>Preserve omitted fields and block markup</li></ul></div>
@@ -56,7 +48,7 @@
   </div>
 </section>
 
-<section class="sa-boundaries sa-deep" aria-labelledby="sa-boundaries-title">
+<section class="sa-boundaries" aria-labelledby="sa-boundaries-title">
   <div class="sa-wrap sa-boundary-grid">
     <div><h2 id="sa-boundaries-title">Access You Can Inspect and Revoke</h2><p class="sa-section-lead">The plugin checks the current user's permissions and enabled tools again for every call.</p><p>Enable Site Agent for basic site and content reads. Turn on each additional tool group separately. Revoke the Application Password or disable Site Agent to stop access.</p><a class="sa-text-link" href="{{GITHUB}}#security-and-access" target="_blank" rel="noopener nofollow">Read the Access Model <span aria-hidden="true">↗</span></a></div>
     <div class="sa-permission-matrix"><div class="sa-matrix-head"><span>Entry point</span><span>Default</span></div><div><span>Content writes</span><span>Off</span></div><div><span>Source inspection</span><span>Off</span></div><div><span>Source editing</span><span>Off</span></div><div><span>PHP execution</span><span>Off</span></div><div><span>WP-CLI execution</span><span>Off</span></div><div class="sa-matrix-note">Connections are also off until enabled.</div></div>
@@ -85,4 +77,4 @@
   </div></div>
 </section>
 
-<section class="sa-close sa-deep" aria-labelledby="sa-close-title"><div class="sa-wrap"><h2 id="sa-close-title">Put Your Agent in Context</h2><p>Connect a development site, start with reads and enable more tools when the task calls for them.</p><div class="sa-actions"><a class="sa-button sa-button-primary" href="{{CHECKOUT}}" data-sa-cta="close">Get Site Agent <span aria-hidden="true">↗</span></a><a class="sa-button sa-button-ghost" href="{{GITHUB}}" target="_blank" rel="noopener nofollow">View the Source <span aria-hidden="true">↗</span></a></div><p class="sa-meta">Free. Open source. Access starts disabled.</p></div></section>
+<section class="sa-close" aria-labelledby="sa-close-title"><div class="sa-wrap"><h2 id="sa-close-title">Put Your Agent in Context</h2><p>Connect a development site, start with reads and enable more tools when the task calls for them.</p><div class="sa-actions"><a class="sa-button sa-button-primary" href="{{CHECKOUT}}" data-sa-cta="close">Get Site Agent <span aria-hidden="true">↗</span></a><a class="sa-button sa-button-ghost" href="{{GITHUB}}" target="_blank" rel="noopener nofollow">View the Source <span aria-hidden="true">↗</span></a></div><p class="sa-meta">Free. Open source. Access starts disabled.</p></div></section>
