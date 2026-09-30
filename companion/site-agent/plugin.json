@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "site-agent",
-  "version": "0.1.0",
-  "description": "Inspect and manage WordPress through the existing Site Agent MCP server. Read site context, audit content, create drafts, and apply scoped content or developer changes when authorized.",
+  "version": "0.1.1",
+  "description": "A WordPress assistant for site inspection, content audits, draft creation, and hash-checked edits through Site Agent's MCP tools.",
   "author": {
     "name": "Gaurav Tiwari",
     "url": "https://gauravtiwari.org"
@@ -11,18 +11,32 @@
     "com.openai": {
       "interface": {
         "displayName": "Site Agent",
-        "shortDescription": "Your WordPress assistant",
-        "longDescription": "Connect to Site Agent on WordPress to inspect site context, find content and media, audit posts, create drafts, and apply hash-checked edits. Optional source inspection, source editing, PHP and WP-CLI depend on the site's enabled tool groups. Requires a separately authenticated Site Agent connection; credentials are not bundled.",
+        "shortDescription": "WordPress content and code",
+        "longDescription": "Site Agent helps WordPress site owners, editors, and developers work with their site's content and code from ChatGPT.\n\nInspect WordPress and PHP versions, installed plugins, the active theme, and enabled tools. Find posts, pages, and media; audit raw content; prepare drafts; and apply scoped edits while preserving Gutenberg markup, ACF data, shortcodes, links, and placeholders. Content updates use the latest content hash to detect intervening changes.\n\nFor developer tasks, separately enabled tools can inspect plugin and theme files, make hash-checked source edits, execute PHP, and run foreground WP-CLI commands. Developer tools run with server privileges and are not sandboxed.\n\nRequires the Site Agent WordPress plugin, an enabled MCP endpoint, and a compatible authenticated connection using a dedicated WordPress Application Password. Authentication is configured separately; credentials are not included. Available features depend on the tool groups enabled on your site. Basic Authorization header compatibility with the ChatGPT host has not been verified.\n\nSite Agent is free and open source. Learn more at https://gauravtiwari.org/product/site-agent/.",
         "developerName": "Gaurav Tiwari",
         "category": "Productivity",
-        "logo": "./assets/icon.svg",
-        "composerIcon": "./assets/icon.svg",
+        "logo": "./assets/icon.png",
+        "composerIcon": "./assets/icon.png",
         "defaultPrompt": [
           "Inspect my WordPress site and identify what needs attention.",
           "Audit a post and prepare improvements as a draft.",
           "Inspect a plugin or theme and propose the smallest fix."
-        ]
+        ],
+        "websiteURL": "https://gauravtiwari.org/product/site-agent/",
+        "supportURL": "https://gauravtiwari.org/contact/",
+        "privacyPolicyURL": "https://gauravtiwari.org/privacy-policy/",
+        "termsOfServiceURL": "https://gauravtiwari.org/tos/"
       }
     }
-  }
+  },
+  "homepage": "https://gauravtiwari.org/product/site-agent/",
+  "repository": "https://github.com/wpgaurav/site-agent",
+  "license": "GPL-2.0-or-later",
+  "keywords": [
+    "wordpress",
+    "site-agent",
+    "mcp",
+    "content",
+    "developer-tools"
+  ]
 }
