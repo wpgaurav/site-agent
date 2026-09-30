@@ -1,0 +1,28 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "site-agent",
+  "version": "0.1.0",
+  "description": "Inspect and manage WordPress through the existing Site Agent MCP server. Read site context, audit content, create drafts, and apply scoped content or developer changes when authorized.",
+  "author": {
+    "name": "Gaurav Tiwari",
+    "url": "https://gauravtiwari.org"
+  },
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Site Agent",
+        "shortDescription": "Your WordPress assistant",
+        "longDescription": "Connect to Site Agent on WordPress to inspect site context, find content and media, audit posts, create drafts, and apply hash-checked edits. Optional source inspection, source editing, PHP and WP-CLI depend on the site's enabled tool groups. Requires a separately authenticated Site Agent connection; credentials are not bundled.",
+        "developerName": "Gaurav Tiwari",
+        "category": "Productivity",
+        "logo": "./assets/icon.svg",
+        "composerIcon": "./assets/icon.svg",
+        "defaultPrompt": [
+          "Inspect my WordPress site and identify what needs attention.",
+          "Audit a post and prepare improvements as a draft.",
+          "Inspect a plugin or theme and propose the smallest fix."
+        ]
+      }
+    }
+  }
+}
