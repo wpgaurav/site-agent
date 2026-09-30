@@ -1,16 +1,16 @@
 {
-  "version": "0.1.1",
+  "version": "0.1.2",
   "github_repository": "https://github.com/wpgaurav/site-agent",
-  "github_release": "https://github.com/wpgaurav/site-agent/releases/tag/v0.1.1",
+  "github_release": "https://github.com/wpgaurav/site-agent/releases/tag/v0.1.2",
   "product_url": "https://gauravtiwari.org/product/site-agent/",
   "product_id": 1180328,
   "variation_id": 131,
   "price": 0,
-  "download_id": 324,
+  "download_id": 325,
   "driver": "r2",
-  "object": "site-agent-0.1.1.zip",
-  "size": 373292,
-  "sha256": "e8c9d82816ad5e42f7925fa93186d2c1d93c654b66c9755b4572e9dbe7717630",
+  "object": "site-agent-0.1.2.zip",
+  "size": 376252,
+  "sha256": "a86da8af21a231a5b1d2a61c46747335b8866053d9e1cf161baa698b91847670",
   "published_content_sha256": "71f93a4620ef761d8927a6d381f8b87d79b69f914e547775ca80436cc3cfde2f",
   "primary_accent": "#1b2733",
   "branding_media": {
@@ -30,5 +30,11 @@
       "alt": "Site Agent icon and wordmark with WordPress MCP Tools on a dark blue background"
     }
   },
-  "rollback_revision": 1180342
+  "rollback_revision": 1180342,
+  "files": 282,
+  "rollback_release": {
+    "version": "0.1.1",
+    "download_id": 324
+  },
+  "production_version": "0.1.2"
 }
