@@ -121,6 +121,21 @@ final class Admin {
 			</ol>
 			<p><strong><?php esc_html_e( 'Endpoint', 'site-agent' ); ?>:</strong> <code><?php echo esc_html( $endpoint ); ?></code></p>
 			<p><?php esc_html_e( 'Remote connections require HTTPS. Plain HTTP is accepted only when WordPress identifies the installation as local. Clients that require OAuth need a compatible Application Password bridge; Site Agent does not provide OAuth.', 'site-agent' ); ?></p>
+			<section id="site-agent-url-auth-guide" aria-labelledby="site-agent-url-auth-heading" style="margin-block:24px;padding:24px;background:#fff;border:1px solid #c3c4c7;">
+				<h3 id="site-agent-url-auth-heading"><?php esc_html_e( 'Connect with an authenticated URL', 'site-agent' ); ?></h3>
+				<p><?php esc_html_e( 'If your MCP client cannot send a custom Authorization header, include your credentials in the endpoint URL instead.', 'site-agent' ); ?></p>
+				<ol>
+					<li><?php esc_html_e( 'Enable Site Agent and URL authentication above, select the tools you need, then save your settings.', 'site-agent' ); ?></li>
+					<li><a href="<?php echo esc_url( admin_url( 'profile.php#application-passwords-section' ) ); ?>"><?php esc_html_e( 'Create a dedicated Application Password in your administrator profile.', 'site-agent' ); ?></a></li>
+					<li><?php esc_html_e( 'Enter your WordPress username and that Application Password in the converter below. Click Generate token, then Copy authenticated endpoint.', 'site-agent' ); ?></li>
+					<li><?php esc_html_e( 'Paste the copied URL into your client as a Streamable HTTP MCP endpoint. The client must retain the auth query parameter on every request; a separate Authorization header is not required.', 'site-agent' ); ?></li>
+				</ol>
+				<p><?php esc_html_e( 'Example format only: BASE64_TOKEN is a placeholder for the encoded username:application-password value. The copy button generates and URL-encodes it for you.', 'site-agent' ); ?></p>
+				<pre style="padding:16px;background:#f6f7f7;overflow:auto;"><code><?php echo esc_html( add_query_arg( 'auth', 'BASE64_TOKEN', $endpoint ) ); ?></code></pre>
+				<p><strong><?php esc_html_e( 'Keep the complete URL private.', 'site-agent' ); ?></strong> <?php esc_html_e( 'Base64 is reversible. This URL contains credentials and may appear in browser history, client configuration or server logs. Use a dedicated Application Password and clear the converter after copying.', 'site-agent' ); ?></p>
+				<p><?php esc_html_e( 'To stop URL-based connections, turn off URL authentication and save. To revoke this credential everywhere, revoke its Application Password in your profile; existing MCP sessions cannot bypass revocation.', 'site-agent' ); ?></p>
+				<p><?php esc_html_e( 'A compatible Streamable HTTP MCP client is required. URL authentication does not provide OAuth support or guarantee compatibility with every client. ChatGPT web compatibility with credential-bearing URLs has not been verified.', 'site-agent' ); ?></p>
+			</section>
 			<?php self::auth_converter(); ?>
 			<pre id="site-agent-connection-config" style="padding:16px;background:#fff;border:1px solid #c3c4c7;overflow:auto;"><?php echo esc_html( wp_json_encode( $connection, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) ); ?></pre>
 			<p><?php esc_html_e( 'Each tool switch controls that entry point. PHP execution, executable source editing, and WP-CLI can change other settings or files, so these switches are not isolation boundaries. Use a backed-up development or staging site for developer tools.', 'site-agent' ); ?></p>

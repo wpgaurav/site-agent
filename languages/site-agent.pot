@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Site Agent 0.1.4\n"
+"Project-Id-Version: Site Agent 0.1.5\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/site-agent\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-30T11:01:41+00:00\n"
+"POT-Creation-Date: 2026-10-01T01:42:00+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: site-agent\n"
@@ -163,7 +163,7 @@ msgid "Credentials and generated token cleared."
 msgstr ""
 
 #: includes/class-admin.php:42
-#: includes/class-admin.php:152
+#: includes/class-admin.php:167
 msgid "Show token"
 msgstr ""
 
@@ -287,159 +287,203 @@ msgstr ""
 msgid "Remote connections require HTTPS. Plain HTTP is accepted only when WordPress identifies the installation as local. Clients that require OAuth need a compatible Application Password bridge; Site Agent does not provide OAuth."
 msgstr ""
 
-#: includes/class-admin.php:126
-msgid "Each tool switch controls that entry point. PHP execution, executable source editing, and WP-CLI can change other settings or files, so these switches are not isolation boundaries. Use a backed-up development or staging site for developer tools."
+#: includes/class-admin.php:125
+msgid "Connect with an authenticated URL"
 msgstr ""
 
-#: includes/class-admin.php:127
-msgid "To revoke remote access, disable Site Agent or revoke its Application Password in your profile. For an emergency stop, set SITE_AGENT_DISABLED to true in wp-config.php. Deactivation also disables access until you enable it again."
+#: includes/class-admin.php:126
+msgid "If your MCP client cannot send a custom Authorization header, include your credentials in the endpoint URL instead."
 msgstr ""
 
 #: includes/class-admin.php:128
-msgid "Recent tool calls"
+msgid "Enable Site Agent and URL authentication above, select the tools you need, then save your settings."
 msgstr ""
 
 #: includes/class-admin.php:129
-msgid "Time (UTC)"
+msgid "Create a dedicated Application Password in your administrator profile."
 msgstr ""
 
-#: includes/class-admin.php:129
-msgid "User ID"
-msgstr ""
-
-#: includes/class-admin.php:129
-msgid "Tool"
-msgstr ""
-
-#: includes/class-admin.php:129
-msgid "Result"
+#: includes/class-admin.php:130
+msgid "Enter your WordPress username and that Application Password in the converter below. Click Generate token, then Copy authenticated endpoint."
 msgstr ""
 
 #: includes/class-admin.php:131
-msgid "Success"
+msgid "Paste the copied URL into your client as a Streamable HTTP MCP endpoint. The client must retain the auth query parameter on every request; a separate Authorization header is not required."
 msgstr ""
 
-#: includes/class-admin.php:131
-msgid "Failed"
+#: includes/class-admin.php:133
+msgid "Example format only: BASE64_TOKEN is a placeholder for the encoded username:application-password value. The copy button generates and URL-encodes it for you."
+msgstr ""
+
+#: includes/class-admin.php:135
+msgid "Keep the complete URL private."
+msgstr ""
+
+#: includes/class-admin.php:135
+msgid "Base64 is reversible. This URL contains credentials and may appear in browser history, client configuration or server logs. Use a dedicated Application Password and clear the converter after copying."
+msgstr ""
+
+#: includes/class-admin.php:136
+msgid "To stop URL-based connections, turn off URL authentication and save. To revoke this credential everywhere, revoke its Application Password in your profile; existing MCP sessions cannot bypass revocation."
+msgstr ""
+
+#: includes/class-admin.php:137
+msgid "A compatible Streamable HTTP MCP client is required. URL authentication does not provide OAuth support or guarantee compatibility with every client. ChatGPT web compatibility with credential-bearing URLs has not been verified."
 msgstr ""
 
 #: includes/class-admin.php:141
-msgid "Create your Authorization value"
+msgid "Each tool switch controls that entry point. PHP execution, executable source editing, and WP-CLI can change other settings or files, so these switches are not isolation boundaries. Use a backed-up development or staging site for developer tools."
 msgstr ""
 
 #: includes/class-admin.php:142
-msgid "Enter a dedicated WordPress Application Password, not your account password. Conversion happens in this browser. Site Agent does not submit or store these credentials."
+msgid "To revoke remote access, disable Site Agent or revoke its Application Password in your profile. For an emergency stop, set SITE_AGENT_DISABLED to true in wp-config.php. Deactivation also disables access until you enable it again."
 msgstr ""
 
-#: includes/class-admin.php:145
-msgid "WordPress username"
+#: includes/class-admin.php:143
+msgid "Recent tool calls"
+msgstr ""
+
+#: includes/class-admin.php:144
+msgid "Time (UTC)"
+msgstr ""
+
+#: includes/class-admin.php:144
+msgid "User ID"
+msgstr ""
+
+#: includes/class-admin.php:144
+msgid "Tool"
+msgstr ""
+
+#: includes/class-admin.php:144
+msgid "Result"
 msgstr ""
 
 #: includes/class-admin.php:146
-msgid "Application Password"
+msgid "Success"
 msgstr ""
 
 #: includes/class-admin.php:146
-msgid "You can paste the password with its spaces. The converter removes them."
+msgid "Failed"
 msgstr ""
 
-#: includes/class-admin.php:148
-msgid "Generate token"
-msgstr ""
-
-#: includes/class-admin.php:148
-msgid "Clear credentials"
-msgstr ""
-
-#: includes/class-admin.php:150
-msgid "Base64 token"
-msgstr ""
-
-#: includes/class-admin.php:152
-msgid "Copy Base64 token"
-msgstr ""
-
-#: includes/class-admin.php:152
-msgid "Copy Authorization value"
-msgstr ""
-
-#: includes/class-admin.php:152
-msgid "Copy MCP configuration"
-msgstr ""
-
-#: includes/class-admin.php:152
-msgid "Copy authenticated endpoint"
-msgstr ""
-
-#: includes/class-admin.php:153
-msgid "The Authorization value includes the Basic prefix. The MCP configuration includes your endpoint and generated value. Base64 is reversible, so keep the token and configuration private."
-msgstr ""
-
-#: includes/class-admin.php:154
-msgid "For clients without custom headers, enable URL authentication above and save first. Copy authenticated endpoint adds the auth query parameter. This URL contains your credentials and may appear in history or logs; keep it private. A compatible Streamable HTTP MCP client is still required."
+#: includes/class-admin.php:156
+msgid "Create your Authorization value"
 msgstr ""
 
 #: includes/class-admin.php:157
-msgid "Enable JavaScript to use the credential converter."
+msgid "Enter a dedicated WordPress Application Password, not your account password. Conversion happens in this browser. Site Agent does not submit or store these credentials."
+msgstr ""
+
+#: includes/class-admin.php:160
+msgid "WordPress username"
+msgstr ""
+
+#: includes/class-admin.php:161
+msgid "Application Password"
+msgstr ""
+
+#: includes/class-admin.php:161
+msgid "You can paste the password with its spaces. The converter removes them."
+msgstr ""
+
+#: includes/class-admin.php:163
+msgid "Generate token"
+msgstr ""
+
+#: includes/class-admin.php:163
+msgid "Clear credentials"
 msgstr ""
 
 #: includes/class-admin.php:165
+msgid "Base64 token"
+msgstr ""
+
+#: includes/class-admin.php:167
+msgid "Copy Base64 token"
+msgstr ""
+
+#: includes/class-admin.php:167
+msgid "Copy Authorization value"
+msgstr ""
+
+#: includes/class-admin.php:167
+msgid "Copy MCP configuration"
+msgstr ""
+
+#: includes/class-admin.php:167
+msgid "Copy authenticated endpoint"
+msgstr ""
+
+#: includes/class-admin.php:168
+msgid "The Authorization value includes the Basic prefix. The MCP configuration includes your endpoint and generated value. Base64 is reversible, so keep the token and configuration private."
+msgstr ""
+
+#: includes/class-admin.php:169
+msgid "For clients without custom headers, enable URL authentication above and save first. Copy authenticated endpoint adds the auth query parameter. This URL contains your credentials and may appear in history or logs; keep it private. A compatible Streamable HTTP MCP client is still required."
+msgstr ""
+
+#: includes/class-admin.php:172
+msgid "Enable JavaScript to use the credential converter."
+msgstr ""
+
+#: includes/class-admin.php:180
 msgid "You cannot manage the Site Agent update license."
 msgstr ""
 
-#: includes/class-admin.php:189
+#: includes/class-admin.php:204
 msgid "Automatic updates"
 msgstr ""
 
-#: includes/class-admin.php:190
+#: includes/class-admin.php:205
 msgid "Activate the free FluentCart license from your Site Agent checkout to receive automatic updates. Plugin functionality remains available without a license."
 msgstr ""
 
-#: includes/class-admin.php:191
+#: includes/class-admin.php:206
 msgid "Get a free update license"
 msgstr ""
 
-#: includes/class-admin.php:193
+#: includes/class-admin.php:208
 msgid "The license operation completed."
 msgstr ""
 
-#: includes/class-admin.php:193
+#: includes/class-admin.php:208
 msgid "The license operation failed. Verify the license and server connection, then try again. Previous credentials are retained on network errors."
 msgstr ""
 
-#: includes/class-admin.php:196
+#: includes/class-admin.php:211
 msgid "Status"
 msgstr ""
 
-#: includes/class-admin.php:196
+#: includes/class-admin.php:211
 msgid "Active"
 msgstr ""
 
-#: includes/class-admin.php:196
+#: includes/class-admin.php:211
 msgid "Activation required or inactive"
 msgstr ""
 
-#: includes/class-admin.php:196
+#: includes/class-admin.php:211
 msgid "Key ending"
 msgstr ""
 
-#: includes/class-admin.php:202
+#: includes/class-admin.php:217
 msgid "License key"
 msgstr ""
 
-#: includes/class-admin.php:204
+#: includes/class-admin.php:219
 msgid "Activate license"
 msgstr ""
 
-#: includes/class-admin.php:206
+#: includes/class-admin.php:221
 msgid "Check status"
 msgstr ""
 
-#: includes/class-admin.php:207
+#: includes/class-admin.php:222
 msgid "Disconnect this site"
 msgstr ""
 
-#: includes/class-admin.php:210
+#: includes/class-admin.php:225
 msgid "Activation sends the license key, site URL, plugin version, WordPress version and PHP version to gauravtiwari.org. Credentials are encrypted and bound to this site. Activated licenses are checked when WordPress checks updates."
 msgstr ""
 

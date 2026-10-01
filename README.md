@@ -10,7 +10,7 @@ Site Agent is free and open source. The complete release ZIP and a free automati
 
 ## Companion Package
 
-Release 0.1.4 also includes `site-agent-companion-0.1.4.zip`, built from `companion/site-agent/`. It supplies the approved icon, a credential-free MCP connection and a WordPress workflow skill for compatible ChatGPT/Codex hosts. The skill covers site inspection, raw-content audits, draft preparation, hash-checked edits and enabled developer tools.
+Release 0.1.5 also includes `site-agent-companion-0.1.5.zip`, built from `companion/site-agent/`. It supplies the approved icon, a credential-free MCP connection and a WordPress workflow skill for compatible ChatGPT/Codex hosts. The skill covers site inspection, raw-content audits, draft preparation, hash-checked edits and enabled developer tools.
 
 This companion archive is separate from the WordPress installable ZIP. Authentication must be configured privately through a compatible host. It does not implement OAuth or establish authenticated ChatGPT web connectivity. The server requires a WordPress Application Password through a Basic Authorization header or explicitly enabled URL authentication. OAuth remains unimplemented, and ChatGPT web compatibility with credential-bearing URLs has not been verified.
 
@@ -30,7 +30,7 @@ The settings page includes a browser-only credential converter. Enter your WordP
 
 The usual endpoint is `/wp-json/site-agent/v1/mcp`. Sites with plain permalinks use the equivalent `?rest_route=/site-agent/v1/mcp` URL shown in the settings. Encode `username:application-password` as Base64 and pass it in `Authorization: Basic …`. Base64 is not encryption; remote transport requires HTTPS.
 
-For clients without custom headers, enable **URL authentication** in Tools → Site Agent, save, and use **Copy authenticated endpoint** in the converter. The format is `/wp-json/site-agent/v1/mcp?auth=BASE64_VALUE`; the converter percent-encodes the value and preserves existing query parameters on plain-permalink sites. Standard and URL-safe Base64 are accepted. The value must decode to `username:application-password`; an account password is rejected. Each request validates the Application Password through WordPress and rechecks administrator and enabled-tool permissions. Revoking that password stops URL access, including existing MCP sessions.
+The settings page includes an inline guide with setup steps, a site-specific URL example, credential privacy and revocation instructions. For clients without custom headers, enable **URL authentication** in Tools → Site Agent, save, and use **Copy authenticated endpoint** in the converter. The format is `/wp-json/site-agent/v1/mcp?auth=BASE64_VALUE`; the converter percent-encodes the value and preserves existing query parameters on plain-permalink sites. Standard and URL-safe Base64 are accepted. The value must decode to `username:application-password`; an account password is rejected. Each request validates the Application Password through WordPress and rechecks administrator and enabled-tool permissions. Revoking that password stops URL access, including existing MCP sessions.
 
 URL authentication is off by default and applies only to the Site Agent MCP route. It accepts query credentials, not credentials inside tool arguments. Invalid supplied tokens fail closed, including when another identity was authenticated. MCP responses are marked private/no-store. HTTPS remains required remotely. Credentials in URLs may be recorded in browser history, proxy/server logs or client configuration; Base64 is reversible. Use a dedicated, revocable Application Password and keep the complete URL private. The client must support the MCP transport/protocol and preserve the query on each request; this is not a guarantee of compatibility with every client.
 
@@ -102,7 +102,7 @@ SITE_AGENT_WP_DIR=/path/to/disposable/wordpress vendor/bin/phpunit
 bash bin/build.sh
 ```
 
-Tests refuse to load an installation without a `.site-agent-test-install` marker. Never place that marker on a real site. Integration tests modify disposable options, users, posts, and fixture files. The build uses a runtime allowlist and excludes tests, development dependencies, Composer metadata, docs, and screenshots. Ship `dist/site-agent-0.1.4.zip`, not a GitHub source archive.
+Tests refuse to load an installation without a `.site-agent-test-install` marker. Never place that marker on a real site. Integration tests modify disposable options, users, posts, and fixture files. The build uses a runtime allowlist and excludes tests, development dependencies, Composer metadata, docs, and screenshots. Ship `dist/site-agent-0.1.5.zip`, not a GitHub source archive.
 
 ## License and Contributions
 
