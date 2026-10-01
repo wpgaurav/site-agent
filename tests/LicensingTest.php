@@ -85,6 +85,14 @@ final class LicensingTest extends TestCase {
 		$this->assertInstanceOf(WP_Error::class,Updater::metadata());$this->assertSame($calls+1,$this->calls,'A cached failure must not trigger another request.');
 		$this->metadata('99.0.0');$this->assertIsArray(Updater::metadata(true));$this->assertSame($calls+2,$this->calls);
 	}
+	public function test_forced_refresh_failure_keeps_validated_metadata(): void {
+		// On the store's own site the upgrader's refresh hits maintenance mode (HTTP 503).
+		$this->activate();$this->metadata('99.0.0');$this->assertSame('99.0.0',Updater::metadata()['new_version']);
+		$this->response=new WP_Error('http_request_failed','maintenance');$calls=$this->calls;
+		$this->assertSame('99.0.0',Updater::metadata(true)['new_version']);$this->assertSame($calls+1,$this->calls);
+		$this->assertSame('99.0.0',Updater::metadata()['new_version'],'The validated cache must survive the failed refresh.');
+		Updater::clear_cache();$this->assertInstanceOf(WP_Error::class,Updater::metadata(true),'Without validated metadata the failure is reported.');
+	}
 	public function test_signed_packages_must_match_exactly(): void {
 		require_once dirname(__DIR__).'/bin/sign-package.php';
 		$pair=sodium_crypto_sign_keypair();$public=base64_encode(sodium_crypto_sign_publickey($pair));

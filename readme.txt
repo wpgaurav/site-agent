@@ -70,7 +70,7 @@ Get the free checkout license from https://gauravtiwari.org/product/site-agent/ 
 * Add diagnostics, a browser connection test and an X-Site-Agent-Auth reason header on refused requests.
 * Remove URL credentials from the request before dispatch. Reject WP-CLI @aliases. Add SITE_AGENT_WP_CLI, SITE_AGENT_WP_CLI_TIMEOUT, SITE_AGENT_PHP_BINARY and SITE_AGENT_ALLOW_EXECUTION.
 * Describe every tool argument and declare output schemas.
-* Use WordPress's Update URI hook for updates, cache failed update checks for 15 minutes, and add signed package verification for use once a release key is configured.
+* Use WordPress's Update URI hook for updates, cache failed update checks for 15 minutes, keep validated update metadata when the store is unreachable during an upgrade (so gauravtiwari.org can update itself in maintenance mode), and add signed package verification for use once a release key is configured.
 * Disable every site on network deactivation and remove MCP sessions and caches on uninstall.
 
 = 0.1.5 =

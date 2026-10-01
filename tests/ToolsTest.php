@@ -107,7 +107,8 @@ final class ToolsTest extends TestCase {
 		$cases = array(
 			// PHP 8.4 made exit a function, so it can be reached without the exit token.
 			'call_user_func( "exit" );'                                         => PHP_VERSION_ID >= 80400 ? 'php_exit' : 'php_execution_failed',
-			'ini_set( "memory_limit", "32M" ); $a = str_repeat( "x", 64000000 );' => 'php_fatal',
+			// A compile error inside eval() cannot be caught on any PHP version.
+			'function site_agent_dup() {} function site_agent_dup() {}'       => 'php_fatal',
 		);
 		foreach ( $cases as $code => $error ) {
 			$output = array();

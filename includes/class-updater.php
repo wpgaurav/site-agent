@@ -59,7 +59,8 @@ final class Updater {
 		}
 		$identity = hash( 'sha256', home_url( '/' ) . wp_json_encode( $credentials ) . SITE_AGENT_VERSION );
 		$cached   = get_transient( self::CACHE );
-		if ( ! $force && is_array( $cached ) && ( $cached['identity'] ?? '' ) === $identity ) {
+		$current  = is_array( $cached ) && ( $cached['identity'] ?? '' ) === $identity;
+		if ( ! $force && $current ) {
 			if ( isset( $cached['error'] ) ) {
 				return new \WP_Error( (string) $cached['error'], __( 'The update server could not be reached recently. WordPress will try again later.', 'site-agent' ) );
 			}
@@ -68,6 +69,11 @@ final class Updater {
 		self::$fetching = true;
 		try {
 			$response = License::request( 'get_license_version', $credentials );
+			// A forced refresh runs while WordPress is in maintenance mode. On the store's own site that
+			// request gets HTTP 503, so keep the metadata validated by the update check instead.
+			if ( is_wp_error( $response ) && $force && $current && isset( $cached['data'] ) ) {
+				return $cached['data'];
+			}
 			if ( ! is_wp_error( $response ) ) {
 				$version = (string) ( $response['new_version'] ?? '' );
 				if ( 'site-agent' !== ( $response['slug'] ?? '' ) || ( isset( $response['product_id'] ) && License::PRODUCT_ID !== (int) $response['product_id'] ) || ! preg_match( '/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/D', $version ) ) {
