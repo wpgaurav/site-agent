@@ -1,0 +1,11 @@
+# Site Agent 0.1.5
+
+Adds an always-visible inline guide above the credential converter in Tools > Site Agent. Four steps cover enabling URL authentication, creating a dedicated Application Password, generating and copying the authenticated endpoint, and configuring a compatible Streamable HTTP MCP client. The example uses the current site's endpoint and a placeholder token. Privacy, revocation and OAuth/client compatibility limits are explained without showing real credentials. Authentication and tool behavior are unchanged.
+
+Published code commit/tag: `62f27b77e5a08fdf981650ad64c3a5d82c693c58` / `v0.1.5`. The WordPress ZIP is 379465 bytes, SHA-256 `225c7926dfedfaa0cea33831309c533c407eee2ff5936f747db05729fb77c0f9`, delivered through FluentCart download 329. All 283 installed files match the published package. The separate companion ZIP is 19594 bytes, SHA-256 `3dd0881b4aef1b5c18f8130744e4041c6776e1f832537ecab9f05f84ac023b52`, with 10 files. Prior release 0.1.4 remains in download 328 and a private production rollback archive.
+
+Validation passed 33 integration tests / 144 assertions against the new package on explicitly disposable WordPress, 7 converter tests, Composer validation, PHP syntax and WordPress coding standards, runtime and translation freshness, package exclusions, and standalone admin rendering. Exact-commit CI passed PHP 8.0, 8.3 and 8.5. The live signed-in settings page showed all four guide steps, the correct HTTPS URL placeholder and profile link, and no horizontal overflow.
+
+GitHub asset readback, R2 readback and licensed delivery matched in size and checksum. A valid synthetic activation received 0.1.5 and the off-site package; an invalid activation received no package. WordPress downloaded the package with maintenance active, then maintenance cleared. The verification activation disconnected and its synthetic license was disabled. All 5 scoped Site Agent storage objects remain referenced by download rows.
+
+Existing access settings, installed update credentials, unrelated active plugins, product content, commerce fields, price and license limits were preserved. Public site/product requests returned HTTP 200; the unauthenticated MCP request returned HTTP 401. No production content-writing, source-editing, PHP-execution or WP-CLI MCP tool was exercised.
