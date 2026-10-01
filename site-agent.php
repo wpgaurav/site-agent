@@ -3,7 +3,7 @@
  * Plugin Name: Site Agent
  * Plugin URI: https://gauravtiwari.org/product/site-agent/
  * Description: Connect an MCP client directly to WordPress with independently enabled developer tools.
- * Version: 0.1.5
+ * Version: 0.2.0
  * Requires at least: 6.9
  * Requires PHP: 8.0
  * Author: Gaurav Tiwari
@@ -21,7 +21,7 @@ namespace SiteAgent;
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'SITE_AGENT_VERSION', '0.1.5' );
+define( 'SITE_AGENT_VERSION', '0.2.0' );
 define( 'SITE_AGENT_DIR', __DIR__ . '/' );
 define( 'SITE_AGENT_FILE', __FILE__ );
 
@@ -46,7 +46,10 @@ add_action(
 	static function () {
 		Admin::init();
 		Updater::init();
+		// Early, so later rest_pre_dispatch callbacks and loggers never see the URL credential.
+		add_filter( 'rest_pre_dispatch', array( Url_Auth::class, 'capture' ), 1, 3 );
 		add_filter( 'rest_post_dispatch', array( Url_Auth::class, 'response' ), 10, 3 );
+		add_action( 'wp_delete_application_password', array( Scopes::class, 'forget' ), 10, 2 );
 		if ( ! Config::get()['enabled'] || Config::locked() || ! function_exists( 'wp_register_ability' ) ) {
 			return;
 		}
@@ -57,6 +60,7 @@ add_action(
 		require_once $runtime;
 		// Keep this private, scoped adapter independent of other MCP plugins.
 		add_filter( 'site_agent_mcp_adapter_create_default_server', '__return_false' );
+		add_filter( 'site_agent_mcp_adapter_tools_list', array( Abilities::class, 'visible_tools' ), 10, 2 );
 		Vendor\WP\MCP\Plugin::instance();
 		add_action( 'wp_abilities_api_categories_init', array( Abilities::class, 'register_category' ) );
 		add_action( 'wp_abilities_api_init', array( Abilities::class, 'register' ) );
@@ -67,9 +71,29 @@ add_action(
 
 register_deactivation_hook(
 	__FILE__,
-	static function () {
-		$config            = Config::get();
-		$config['enabled'] = false;
-		update_option( Config::OPTION, $config, false );
+	static function ( $network_wide = false ) {
+		$disable = static function () {
+			if ( false === get_option( Config::OPTION ) ) {
+				return;
+			}
+			$config            = Config::get();
+			$config['enabled'] = false;
+			update_option( Config::OPTION, $config, true );
+		};
+		if ( ! is_multisite() || ! $network_wide ) {
+			$disable();
+			return;
+		}
+		// Network deactivation must not leave subsites enabled for a later reactivation.
+		foreach ( get_sites(
+			array(
+				'fields' => 'ids',
+				'number' => 0,
+			)
+		) as $site_id ) {
+			switch_to_blog( (int) $site_id );
+			$disable();
+			restore_current_blog();
+		}
 	}
 );

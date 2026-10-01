@@ -18,12 +18,16 @@ def rpc(method,params,role='admin'):
  try:
   with urllib.request.urlopen(request,timeout=30) as response:
    body=json.loads(response.read());session=response.headers.get('Mcp-Session-Id',session);return response.status,body
- except urllib.error.HTTPError as response:return response.code,json.loads(response.read())
+ except urllib.error.HTTPError as response:
+  global last_headers
+  last_headers=response.headers;return response.code,json.loads(response.read())
+last_headers=None
 code,body=rpc('initialize',{'protocolVersion':'2025-11-25','capabilities':{},'clientInfo':{'name':'qa','version':'1'}})
 assert code==200 and session
 code,body=rpc('tools/list',{})
-tools=body['result']['tools'];assert len(tools)==10
-print('PASS initialize and list all 10 tools')
+tools=body['result']['tools'];assert len(tools)==16,len(tools)
+assert all(t['inputSchema'].get('type')=='object' for t in tools)
+print('PASS initialize and list all 16 tools')
 def tool(name,args):
  code,body=rpc('tools/call',{'name':'site-agent-'+name,'arguments':args})
  assert code==200,(code,body)
@@ -44,5 +48,15 @@ assert structured.get('stdout','').strip()
 print('PASS WP-CLI command as authenticated administrator')
 code,body=rpc('tools/list',{},role='contributor');assert code==403
 code,body=rpc('tools/list',{},role=None);assert code==401
+assert last_headers.get('X-Site-Agent-Auth')=='unauthenticated',dict(last_headers)
 print('PASS session does not grant access to contributor or anonymous callers')
+body=tool('create-directory',{'path':'mu-plugins'})
+assert not body.get('isError'),body
+body=tool('write-file',{'path':'mu-plugins/site-agent-smoke.php','content':'<?php site_agent_smoke_undefined_function();','expected_sha256':'new'})
+assert body.get('isError') and 'reverted' in body['content'][0]['text'],body
+body=tool('write-file',{'path':'mu-plugins/site-agent-smoke.php','content':'<?php // Site Agent smoke test.','expected_sha256':'new'})
+assert not body.get('isError') and body['structuredContent']['checks']['health']=='ok',body
+body=tool('delete-file',{'path':'mu-plugins/site-agent-smoke.php','expected_sha256':body['structuredContent']['sha256']})
+assert not body.get('isError'),body
+print('PASS fatal PHP changes are detected through the site and reverted')
 print('All HTTP MCP smoke checks passed.')

@@ -12,6 +12,10 @@ defined( 'ABSPATH' ) || exit;
 /** Configuration with opt-in defaults. */
 final class Config {
 	const OPTION = 'site_agent_settings';
+	/** Groups that read or change code and respect WordPress's file modification constants. */
+	const CODE_GROUPS = array( 'file_read', 'file_write', 'php_execute', 'cli_execute' );
+	/** Groups that can run or change executable code. */
+	const EXECUTION_GROUPS = array( 'file_write', 'php_execute', 'cli_execute' );
 
 	public static function defaults(): array {
 		return array(
@@ -49,5 +53,18 @@ final class Config {
 	public static function code_locked(): bool {
 		return ( defined( 'DISALLOW_FILE_EDIT' ) && DISALLOW_FILE_EDIT )
 			|| ( defined( 'DISALLOW_FILE_MODS' ) && DISALLOW_FILE_MODS );
+	}
+
+	/** SITE_AGENT_ALLOW_EXECUTION set to false in wp-config.php blocks code-changing tools on this site. */
+	public static function execution_blocked(): bool {
+		return defined( 'SITE_AGENT_ALLOW_EXECUTION' ) && ! SITE_AGENT_ALLOW_EXECUTION;
+	}
+
+	/** Whether wp-config.php constants leave a tool group usable, independent of the settings screen. */
+	public static function group_available( string $group ): bool {
+		if ( in_array( $group, self::CODE_GROUPS, true ) && self::code_locked() ) {
+			return false;
+		}
+		return ! ( in_array( $group, self::EXECUTION_GROUPS, true ) && self::execution_blocked() );
 	}
 }

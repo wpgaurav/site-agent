@@ -1,22 +1,30 @@
 # Source-derived tool reference
 
-Reference source: wpgaurav/site-agent, commit 51a46952a1feab439e091d2464021da06e8d4c98, includes/class-abilities.php and includes/class-content.php. Live discovery determines the names and schemas used by the host.
+Reference source: wpgaurav/site-agent 0.2.0, includes/class-abilities.php, includes/class-content.php, includes/class-media.php and includes/class-files.php. Live discovery determines the names and schemas used by the host; every argument carries a description there.
 
 | Source tool name | Input fields | Purpose |
 | --- | --- | --- |
-| site-agent-site-context | none | Site URL, environment, versions, plugins, theme, post types, enabled groups |
-| site-agent-list-content | post_type, search, limit, page | Search accessible content; default post, 20 results |
-| site-agent-get-content | post_id required | Raw content, title, excerpt, status, content_sha256 |
-| site-agent-list-media | search, limit, page | Existing media IDs, URLs, MIME types and alt text |
-| site-agent-save-content | post_id, post_type, title, content, excerpt, status, expected_content_sha256 | Creates default to draft; updates require current hash |
-| site-agent-list-files | path required, offset, limit | Browse plugin/theme paths |
+| site-agent-site-context | none | Site URL, environment, versions, plugins, theme, post types, taxonomies, tools available to this connection |
+| site-agent-list-content | post_type, status, orderby, order, search, limit, page | Search accessible content; default post, 20 results, most recently modified first |
+| site-agent-get-content | post_id, url or slug (+ post_type) | Raw content, title, slug, status, dates, link, terms, featured_media, meta, your newer autosave, content_sha256 |
+| site-agent-list-terms | taxonomy, search, limit, page | Term IDs, names, slugs, parents and counts; default category |
+| site-agent-list-media | mime_type, search, limit, page | Existing media IDs, URLs, MIME types, dimensions and alt text |
+| site-agent-save-content | post_id, post_type, title, content, excerpt, status, slug, date_gmt, terms, featured_media, meta, expected_content_sha256 | Creates default to draft; updates require current hash; edits to live posts are staged unless status is passed |
+| site-agent-upload-media | url or data_base64 + filename; title, alt, caption, description, post_id | Import into the media library with alt text |
+| site-agent-update-media | id required; title, alt, caption, description | Change media metadata |
+| site-agent-list-files | path required, offset, limit | Browse plugin, theme and mu-plugin paths with sizes and modification times |
 | site-agent-read-file | path required | UTF-8 source and SHA-256 |
-| site-agent-write-file | path, content, expected_sha256 required | Hash-checked file write; new for a new file |
-| site-agent-execute-php | code required | PHP statements, without PHP tags |
+| site-agent-write-file | path, content, expected_sha256 required | Hash-checked write; new for a new file; fatal PHP changes are reverted |
+| site-agent-create-directory | path required | Create a directory and missing parents |
+| site-agent-delete-file | path, expected_sha256 required | Delete a hash-matched file, or an empty directory with directory |
+| site-agent-move-file | from, to, expected_sha256 required | Rename a hash-matched file; the destination must not exist |
+| site-agent-execute-php | code required | PHP statements, without PHP tags, exit or die |
 | site-agent-run-wp-cli | arguments required | An argument array, not a shell string |
 
-Content/media limit is 1-100. File listing limit is 1-200. Save statuses are draft, pending, publish and private. Omitted update fields remain unchanged, including a published status.
+Content/media/term limit is 1-100. File listing limit is 1-200. Save statuses are draft, pending, publish, private and future; future needs a future date_gmt. Omitted update fields remain unchanged. Updating a published, private or scheduled post without status saves an autosave for human review and returns staged true; pass status (for example publish) only when the user asked to change the live post.
 
-Tool groups are disabled by default. Base content reads require Site Agent enabled. Content writes, source inspection, source editing, PHP and WP-CLI each require their relevant opt-in. Tools return errors when unavailable; do not infer success from transport completion.
+Terms replace the post's terms per taxonomy and accept IDs or names (missing names are created). Meta accepts only the keys the site allows, typically Rank Math or Yoast SEO title, description and focus keyword; an empty string deletes a value. Prefer existing media over uploads, and always provide meaningful alt text.
 
-This version has no dedicated SEO metadata, media import, arbitrary settings, plugin-update or deletion tools. Developer entry points are broader but are not substitutes for missing capabilities without appropriate scope and authorization.
+Tool groups are disabled by default. Base reads require Site Agent enabled. Content writes, source inspection, source editing, PHP and WP-CLI each require their relevant opt-in, and an Application Password can be limited to fewer groups, so a connection may see fewer tools than the site enables. Tools return errors with the underlying message; do not infer success from transport completion.
+
+This version has no arbitrary settings, plugin-update or post deletion tools. Developer entry points are broader but are not substitutes for missing capabilities without appropriate scope and authorization.

@@ -38,7 +38,7 @@ final class SiteAgentTest extends TestCase {
 		$this->assertTrue( Permissions::allowed( 'file_read' ) );
 		$this->assertFalse( Permissions::allowed( 'php_execute' ) );
 		$this->assertFalse( Permissions::allowed( 'file_write' ) );
-		$this->assertCount( 6, Abilities::enabled_definitions() );
+		$this->assertCount( 7, Abilities::enabled_definitions() );
 		update_option( Config::OPTION, Config::defaults(), false );
 		$this->assertFalse( Permissions::allowed( 'file_read' ) );
 	}
@@ -72,8 +72,12 @@ final class SiteAgentTest extends TestCase {
 		$this->assertTrue( $result['truncated'] );
 	}
 	public function test_files_block_traversal_hidden_credentials_and_symlinks(): void {
-		foreach ( array( '../wp-config.php', 'plugins/../themes', 'themes/.env', 'themes/site-agent-test/config.php', '/etc/passwd', 'themes/site-agent-test/../../wp-config.php' ) as $path ) {
-			$this->assertInstanceOf( WP_Error::class, Files::resolve( $path ), $path );
+		foreach ( array( '../wp-config.php', 'plugins/../themes', 'themes/.env', 'themes/site-agent-test/wp-config.php', 'themes/site-agent-test/auth.json', 'themes/site-agent-test/credentials.json', 'themes/site-agent-test/secrets.yml', 'themes/site-agent-test/server.pem', 'uploads', '/etc/passwd', 'themes/site-agent-test/../../wp-config.php' ) as $path ) {
+			$this->assertInstanceOf( WP_Error::class, Files::resolve( $path, true ), $path );
+		}
+		// Ordinary build and source files that merely mention configuration or credentials stay accessible.
+		foreach ( array( 'themes/site-agent-test/tailwind.config.js', 'themes/site-agent-test/vite.config.js', 'themes/site-agent-test/class-credentials-form.php' ) as $path ) {
+			$this->assertIsString( Files::resolve( $path, true ), $path );
 		}
 		symlink( ABSPATH . 'wp-config.php', $this->directory . '/linked.php' );
 		$this->assertInstanceOf( WP_Error::class, Files::resolve( 'themes/site-agent-test/linked.php' ) );

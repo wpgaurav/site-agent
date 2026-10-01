@@ -68,13 +68,39 @@ final class LicensingTest extends TestCase {
 		foreach(array('http://gauravtiwari.org/a','https://attacker.test/a','https://gauravtiwari.org.attacker.test/a','https://user@gauravtiwari.org/a','https://gauravtiwari.org:8443/a','https://gauravtiwari.org/a#fragment') as $url){$this->assertFalse(Updater::package_allowed($url));}
 	}
 	public function test_updates_reject_invalid_entitlement_and_downgrades(): void {
-		$this->activate();$this->metadata('0.2.0','invalid');$file=plugin_basename(SITE_AGENT_FILE);
-		$result=Updater::updates((object)array('checked'=>array($file=>SITE_AGENT_VERSION),'response'=>array()));
-		$this->assertArrayNotHasKey($file,$result->response);$this->assertSame('',$result->no_update[$file]->package);
-		Updater::clear_cache();$this->metadata('0.1.0');$result=Updater::updates((object)array('checked'=>array($file=>SITE_AGENT_VERSION),'response'=>array()));
-		$this->assertArrayNotHasKey($file,$result->response);
-		Updater::clear_cache();$this->metadata();$result=Updater::updates((object)array('checked'=>array($file=>SITE_AGENT_VERSION),'response'=>array()));
-		$this->assertSame('0.2.0',$result->response[$file]->new_version);
+		$file=plugin_basename(SITE_AGENT_FILE);$headers=array('Version'=>SITE_AGENT_VERSION);
+		$this->assertFalse(Updater::update(false,$headers,$file),'No license means no update entry.');
+		$this->activate();$this->metadata('99.0.0','invalid');
+		$result=Updater::update(false,$headers,$file);
+		$this->assertSame(SITE_AGENT_VERSION,$result['version']);$this->assertSame('',$result['package']);
+		Updater::clear_cache();$this->metadata('0.1.0');
+		$this->assertSame(SITE_AGENT_VERSION,Updater::update(false,$headers,$file)['version']);
+		Updater::clear_cache();$this->metadata('99.0.0');$result=Updater::update(false,$headers,$file);
+		$this->assertSame('99.0.0',$result['version']);$this->assertStringStartsWith('https://gauravtiwari-org-fluentcart.',$result['package']);
+		$this->assertSame('another',Updater::update('another',$headers,'other-plugin/other-plugin.php'),'Other plugins on the same update host are untouched.');
+	}
+	public function test_failed_update_requests_are_cached_briefly(): void {
+		$this->activate();$this->response=new WP_Error('http_request_failed','offline');$calls=$this->calls;
+		$this->assertInstanceOf(WP_Error::class,Updater::metadata());$this->assertSame($calls+1,$this->calls);
+		$this->assertInstanceOf(WP_Error::class,Updater::metadata());$this->assertSame($calls+1,$this->calls,'A cached failure must not trigger another request.');
+		$this->metadata('99.0.0');$this->assertIsArray(Updater::metadata(true));$this->assertSame($calls+2,$this->calls);
+	}
+	public function test_signed_packages_must_match_exactly(): void {
+		require_once dirname(__DIR__).'/bin/sign-package.php';
+		$pair=sodium_crypto_sign_keypair();$public=base64_encode(sodium_crypto_sign_publickey($pair));
+		$folder=sys_get_temp_dir().'/site-agent-signature-test-'.uniqid();mkdir($folder.'/includes',0777,true);
+		file_put_contents($folder.'/site-agent.php','<?php // main');file_put_contents($folder.'/includes/class-a.php','<?php // a');
+		$files=site_agent_package_files($folder);
+		$this->assertSame(Updater::package_message('9.9.9',$files),site_agent_package_message('9.9.9',$files),'Signer and verifier must build the same message.');
+		site_agent_sign_package($folder,'9.9.9',sodium_crypto_sign_secretkey($pair));
+		$this->assertTrue(Updater::verify_package($folder,'9.9.9',$public));
+		$this->assertInstanceOf(WP_Error::class,Updater::verify_package($folder,'9.9.8',$public),'The signature binds the version.');
+		$this->assertInstanceOf(WP_Error::class,Updater::verify_package($folder,'9.9.9',base64_encode(sodium_crypto_sign_publickey(sodium_crypto_sign_keypair()))),'Another key must fail.');
+		file_put_contents($folder.'/includes/extra.php','<?php // injected');
+		$this->assertInstanceOf(WP_Error::class,Updater::verify_package($folder,'9.9.9',$public),'Unsigned extra files must fail.');
+		unlink($folder.'/includes/extra.php');file_put_contents($folder.'/includes/class-a.php','<?php // changed');
+		$this->assertInstanceOf(WP_Error::class,Updater::verify_package($folder,'9.9.9',$public),'Changed files must fail.');
+		foreach(array('/includes/class-a.php','/site-agent.php','/signature.json') as $f){unlink($folder.$f);}rmdir($folder.'/includes');rmdir($folder);
 	}
 	public function test_wrong_update_identity_and_wrong_extracted_plugin_are_rejected(): void {
 		$this->activate();$this->metadata();$this->response['slug']='another-plugin';

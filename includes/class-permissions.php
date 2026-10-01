@@ -11,21 +11,43 @@ defined( 'ABSPATH' ) || exit;
 
 /** Authorization independent of tool arguments. */
 final class Permissions {
+	/**
+	 * Why the current request was refused at the transport, sent as a diagnostic header.
+	 *
+	 * @var string
+	 */
+	private static $denial = '';
+
 	public static function administrator(): bool {
 		return is_user_logged_in() && current_user_can( 'manage_options' )
 			&& ( ! is_multisite() || is_super_admin() );
 	}
 
 	public static function transport( $request = null ): bool {
-		if ( Config::locked() || ! Config::get()['enabled'] || ( ! is_ssl() && 'local' !== wp_get_environment_type() ) ) {
+		self::$denial = '';
+		if ( Config::locked() || ! Config::get()['enabled'] ) {
+			return self::denied( 'disabled' );
+		}
+		if ( ! is_ssl() && 'local' !== wp_get_environment_type() ) {
+			return self::denied( 'https_required' );
+		}
+		if ( $request instanceof \WP_REST_Request && Url_Auth::supplied( $request ) && ! Url_Auth::authenticate( $request ) ) {
 			return false;
 		}
-		if ( $request instanceof \WP_REST_Request && array_key_exists( 'auth', $request->get_query_params() ) ) {
-			if ( ! Url_Auth::authenticate( $request ) ) {
-				return false;
-			}
+		if ( ! is_user_logged_in() ) {
+			return self::denied( 'unauthenticated' );
 		}
-		return self::allowed();
+		return self::administrator() ? true : self::denied( 'not_administrator' );
+	}
+
+	/** Record a transport refusal reason. Reasons never include credentials or identities. */
+	public static function denied( string $reason ): bool {
+		self::$denial = $reason;
+		return false;
+	}
+
+	public static function denial(): string {
+		return self::$denial;
 	}
 
 	public static function allowed( string $group = '' ): bool {
@@ -33,14 +55,12 @@ final class Permissions {
 		if ( Config::locked() || empty( $config['enabled'] ) || ! self::administrator() ) {
 			return false;
 		}
-		if ( '' !== $group && empty( $config[ $group ] ) ) {
+		if ( '' !== $group && ( empty( $config[ $group ] ) || ! Config::group_available( $group ) ) ) {
 			return false;
 		}
-		if ( in_array( $group, array( 'file_read', 'file_write', 'php_execute', 'cli_execute' ), true ) ) {
-			if ( Config::code_locked() || ! current_user_can( 'edit_plugins' ) ) {
-				return false;
-			}
+		if ( in_array( $group, Config::CODE_GROUPS, true ) && ! current_user_can( 'edit_plugins' ) ) {
+			return false;
 		}
-		return true;
+		return Scopes::permits( $group );
 	}
 }

@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "site-agent",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "description": "A WordPress assistant for site inspection, content audits, draft creation, and hash-checked edits through Site Agent's MCP tools.",
   "author": {
     "name": "Gaurav Tiwari",

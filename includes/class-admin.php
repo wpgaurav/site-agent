@@ -16,12 +16,19 @@ final class Admin {
 		add_action( 'admin_init', array( self::class, 'settings' ) );
 		add_action( 'admin_enqueue_scripts', array( self::class, 'assets' ) );
 		add_action( 'admin_post_site_agent_license', array( self::class, 'license_action' ) );
+		add_filter( 'plugin_action_links_' . plugin_basename( SITE_AGENT_FILE ), array( self::class, 'action_links' ) );
 		add_filter(
 			'option_page_capability_site_agent',
 			static function () {
 				return is_multisite() ? 'manage_network_options' : 'manage_options';
 			}
 		);
+	}
+
+	public static function action_links( $links ): array {
+		$links = is_array( $links ) ? $links : array();
+		array_unshift( $links, '<a href="' . esc_url( admin_url( 'tools.php?page=site-agent' ) ) . '">' . esc_html__( 'Settings', 'site-agent' ) . '</a>' );
+		return $links;
 	}
 
 	public static function assets( string $hook ): void {
@@ -33,14 +40,31 @@ final class Admin {
 			'site-agent-auth-converter',
 			'SiteAgentAuthConverter',
 			array(
-				'generated'   => __( 'Token generated. Copy the value you need into your MCP client.', 'site-agent' ),
-				'required'    => __( 'Enter your WordPress username and Application Password.', 'site-agent' ),
-				'username'    => __( 'A Basic authentication username cannot contain a colon.', 'site-agent' ),
-				'copied'      => __( 'Copied to clipboard.', 'site-agent' ),
-				'copy_failed' => __( 'Clipboard access is unavailable. Show the token, select it and copy it manually.', 'site-agent' ),
-				'cleared'     => __( 'Credentials and generated token cleared.', 'site-agent' ),
-				'show'        => __( 'Show token', 'site-agent' ),
-				'hide'        => __( 'Hide token', 'site-agent' ),
+				'generated'          => __( 'Token generated. Copy the value you need into your MCP client.', 'site-agent' ),
+				'required'           => __( 'Enter your WordPress username and Application Password.', 'site-agent' ),
+				'username'           => __( 'A Basic authentication username cannot contain a colon.', 'site-agent' ),
+				'copied'             => __( 'Copied to clipboard.', 'site-agent' ),
+				'copy_failed'        => __( 'Clipboard access is unavailable. Show the token, select it and copy it manually.', 'site-agent' ),
+				'cleared'            => __( 'Credentials and generated token cleared.', 'site-agent' ),
+				'show'               => __( 'Show token', 'site-agent' ),
+				'hide'               => __( 'Hide token', 'site-agent' ),
+				'url_auth'           => (bool) Config::get()['url_auth'],
+				// wp_localize_script() turns booleans into strings.
+				'app_passwords'      => wp_is_application_passwords_available_for_user( wp_get_current_user() ) ? 'yes' : 'no',
+				'testing'            => __( 'Testing the connection…', 'site-agent' ),
+				/* translators: %d: number of tools. */
+				'test_ok'            => __( 'Connected. %d tools are available to this password.', 'site-agent' ),
+				'test_url_ok'        => __( 'The authenticated URL also works.', 'site-agent' ),
+				'test_url_failed'    => __( 'The authenticated URL did not connect.', 'site-agent' ),
+				'test_credentials'   => __( 'WordPress rejected this username or Application Password.', 'site-agent' ),
+				'test_disabled'      => __( 'Application Passwords are disabled on this site or for this account.', 'site-agent' ),
+				'test_stripped'      => __( 'WordPress received no credentials, so the server is removing the Authorization header. Enable URL authentication, or ask your host to pass the Authorization header to PHP.', 'site-agent' ),
+				'test_administrator' => __( 'This account is not an administrator (or super administrator on multisite).', 'site-agent' ),
+				'test_https'         => __( 'WordPress does not detect HTTPS, so connections are refused. See the HTTPS diagnostic above.', 'site-agent' ),
+				'test_missing'       => __( 'The MCP endpoint is not registered. Enable Site Agent and at least one tool, then save.', 'site-agent' ),
+				'test_network'       => __( 'The test request could not reach the endpoint.', 'site-agent' ),
+				/* translators: %d: HTTP status code. */
+				'test_failed'        => __( 'The connection failed with HTTP %d.', 'site-agent' ),
 			)
 		);
 	}
@@ -60,6 +84,40 @@ final class Admin {
 				'show_in_rest'      => false,
 			)
 		);
+		register_setting(
+			'site_agent',
+			Scopes::OPTION,
+			array(
+				'type'              => 'array',
+				'sanitize_callback' => array( Scopes::class, 'sanitize' ),
+				'default'           => array(),
+				'show_in_rest'      => false,
+			)
+		);
+	}
+
+	/**
+	 * Settings switches with labels and descriptions.
+	 *
+	 * @return array<string, array{0: string, 1: string}>
+	 */
+	private static function controls(): array {
+		$cli = sprintf(
+			/* translators: %d: seconds. */
+			__( 'Run foreground WP-CLI commands with a %d-second limit. This grants full developer access, including code execution and database changes.', 'site-agent' ),
+			Developer::cli_timeout()
+		);
+		return array(
+			'enabled'       => array( __( 'Enable Site Agent', 'site-agent' ), __( 'Allow authenticated administrators to connect and use the tools selected below.', 'site-agent' ) ),
+			'url_auth'      => array( __( 'URL authentication', 'site-agent' ), __( 'Allow Base64-encoded username and Application Password credentials in the MCP endpoint auth query parameter. URLs may be recorded in client history and server logs. Use a dedicated, revocable Application Password.', 'site-agent' ) ),
+			'content_write' => array( __( 'Content writes', 'site-agent' ), __( 'Create drafts, edit posts or pages, set terms, featured images and SEO fields, and import media. Edits to live posts are staged as autosaves unless a status is passed explicitly.', 'site-agent' ) ),
+			'file_read'     => array( __( 'Source inspection', 'site-agent' ), __( 'Read plugin, theme and must-use plugin source files. Source files can contain sensitive data.', 'site-agent' ) ),
+			'file_write'    => array( __( 'Source editing', 'site-agent' ), __( 'Create, overwrite, move or delete plugin and theme files, including PHP. PHP changes that cause a fatal error are reverted when the site can be checked.', 'site-agent' ) ),
+			'php_execute'   => array( __( 'PHP execution', 'site-agent' ), __( 'Run PHP inside WordPress with the server process privileges. This is not a sandbox and can modify files, the database, and Site Agent itself.', 'site-agent' ) ),
+			'cli_execute'   => array( __( 'WP-CLI execution', 'site-agent' ), $cli ),
+			'audit_enabled' => array( __( 'Audit history', 'site-agent' ), __( 'Keep the last 100 tool calls: time, user ID, tool, target (post ID, file path or WP-CLI command name), Application Password name, result and duration. Content, code, other arguments, outputs, IP addresses and credential secrets are not logged.', 'site-agent' ) ),
+			'delete_data'   => array( __( 'Delete data on uninstall', 'site-agent' ), __( 'Remove Site Agent settings, password limits, audit history and the update license when deleting the plugin.', 'site-agent' ) ),
+		);
 	}
 
 	public static function render(): void {
@@ -67,17 +125,6 @@ final class Admin {
 			wp_die( esc_html__( 'Site Agent requires site administration rights, or super administrator rights on multisite.', 'site-agent' ) );
 		}
 		$config     = Config::get();
-		$controls   = array(
-			'enabled'       => array( __( 'Enable Site Agent', 'site-agent' ), __( 'Allow authenticated administrators to connect and use the tools selected below.', 'site-agent' ) ),
-			'url_auth'      => array( __( 'URL authentication', 'site-agent' ), __( 'Allow Base64-encoded username and Application Password credentials in the MCP endpoint auth query parameter. URLs may be recorded in client history and server logs. Use a dedicated, revocable Application Password.', 'site-agent' ) ),
-			'content_write' => array( __( 'Content writes', 'site-agent' ), __( 'Create drafts and edit posts or pages. Publishing requires an explicit tool argument.', 'site-agent' ) ),
-			'file_read'     => array( __( 'Source inspection', 'site-agent' ), __( 'Read plugin and theme source files. Source files can contain sensitive data.', 'site-agent' ) ),
-			'file_write'    => array( __( 'Source editing', 'site-agent' ), __( 'Create or overwrite plugin and theme files, including PHP. Incorrect code can break the site.', 'site-agent' ) ),
-			'php_execute'   => array( __( 'PHP execution', 'site-agent' ), __( 'Run PHP inside WordPress with the server process privileges. This is not a sandbox and can modify files, the database, and Site Agent itself.', 'site-agent' ) ),
-			'cli_execute'   => array( __( 'WP-CLI execution', 'site-agent' ), __( 'Run foreground WP-CLI commands with a 20-second limit. This grants full developer access, including code execution and database changes.', 'site-agent' ) ),
-			'audit_enabled' => array( __( 'Audit history', 'site-agent' ), __( 'Keep the last 100 tool calls: time, user ID, tool name, result status, and duration. Arguments, source code, outputs, IP addresses, and credentials are not logged.', 'site-agent' ) ),
-			'delete_data'   => array( __( 'Delete data on uninstall', 'site-agent' ), __( 'Remove Site Agent settings and audit history when deleting the plugin.', 'site-agent' ) ),
-		);
 		$endpoint   = rest_url( 'site-agent/v1/mcp' );
 		$connection = array(
 			'mcpServers' => array(
@@ -90,6 +137,7 @@ final class Admin {
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'Site Agent', 'site-agent' ); ?></h1>
+			<?php settings_errors(); ?>
 			<p><?php esc_html_e( 'Connect your AI client directly to this WordPress installation. Site Agent has no hosted proxy and makes no telemetry requests.', 'site-agent' ); ?></p>
 			<?php if ( Config::locked() ) : ?>
 				<div class="notice notice-warning inline"><p><?php esc_html_e( 'SITE_AGENT_DISABLED is active. All Site Agent access is disabled.', 'site-agent' ); ?></p></div>
@@ -97,21 +145,26 @@ final class Admin {
 			<?php if ( Config::code_locked() ) : ?>
 				<div class="notice notice-warning inline"><p><?php esc_html_e( 'WordPress file modification or editing is disabled. Source inspection, source editing, PHP, and WP-CLI tools are blocked.', 'site-agent' ); ?></p></div>
 			<?php endif; ?>
-			<?php if ( ! function_exists( 'wp_register_ability' ) || ! is_readable( SITE_AGENT_DIR . 'runtime/autoload.php' ) ) : ?>
-				<div class="notice notice-error inline"><p><?php esc_html_e( 'Site Agent requires WordPress 6.9 or newer and the complete release ZIP with its bundled runtime.', 'site-agent' ); ?></p></div>
+			<?php if ( Config::execution_blocked() ) : ?>
+				<div class="notice notice-warning inline"><p><?php esc_html_e( 'SITE_AGENT_ALLOW_EXECUTION is false in wp-config.php. Source editing, PHP, and WP-CLI tools are blocked on this site.', 'site-agent' ); ?></p></div>
 			<?php endif; ?>
 			<form method="post" action="options.php">
 				<?php settings_fields( 'site_agent' ); ?>
 				<table class="form-table" role="presentation">
-					<?php foreach ( $controls as $key => $control ) : ?>
+					<?php foreach ( self::controls() as $key => $control ) : ?>
 						<tr><th scope="row"><?php echo esc_html( $control[0] ); ?></th><td>
 							<label><input type="checkbox" name="<?php echo esc_attr( Config::OPTION . '[' . $key . ']' ); ?>" value="1" <?php checked( ! empty( $config[ $key ] ) ); ?>> <?php echo esc_html( $control[0] ); ?></label>
 							<p class="description"><?php echo esc_html( $control[1] ); ?></p>
+							<?php if ( ! Config::group_available( $key ) ) : ?>
+								<p class="description"><strong><?php esc_html_e( 'Blocked by a wp-config.php constant on this site.', 'site-agent' ); ?></strong></p>
+							<?php endif; ?>
 						</td></tr>
 					<?php endforeach; ?>
 				</table>
+				<?php self::scopes_panel(); ?>
 				<?php submit_button(); ?>
 			</form>
+			<?php self::diagnostics_panel(); ?>
 			<?php self::license_panel(); ?>
 			<h2><?php esc_html_e( 'Connect a client', 'site-agent' ); ?></h2>
 			<ol>
@@ -132,21 +185,103 @@ final class Admin {
 				</ol>
 				<p><?php esc_html_e( 'Example format only: BASE64_TOKEN is a placeholder for the encoded username:application-password value. The copy button generates and URL-encodes it for you.', 'site-agent' ); ?></p>
 				<pre style="padding:16px;background:#f6f7f7;overflow:auto;"><code><?php echo esc_html( add_query_arg( 'auth', 'BASE64_TOKEN', $endpoint ) ); ?></code></pre>
-				<p><strong><?php esc_html_e( 'Keep the complete URL private.', 'site-agent' ); ?></strong> <?php esc_html_e( 'Base64 is reversible. This URL contains credentials and may appear in browser history, client configuration or server logs. Use a dedicated Application Password and clear the converter after copying.', 'site-agent' ); ?></p>
+				<p><strong><?php esc_html_e( 'Keep the complete URL private.', 'site-agent' ); ?></strong> <?php esc_html_e( 'Base64 is reversible. This URL contains credentials and may appear in browser history, client configuration or server logs. Site Agent removes it from the request before other plugins run their late logging, but earlier server logs can still record it. Use a dedicated Application Password and clear the converter after copying.', 'site-agent' ); ?></p>
 				<p><?php esc_html_e( 'To stop URL-based connections, turn off URL authentication and save. To revoke this credential everywhere, revoke its Application Password in your profile; existing MCP sessions cannot bypass revocation.', 'site-agent' ); ?></p>
 				<p><?php esc_html_e( 'A compatible Streamable HTTP MCP client is required. URL authentication does not provide OAuth support or guarantee compatibility with every client. ChatGPT web compatibility with credential-bearing URLs has not been verified.', 'site-agent' ); ?></p>
 			</section>
 			<?php self::auth_converter(); ?>
 			<pre id="site-agent-connection-config" style="padding:16px;background:#fff;border:1px solid #c3c4c7;overflow:auto;"><?php echo esc_html( wp_json_encode( $connection, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) ); ?></pre>
 			<p><?php esc_html_e( 'Each tool switch controls that entry point. PHP execution, executable source editing, and WP-CLI can change other settings or files, so these switches are not isolation boundaries. Use a backed-up development or staging site for developer tools.', 'site-agent' ); ?></p>
-			<p><?php esc_html_e( 'To revoke remote access, disable Site Agent or revoke its Application Password in your profile. For an emergency stop, set SITE_AGENT_DISABLED to true in wp-config.php. Deactivation also disables access until you enable it again.', 'site-agent' ); ?></p>
-			<h2><?php esc_html_e( 'Recent tool calls', 'site-agent' ); ?></h2>
-			<table class="widefat striped"><thead><tr><th><?php esc_html_e( 'Time (UTC)', 'site-agent' ); ?></th><th><?php esc_html_e( 'User ID', 'site-agent' ); ?></th><th><?php esc_html_e( 'Tool', 'site-agent' ); ?></th><th><?php esc_html_e( 'Result', 'site-agent' ); ?></th></tr></thead><tbody>
-				<?php foreach ( array_reverse( (array) get_option( Audit::OPTION, array() ) ) as $row ) : ?>
-					<tr><td><?php echo esc_html( $row['time'] ); ?></td><td><?php echo esc_html( (string) $row['user_id'] ); ?></td><td><?php echo esc_html( $row['tool'] ); ?></td><td><?php echo esc_html( $row['success'] ? __( 'Success', 'site-agent' ) : __( 'Failed', 'site-agent' ) ); ?></td></tr>
-				<?php endforeach; ?>
-			</tbody></table>
+			<p><?php esc_html_e( 'To revoke remote access, disable Site Agent or revoke its Application Password in your profile. For an emergency stop, set SITE_AGENT_DISABLED to true in wp-config.php; set SITE_AGENT_ALLOW_EXECUTION to false to block only source editing, PHP and WP-CLI. Deactivation also disables access until you enable it again.', 'site-agent' ); ?></p>
+			<?php self::audit_table(); ?>
 		</div>
+		<?php
+	}
+
+	/** Per-Application-Password limits for the current user's passwords. */
+	private static function scopes_panel(): void {
+		if ( ! wp_is_application_passwords_available_for_user( wp_get_current_user() ) ) {
+			return;
+		}
+		$passwords = \WP_Application_Passwords::get_user_application_passwords( get_current_user_id() );
+		$scopes    = Scopes::all();
+		$labels    = self::controls();
+		?>
+		<h2><?php esc_html_e( 'Application Password access', 'site-agent' ); ?></h2>
+		<p><?php esc_html_e( 'Limit what each of your Application Passwords can do, for example content-only for a chat client and developer tools for a local coding agent. A limit can only narrow the switches above. Read-only content tools stay available to every administrator password.', 'site-agent' ); ?></p>
+		<?php if ( ! $passwords ) : ?>
+			<p><em><?php esc_html_e( 'You have no Application Passwords yet.', 'site-agent' ); ?></em></p>
+			<?php
+			return;
+		endif;
+		?>
+		<table class="widefat striped" style="max-width:960px;">
+			<thead><tr><th><?php esc_html_e( 'Application Password', 'site-agent' ); ?></th><th><?php esc_html_e( 'Last used', 'site-agent' ); ?></th><th><?php esc_html_e( 'Access', 'site-agent' ); ?></th></tr></thead>
+			<tbody>
+			<?php foreach ( $passwords as $password ) : ?>
+				<?php
+				$uuid    = (string) $password['uuid'];
+				$name    = Scopes::OPTION . '[' . $uuid . ']';
+				$limited = isset( $scopes[ $uuid ] );
+				?>
+				<tr>
+					<td><strong><?php echo esc_html( $password['name'] ); ?></strong><input type="hidden" name="<?php echo esc_attr( Scopes::OPTION . '[__shown][]' ); ?>" value="<?php echo esc_attr( $uuid ); ?>"></td>
+					<td><?php echo esc_html( $password['last_used'] ? wp_date( get_option( 'date_format' ), (int) $password['last_used'] ) : __( 'Never', 'site-agent' ) ); ?></td>
+					<td>
+						<label><input type="checkbox" name="<?php echo esc_attr( $name . '[limited]' ); ?>" value="1" <?php checked( $limited ); ?>> <?php esc_html_e( 'Limit this password to:', 'site-agent' ); ?></label>
+						<fieldset style="margin:6px 0 0 24px;">
+							<?php foreach ( Scopes::GROUPS as $group ) : ?>
+								<label style="display:inline-block;margin-right:12px;"><input type="checkbox" name="<?php echo esc_attr( $name . '[groups][]' ); ?>" value="<?php echo esc_attr( $group ); ?>" <?php checked( $limited && in_array( $group, $scopes[ $uuid ], true ) ); ?>> <?php echo esc_html( $labels[ $group ][0] ); ?></label>
+							<?php endforeach; ?>
+						</fieldset>
+					</td>
+				</tr>
+			<?php endforeach; ?>
+			</tbody>
+		</table>
+		<?php
+	}
+
+	private static function diagnostics_panel(): void {
+		$icons = array(
+			'ok'      => array( 'yes-alt', '#008a20', __( 'OK', 'site-agent' ) ),
+			'warning' => array( 'warning', '#996800', __( 'Warning', 'site-agent' ) ),
+			'error'   => array( 'dismiss', '#d63638', __( 'Problem', 'site-agent' ) ),
+		);
+		?>
+		<h2><?php esc_html_e( 'Diagnostics', 'site-agent' ); ?></h2>
+		<p><?php esc_html_e( 'Server checks for common connection problems. Generate a token below and use Test connection to confirm the whole path, including whether your server passes the Authorization header to WordPress.', 'site-agent' ); ?></p>
+		<table class="widefat striped" style="max-width:960px;"><tbody>
+			<?php foreach ( Diagnostics::checks() as $check ) : ?>
+				<?php $icon = $icons[ $check['status'] ] ?? $icons['warning']; ?>
+				<tr>
+					<th scope="row" style="width:200px;"><span class="dashicons dashicons-<?php echo esc_attr( $icon[0] ); ?>" style="color:<?php echo esc_attr( $icon[1] ); ?>;" aria-hidden="true"></span> <?php echo esc_html( $check['label'] ); ?><span class="screen-reader-text"> (<?php echo esc_html( $icon[2] ); ?>)</span></th>
+					<td><?php echo esc_html( $check['detail'] ); ?></td>
+				</tr>
+			<?php endforeach; ?>
+		</tbody></table>
+		<?php
+	}
+
+	private static function audit_table(): void {
+		$results = array(
+			'denied' => __( 'Denied', 'site-agent' ),
+		);
+		?>
+		<h2><?php esc_html_e( 'Recent tool calls', 'site-agent' ); ?></h2>
+		<table class="widefat striped"><thead><tr><th><?php esc_html_e( 'Time (UTC)', 'site-agent' ); ?></th><th><?php esc_html_e( 'User ID', 'site-agent' ); ?></th><th><?php esc_html_e( 'Tool', 'site-agent' ); ?></th><th><?php esc_html_e( 'Target', 'site-agent' ); ?></th><th><?php esc_html_e( 'Credential', 'site-agent' ); ?></th><th><?php esc_html_e( 'Result', 'site-agent' ); ?></th></tr></thead><tbody>
+			<?php foreach ( array_reverse( (array) get_option( Audit::OPTION, array() ) ) as $row ) : ?>
+				<?php
+				if ( ! is_array( $row ) ) {
+					continue;
+				}
+				$error      = (string) ( $row['error'] ?? '' );
+				$credential = trim( ( (string) ( $row['credential'] ?? '' ) ) . ( empty( $row['via'] ) ? '' : ' (' . $row['via'] . ')' ) );
+				$result     = ! empty( $row['success'] ) ? __( 'Success', 'site-agent' ) : ( $results[ $error ] ?? trim( __( 'Failed', 'site-agent' ) . ( '' === $error ? '' : ': ' . $error ) ) );
+				?>
+				<tr><td><?php echo esc_html( (string) ( $row['time'] ?? '' ) ); ?></td><td><?php echo esc_html( (string) ( $row['user_id'] ?? '' ) ); ?></td><td><?php echo esc_html( (string) ( $row['tool'] ?? '' ) ); ?></td><td><?php echo esc_html( (string) ( $row['target'] ?? '' ) ); ?></td><td><?php echo esc_html( $credential ); ?></td><td><?php echo esc_html( $result ); ?></td></tr>
+			<?php endforeach; ?>
+		</tbody></table>
 		<?php
 	}
 
@@ -154,7 +289,7 @@ final class Admin {
 		?>
 		<section style="margin-block:24px;padding:24px;background:#fff;border:1px solid #c3c4c7;">
 			<h3><?php esc_html_e( 'Create your Authorization value', 'site-agent' ); ?></h3>
-			<p><?php esc_html_e( 'Enter a dedicated WordPress Application Password, not your account password. Conversion happens in this browser. Site Agent does not submit or store these credentials.', 'site-agent' ); ?></p>
+			<p><?php esc_html_e( 'Enter a dedicated WordPress Application Password, not your account password. Conversion happens in this browser. Site Agent does not submit or store these credentials; Test connection sends them only to this site\'s MCP endpoint.', 'site-agent' ); ?></p>
 			<form id="site-agent-auth-converter" autocomplete="off">
 				<table class="form-table" role="presentation">
 					<tr><th><label for="site-agent-auth-username"><?php esc_html_e( 'WordPress username', 'site-agent' ); ?></label></th><td><input id="site-agent-auth-username" type="text" value="<?php echo esc_attr( wp_get_current_user()->user_login ); ?>" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="60" required class="regular-text" style="width:100%;max-width:480px;"></td></tr>
@@ -164,7 +299,7 @@ final class Admin {
 				<div id="site-agent-auth-result" hidden>
 					<p><label for="site-agent-auth-token"><strong><?php esc_html_e( 'Base64 token', 'site-agent' ); ?></strong></label></p>
 					<input id="site-agent-auth-token" type="password" readonly autocomplete="off" spellcheck="false" class="large-text" aria-describedby="site-agent-auth-help" style="width:100%;max-width:640px;">
-					<p><button type="button" id="site-agent-auth-show" class="button" aria-pressed="false"><?php esc_html_e( 'Show token', 'site-agent' ); ?></button> <button type="button" class="button" data-site-agent-copy="token"><?php esc_html_e( 'Copy Base64 token', 'site-agent' ); ?></button> <button type="button" class="button" data-site-agent-copy="authorization"><?php esc_html_e( 'Copy Authorization value', 'site-agent' ); ?></button> <button type="button" class="button" data-site-agent-copy="configuration"><?php esc_html_e( 'Copy MCP configuration', 'site-agent' ); ?></button> <button type="button" class="button" data-site-agent-copy="endpoint" <?php disabled( ! Config::get()['url_auth'] ); ?>><?php esc_html_e( 'Copy authenticated endpoint', 'site-agent' ); ?></button></p>
+					<p><button type="button" id="site-agent-auth-show" class="button" aria-pressed="false"><?php esc_html_e( 'Show token', 'site-agent' ); ?></button> <button type="button" class="button" data-site-agent-copy="token"><?php esc_html_e( 'Copy Base64 token', 'site-agent' ); ?></button> <button type="button" class="button" data-site-agent-copy="authorization"><?php esc_html_e( 'Copy Authorization value', 'site-agent' ); ?></button> <button type="button" class="button" data-site-agent-copy="configuration"><?php esc_html_e( 'Copy MCP configuration', 'site-agent' ); ?></button> <button type="button" class="button" data-site-agent-copy="endpoint" <?php disabled( ! Config::get()['url_auth'] ); ?>><?php esc_html_e( 'Copy authenticated endpoint', 'site-agent' ); ?></button> <button type="button" id="site-agent-auth-test" class="button button-secondary"><?php esc_html_e( 'Test connection', 'site-agent' ); ?></button></p>
 					<p id="site-agent-auth-help" class="description"><?php esc_html_e( 'The Authorization value includes the Basic prefix. The MCP configuration includes your endpoint and generated value. Base64 is reversible, so keep the token and configuration private.', 'site-agent' ); ?></p>
 					<p class="description"><?php esc_html_e( 'For clients without custom headers, enable URL authentication above and save first. Copy authenticated endpoint adds the auth query parameter. This URL contains your credentials and may appear in history or logs; keep it private. A compatible Streamable HTTP MCP client is still required.', 'site-agent' ); ?></p>
 				</div>

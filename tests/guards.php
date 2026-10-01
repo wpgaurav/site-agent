@@ -4,10 +4,11 @@ if ( ! $root || ! is_file( $root . '/.site-agent-test-install' ) ) {
 	exit( 1 );
 }
 $flag = $argv[1] ?? '';
-if ( ! in_array( $flag, array( 'SITE_AGENT_DISABLED', 'DISALLOW_FILE_EDIT', 'DISALLOW_FILE_MODS' ), true ) ) {
+if ( ! in_array( $flag, array( 'SITE_AGENT_DISABLED', 'DISALLOW_FILE_EDIT', 'DISALLOW_FILE_MODS', 'SITE_AGENT_ALLOW_EXECUTION' ), true ) ) {
 	exit( 1 );
 }
-define( $flag, true );
+// SITE_AGENT_ALLOW_EXECUTION restricts when false; the others restrict when true.
+define( $flag, 'SITE_AGENT_ALLOW_EXECUTION' !== $flag );
 require $root . '/wp-load.php';
 wp_set_current_user( 1 );
 $saved = SiteAgent\Config::get();

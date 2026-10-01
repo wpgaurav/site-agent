@@ -3,7 +3,7 @@ Contributors: wpgaurav
 Tags: mcp, developer-tools, ai, automation
 Requires at least: 6.9
 Requires PHP: 8.0
-Stable tag: 0.1.5
+Stable tag: 0.2.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -11,9 +11,11 @@ Connect an MCP client directly to WordPress with independently enabled developer
 
 == Description ==
 
-Site Agent provides WordPress context, content and media discovery, content writes, source inspection, source editing, PHP execution, and foreground WP-CLI commands. It is distributed independently through gauravtiwari.org.
+Site Agent provides WordPress context, content, term and media discovery, content and media writes, source inspection, source editing, PHP execution, and foreground WP-CLI commands. It is distributed independently through gauravtiwari.org.
 
-Access starts disabled. Open Tools > Site Agent to choose the tool groups, then connect with a dedicated WordPress Application Password. Remote requests require HTTPS. Administrators can connect; multisite requires a super administrator. Source/developer tools also respect WordPress's file modification restrictions.
+Access starts disabled. Open Tools > Site Agent to choose the tool groups, then connect with a dedicated WordPress Application Password. Each password can be limited to some of the enabled groups. Remote requests require HTTPS. Administrators can connect; multisite requires a super administrator. Source/developer tools also respect WordPress's file modification restrictions. The settings page includes connection diagnostics and a Test connection button.
+
+Edits to live posts are staged as autosaves unless a status is passed explicitly. PHP file changes are syntax- and compile-checked, and a change that makes the site fail with a fatal error is reverted.
 
 PHP, executable file editing, and WP-CLI provide full developer access and are not sandboxed. Use developer tools on backed-up development or staging sites. They can change other settings and files even if another tool entry point is disabled.
 
@@ -25,7 +27,7 @@ Site Agent has no hosted MCP proxy, telemetry or external AI provider SDK. Your 
 
 Optional update activation sends the license key, site URL, plugin version, WordPress version and PHP version to the FluentCart store at https://gauravtiwari.org/. Credentials are encrypted with Sodium, stored without autoload and bound to this site. Activated licenses contact the store when WordPress checks for updates. Plugin functionality remains available without activation. Privacy policy: https://gauravtiwari.org/privacy-policy/.
 
-An optional history keeps the last 100 tool calls with the time, user ID, tool name, result status, and duration. It does not store code, arguments, results, IP addresses, or credentials. This history is not a tamper-proof security log. Data removal on uninstall is optional.
+An optional history keeps the last 100 tool calls with the time, user ID, tool name, target (post or attachment ID, file path, WP-CLI command name or imported URL host), Application Password name, result status, and duration. It does not store content, code, other arguments, results, IP addresses, or credential secrets. This history is not a tamper-proof security log. Data removal on uninstall is optional.
 
 == Installation ==
 
@@ -41,15 +43,35 @@ An optional history keeps the last 100 tool calls with the time, user ID, tool n
 No. It is an independent plugin.
 
 = Does this version provide OAuth or background commands? =
-No. Authentication uses WordPress Application Passwords. WP-CLI commands run in the foreground with a 20-second limit. PHP execution is not sandboxed.
+No. Authentication uses WordPress Application Passwords. WP-CLI commands run in the foreground with a 20-second limit by default (SITE_AGENT_WP_CLI_TIMEOUT, up to 300 seconds). PHP execution is not sandboxed.
+
+= WP-CLI is installed but reported as unavailable. =
+Define SITE_AGENT_WP_CLI in wp-config.php with the full path to the wp executable. Process execution (proc_open) must also be enabled.
+
+= My client cannot connect. =
+Open Tools > Site Agent, check Diagnostics, then generate a token and use Test connection. It reports rejected credentials, a server that strips the Authorization header, missing administrator rights and HTTPS detection problems.
 
 = How do I stop access? =
-Disable Site Agent or revoke its Application Password. An emergency SITE_AGENT_DISABLED constant in wp-config.php blocks all access. Deactivation also disables access until it is explicitly re-enabled.
+Disable Site Agent or revoke its Application Password. An emergency SITE_AGENT_DISABLED constant in wp-config.php blocks all access, and SITE_AGENT_ALLOW_EXECUTION set to false blocks only source editing, PHP and WP-CLI. Deactivation also disables access until it is explicitly re-enabled, including on every site of a network.
 
 = How do updates work? =
 Get the free checkout license from https://gauravtiwari.org/product/site-agent/ and activate it under Tools > Site Agent. FluentCart supplies automatic updates through protected HTTPS packages. The Update URI protects against unrelated WordPress.org slug matches. Manual release ZIP updates remain available. Licensing never disables the developer tools.
 
 == Changelog ==
+
+= 0.2.0 =
+* Revert PHP file writes, moves and deletes that make the site fail with a fatal error, using WordPress's edit-scrape check; compile-check PHP with a matching PHP binary before writing.
+* Report PHP and tool errors with their message and line. Reject exit and die, and report wp_die(), indirect exits and fatal errors during PHP execution as tool errors.
+* Stage edits to live posts as autosaves unless a status is passed. Require a future date for scheduling. Keep tag-like text and percent sequences in titles.
+* Add terms, featured image, slug, publish date and SEO meta to content writes; read posts by URL or slug; list terms; sort listings by modification date.
+* Add media import from a URL or base64 data with alt text, and media metadata updates.
+* Add create-directory, delete-file and move-file tools and must-use plugin access. Block credential files by name instead of blocking any path containing "config".
+* Limit tools per Application Password, record the target and password in the audit history, and audit denied calls.
+* Add diagnostics, a browser connection test and an X-Site-Agent-Auth reason header on refused requests.
+* Remove URL credentials from the request before dispatch. Reject WP-CLI @aliases. Add SITE_AGENT_WP_CLI, SITE_AGENT_WP_CLI_TIMEOUT, SITE_AGENT_PHP_BINARY and SITE_AGENT_ALLOW_EXECUTION.
+* Describe every tool argument and declare output schemas.
+* Use WordPress's Update URI hook for updates, cache failed update checks for 15 minutes, and add signed package verification for use once a release key is configured.
+* Disable every site on network deactivation and remove MCP sessions and caches on uninstall.
 
 = 0.1.5 =
 * Add inline setup instructions for authenticated MCP URLs, including a site-specific example, credential privacy, revocation and client compatibility.

@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');
 const vm = require('node:vm');
 
-function fixture() {
+function fixture(fetch) {
 	const elements = new Map();
 	function element(id) {
 		const listeners = {};
@@ -17,7 +17,7 @@ function fixture() {
 		elements.set(id, node);
 		return node;
 	}
-	['converter', 'username', 'password', 'token', 'result', 'status', 'show', 'clear'].forEach((key) => element('site-agent-auth-' + key));
+	['converter', 'username', 'password', 'token', 'result', 'status', 'show', 'clear', 'test'].forEach((key) => element('site-agent-auth-' + key));
 	const config = element('site-agent-connection-config');
 	config.textContent = JSON.stringify({ mcpServers: { 'site-agent': { url: 'https://example.test/wp-json/site-agent/v1/mcp', headers: { Authorization: 'Basic PLACEHOLDER' } } } });
 	const buttons = ['token', 'authorization', 'configuration', 'endpoint'].map((kind) => {
@@ -28,11 +28,15 @@ function fixture() {
 	const clipboard = [];
 	let clipboardWrite = async (value) => clipboard.push(value);
 	const window = {
-		SiteAgentAuthConverter: { generated: 'Generated', required: 'Required', username: 'Invalid username', copied: 'Copied', copy_failed: 'Manual copy', cleared: 'Cleared', show: 'Show', hide: 'Hide' },
+		SiteAgentAuthConverter: {
+			generated: 'Generated', required: 'Required', username: 'Invalid username', copied: 'Copied', copy_failed: 'Manual copy', cleared: 'Cleared', show: 'Show', hide: 'Hide',
+			url_auth: '1', app_passwords: 'yes', testing: 'Testing', test_ok: 'Connected %d', test_url_ok: 'URL ok', test_url_failed: 'URL failed',
+			test_credentials: 'Rejected', test_disabled: 'Disabled', test_stripped: 'Stripped', test_administrator: 'Not admin', test_https: 'HTTPS', test_missing: 'Missing', test_network: 'Network', test_failed: 'HTTP %d',
+		},
 		addEventListener(name, handler) { events[name] = handler; },
 	};
 	vm.runInNewContext(readFileSync('assets/admin-auth-converter.js', 'utf8'), {
-		window, document: { getElementById: (id) => elements.get(id) }, TextEncoder, URL,
+		window, document: { getElementById: (id) => elements.get(id) }, TextEncoder, URL, ...(fetch ? { fetch } : {}),
 		btoa: (value) => Buffer.from(value, 'binary').toString('base64'),
 		navigator: { clipboard: { writeText: (value) => clipboardWrite(value) } },
 	});
@@ -113,4 +117,52 @@ test('navigation clears credentials and stale clipboard promises cannot restore 
 	assert.equal(ui.get('password').value, ''); assert.equal(ui.get('token').value, ''); assert.equal(ui.get('status').textContent, '');
 	ui.generate('demo', 'abcd'); ui.events.pageshow({ persisted: true });
 	assert.equal(ui.get('username').value, ''); assert.equal(ui.get('password').value, '');
+});
+
+function server(handler) {
+	const calls = [];
+	const fetch = async (url, options) => {
+		calls.push({ url, options });
+		const { status = 200, body = {}, headers = {} } = handler(url, options, calls.length) ?? {};
+		return { ok: status < 300, status, headers: { get: (name) => headers[name] ?? null }, text: async () => JSON.stringify(body) };
+	};
+	return { fetch, calls };
+}
+
+test('connection test initializes, counts tools and ends the session without cookies', async () => {
+	const mock = server((url, options) => {
+		const method = options.body ? JSON.parse(options.body).method : options.method;
+		if (method === 'initialize') return { headers: { 'Mcp-Session-Id': 'session-1' }, body: { result: {} } };
+		if (method === 'tools/list') return { body: { result: { tools: [{}, {}, {}] } } };
+		return {};
+	});
+	const ui = fixture(mock.fetch); ui.generate('demo', 'abcd');
+	await ui.get('test').fire('click');
+	await new Promise((resolve) => setImmediate(resolve));
+	assert.equal(ui.get('status').textContent, 'Connected 3 URL ok');
+	const token = Buffer.from('demo:abcd').toString('base64');
+	assert.equal(mock.calls[0].options.headers.Authorization, 'Basic ' + token);
+	assert.equal(mock.calls[0].options.credentials, 'omit');
+	assert.equal(mock.calls[1].options.headers['Mcp-Session-Id'], 'session-1');
+	assert.ok(mock.calls.some((call) => call.options.method === 'DELETE'));
+	const urlCall = mock.calls.find((call) => new URL(call.url).searchParams.has('auth'));
+	assert.equal(new URL(urlCall.url).searchParams.get('auth'), token);
+	assert.equal(urlCall.options.headers.Authorization, undefined);
+});
+
+test('connection failures name the likely cause', async () => {
+	const cases = [
+		[{ status: 401, body: { code: 'incorrect_password' } }, 'Rejected'],
+		[{ status: 401, headers: { 'X-Site-Agent-Auth': 'unauthenticated' } }, 'Stripped'],
+		[{ status: 403, headers: { 'X-Site-Agent-Auth': 'not_administrator' } }, 'Not admin'],
+		[{ status: 404, body: { code: 'rest_no_route' } }, 'Missing'],
+	];
+	for (const [reply, message] of cases) {
+		const ui = fixture(server(() => reply).fetch); ui.generate('demo', 'abcd');
+		await ui.get('test').fire('click');
+		assert.ok(ui.get('status').textContent.startsWith(message), `${message}: ${ui.get('status').textContent}`);
+	}
+	const offline = fixture(async () => { throw new Error('offline'); }); offline.generate('demo', 'abcd');
+	await offline.get('test').fire('click');
+	assert.equal(offline.get('status').textContent, 'Network');
 });

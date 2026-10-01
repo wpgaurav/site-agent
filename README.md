@@ -10,7 +10,7 @@ Site Agent is free and open source. The complete release ZIP and a free automati
 
 ## Companion Package
 
-Release 0.1.5 also includes `site-agent-companion-0.1.5.zip`, built from `companion/site-agent/`. It supplies the approved icon, a credential-free MCP connection and a WordPress workflow skill for compatible ChatGPT/Codex hosts. The skill covers site inspection, raw-content audits, draft preparation, hash-checked edits and enabled developer tools.
+Release 0.2.0 also includes `site-agent-companion-0.2.0.zip`, built from `companion/site-agent/`. It supplies the approved icon, a credential-free MCP connection and a WordPress workflow skill for compatible ChatGPT/Codex hosts. The skill covers site inspection, raw-content audits, draft preparation, hash-checked edits and enabled developer tools.
 
 This companion archive is separate from the WordPress installable ZIP. Authentication must be configured privately through a compatible host. It does not implement OAuth or establish authenticated ChatGPT web connectivity. The server requires a WordPress Application Password through a Basic Authorization header or explicitly enabled URL authentication. OAuth remains unimplemented, and ChatGPT web compatibility with credential-bearing URLs has not been verified.
 
@@ -44,26 +44,40 @@ define( 'SITE_AGENT_DISABLED', true );
 
 | Tool | Opt-in group | Behavior |
 | --- | --- | --- |
-| `site-agent-site-context` | Enable Site Agent | WordPress/PHP versions, plugins, theme, REST post types |
-| `site-agent-list-content` | Enable Site Agent | Search and paginate accessible content |
-| `site-agent-get-content` | Enable Site Agent | Raw content and content hash |
-| `site-agent-list-media` | Enable Site Agent | Existing media URLs, MIME types, and alt text |
-| `site-agent-save-content` | Content writes | Create drafts or update posts through core APIs |
-| `site-agent-list-files` | Source inspection | Browse plugin and theme directories |
+| `site-agent-site-context` | Enable Site Agent | WordPress/PHP versions, plugins, theme, REST post types and taxonomies, tools available to this connection |
+| `site-agent-list-content` | Enable Site Agent | Search and paginate accessible content, most recently modified first |
+| `site-agent-get-content` | Enable Site Agent | Read by ID, URL or slug: raw content, terms, featured image, SEO meta, newer autosave, content hash |
+| `site-agent-list-terms` | Enable Site Agent | Find categories, tags and other taxonomy terms |
+| `site-agent-list-media` | Enable Site Agent | Existing media URLs, MIME types, dimensions, and alt text |
+| `site-agent-save-content` | Content writes | Create drafts or update posts, terms, featured image, slug, schedule and SEO meta through core APIs |
+| `site-agent-upload-media` | Content writes | Import a public URL or base64 file into the media library with alt text |
+| `site-agent-update-media` | Content writes | Set media title, alt text, caption and description |
+| `site-agent-list-files` | Source inspection | Browse plugin, theme and must-use plugin directories |
 | `site-agent-read-file` | Source inspection | Read UTF-8 source with a SHA-256 hash |
-| `site-agent-write-file` | Source editing | Compare current hash, check PHP syntax, lock and write |
+| `site-agent-write-file` | Source editing | Compare current hash, check PHP, lock, write, then load the site and revert fatal changes |
+| `site-agent-create-directory` | Source editing | Create directories and missing parents |
+| `site-agent-delete-file` | Source editing | Delete a hash-matched file or an empty directory |
+| `site-agent-move-file` | Source editing | Rename a hash-matched file to a new path |
 | `site-agent-execute-php` | PHP execution | Run PHP inside the loaded WordPress request |
 | `site-agent-run-wp-cli` | WP-CLI execution | Run argument-array commands on this installation |
 
-Content creates default to drafts. Updates require `expected_content_sha256`; omitted fields are preserved. Core save hooks, revisions, and the author's HTML filtering apply. Content hashes detect intervening changes before a save; they are not a database transaction or a replacement for backups.
+Every tool argument has a schema description, and every tool declares an output schema. Errors report the underlying message and line, because the caller already controls the failing code.
 
-File tools operate only under `wp-content/plugins` and `wp-content/themes`. Hidden, configuration, credential, and symlink paths are blocked. Source files may still contain sensitive data, so source inspection is an explicit opt-in. Source editing cannot rewrite Site Agent's own files. File content is bounded to 256 KiB. Writes require `expected_sha256` from a read, or `new` for a new file. The file's current hash is checked under an exclusive lock. PHP syntax is checked before replacing the content. Write failures attempt to restore the previous content. A lock/write is not a transactional deployment, and syntax checking does not prove a change will work.
+Content creates default to drafts. Updates require `expected_content_sha256`; omitted fields are preserved. Edits to a published, private or scheduled post are saved as the user's autosave (shown in the editor for review) unless the call passes `status`; publishing and scheduling always require an explicit status, and `future` needs a future `date_gmt`. Titles are stored as plain text without stripping tag-like text or percent sequences. Terms accept IDs or names (missing names are created). Meta writes are limited to Rank Math or Yoast SEO fields when those plugins are active, single scalar meta registered with `show_in_rest`, and keys added through the `site_agent_post_meta_keys` filter. Core save hooks, revisions, and the author's HTML filtering apply. Content hashes detect intervening changes before a save; they are not a database transaction or a replacement for backups.
 
-PHP code is limited to 64 KiB. Output and JSON return values are each limited to 64 KiB. PHP runs in the WordPress process and is **not sandboxed**. Infinite loops, `exit`, memory exhaustion, runtime errors, or changes to output buffers can terminate or disrupt the request. Use it on backed-up development or staging sites. PHP execution, executable file editing, and WP-CLI can each alter other settings or files; the switches control entry points, not isolation boundaries.
+Media imports use `wp_safe_remote_get()` (no private or loopback hosts) within WordPress's upload size limit, or base64 data up to 10 MiB, and pass through core's file type checks.
 
-WP-CLI runs without a shell, on the current WordPress installation, and as the authenticated user. Identity, connection, and bootstrap override arguments are rejected. Commands have a 20-second foreground limit; stdout/stderr are capped at 64 KiB each. Server-disabled functions and missing WP-CLI return a clear availability error. Detached jobs, descendants created by a command, and arbitrary PHP are not contained by this foreground timeout.
+File tools operate only under `wp-content/plugins`, `wp-content/themes`, and `wp-content/mu-plugins`. Hidden (dot) paths, symlinks, and credential files such as `wp-config*.php`, `auth.json`, `credentials.json`, `secrets.*`, service-account JSON, and key files are blocked; the `site_agent_file_blocked` filter can block more. Ordinary files such as `tailwind.config.js` remain accessible. Source files may still contain sensitive data, so source inspection is an explicit opt-in. Source editing cannot rewrite Site Agent's own files. File content is bounded to 256 KiB. Writes, moves and deletes require the current `expected_sha256` (or `new` for a new file and `directory` for an empty directory). The file's current hash is checked under an exclusive lock.
 
-`DISALLOW_FILE_EDIT` and `DISALLOW_FILE_MODS` block source inspection, source editing, PHP execution, and WP-CLI entry points. Every ability checks authenticated administration rights and its group setting again at execution time. Abilities remain private to the Site Agent server, with no public exposure through the default adapter or core REST ability routes.
+PHP changes pass three checks. The tokenizer catches syntax errors; a matching PHP command-line binary (`SITE_AGENT_PHP_BINARY`, or one found automatically) catches compile errors such as redeclared functions; then, after the write, Site Agent loads the front end, an admin request, and the MCP route with WordPress's own edit-scrape mechanism, as the core plugin editor does, and reverts the change if it causes a fatal error. Must-use plugins load before WordPress starts scraping, so for `mu-plugins/` a server error counts as fatal. If the site cannot be reached, the change is kept and the result reports `health: unverified`. The `site_agent_health_check` and `site_agent_health_check_urls` filters control this check. None of this is a transactional deployment or proof that a change works.
+
+PHP code is limited to 64 KiB. Output and JSON return values are each limited to 64 KiB. PHP runs in the WordPress process and is **not sandboxed**. Code containing `exit` or `die` is rejected, `wp_die()` becomes a tool error, and an early end of the request (for example a fatal error or `exit()` reached indirectly) is reported to the client as a tool error and recorded in the audit history. Infinite loops, memory exhaustion, or changes to output buffers can still disrupt the request. Use it on backed-up development or staging sites. PHP execution, executable file editing, and WP-CLI can each alter other settings or files; the switches control entry points, not isolation boundaries.
+
+WP-CLI runs without a shell, on the current WordPress installation, and as the authenticated user. Identity, connection, bootstrap and `@alias` arguments are rejected. Commands have a 20-second foreground limit by default (`SITE_AGENT_WP_CLI_TIMEOUT` or the `site_agent_wp_cli_timeout` filter, up to 300); stdout/stderr are capped at 64 KiB each. The executable is found in common locations or set with `SITE_AGENT_WP_CLI`. The process inherits the server environment with a `PATH` that includes PHP and a `HOME`, so the WP-CLI phar works under PHP-FPM. Server-disabled functions and missing WP-CLI return a clear availability error. Detached jobs, descendants created by a command, and arbitrary PHP are not contained by this foreground timeout.
+
+`DISALLOW_FILE_EDIT` and `DISALLOW_FILE_MODS` block source inspection, source editing, PHP execution, and WP-CLI entry points. Setting `SITE_AGENT_ALLOW_EXECUTION` to `false` in `wp-config.php` blocks source editing, PHP execution and WP-CLI on that site while leaving content tools and source inspection available. Each Application Password can be limited to a subset of the enabled tool groups under Tools → Site Agent; limited passwords do not see other tools in `tools/list`. Every ability checks authenticated administration rights, its group setting and the password's limit again at execution time. Abilities remain private to the Site Agent server, with no public exposure through the default adapter or core REST ability routes.
+
+The settings page shows diagnostics for HTTPS detection (including proxies that hide HTTPS), Application Password availability, WP-CLI, PHP compile checks and symlinked folders. Its Test connection button calls the MCP endpoint from the browser with the generated token, without cookies, and names the likely cause of a failure. Refused MCP requests carry an `X-Site-Agent-Auth` header with a coarse reason such as `unauthenticated` or `https_required`.
 
 ## Runtime Provenance
 
@@ -77,7 +91,7 @@ The only bundled third-party runtime packages are the official [WordPress MCP Ad
 
 Site Agent has no hosted MCP proxy, telemetry or AI provider SDK. Requests go between the configured client and the site. What the client does with tool results is governed by that client/provider's policy. Developer tools can intentionally make outbound requests when instructed to do so.
 
-The optional audit history stores the last 100 calls in a non-autoloaded WordPress option: UTC time, user ID, tool name, success/failure, and elapsed milliseconds. It does not store arguments, output, source content, IP addresses, or credentials. Concurrent calls may overwrite audit rows; this history is an operational aid, not a tamper-proof security log. Clearing data on uninstall is opt-in.
+The optional audit history stores the last 100 calls in a non-autoloaded WordPress option: UTC time, user ID, tool name, target, Application Password name and transport (header, URL or session), result with error code, and elapsed milliseconds. Targets identify what was touched: a post or attachment ID, a file path, the first WP-CLI command words, or the host of an imported URL. Authenticated calls refused by a switch or password limit are recorded as denied. It does not store content, code, other arguments, output, IP addresses, or credential secrets. Concurrent calls may overwrite audit rows; this history is an operational aid, not a tamper-proof security log. Clearing data on uninstall is opt-in.
 
 The `Update URI` header prevents an unrelated WordPress.org plugin with a matching slug from replacing Site Agent. Version 0.1.1 adds native WordPress updates through FluentCart product 1180328 on gauravtiwari.org. Complete the free checkout, then activate its update license under Tools → Site Agent. The license controls automatic update delivery only; every tool remains available without activation.
 
@@ -102,7 +116,7 @@ SITE_AGENT_WP_DIR=/path/to/disposable/wordpress vendor/bin/phpunit
 bash bin/build.sh
 ```
 
-Tests refuse to load an installation without a `.site-agent-test-install` marker. Never place that marker on a real site. Integration tests modify disposable options, users, posts, and fixture files. The build uses a runtime allowlist and excludes tests, development dependencies, Composer metadata, docs, and screenshots. Ship `dist/site-agent-0.1.5.zip`, not a GitHub source archive.
+Tests refuse to load an installation without a `.site-agent-test-install` marker. Never place that marker on a real site. Integration tests modify disposable options, users, posts, and fixture files. The build uses a runtime allowlist and excludes tests, development dependencies, Composer metadata, docs, and screenshots. Ship `dist/site-agent-0.2.0.zip`, not a GitHub source archive.
 
 ## License and Contributions
 
