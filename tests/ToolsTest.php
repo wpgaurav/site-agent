@@ -220,16 +220,54 @@ final class ToolsTest extends TestCase {
 	}
 
 	public function test_edits_to_live_posts_are_staged_unless_status_is_explicit(): void {
-		$created   = $this->call( 'save-content', array( 'title' => 'Live fixture', 'content' => 'original', 'status' => 'publish' ) );
+		global $wpdb;
+		$created = $this->call( 'save-content', array( 'title' => 'Live fixture', 'content' => 'original', 'status' => 'publish' ) );
 		$this->assertSame( 'publish', $created['status'] );
+		// Autosaves count as newer only when modified after the post, at one-second resolution.
+		$minute_ago = time() - MINUTE_IN_SECONDS;
+		$wpdb->update( $wpdb->posts, array( 'post_modified_gmt' => gmdate( 'Y-m-d H:i:s', $minute_ago ), 'post_modified' => get_date_from_gmt( gmdate( 'Y-m-d H:i:s', $minute_ago ) ) ), array( 'ID' => $created['id'] ) );
+		clean_post_cache( $created['id'] );
 		$staged = $this->call( 'save-content', array( 'post_id' => $created['id'], 'content' => 'proposed', 'expected_content_sha256' => $created['content_sha256'] ) );
 		$this->assertTrue( $staged['staged'] );
 		$this->assertSame( 'original', $staged['content'] );
 		$this->assertSame( hash( 'sha256', 'proposed' ), $staged['autosave']['content_sha256'] );
+		$this->assertArrayNotHasKey( 'content', $staged['autosave'] );
+		// The staged text can be read back, and a second staged edit builds on it with the live hash.
+		$read = $this->call( 'get-content', array( 'post_id' => $created['id'], 'autosave_content' => true ) );
+		$this->assertMatchesOutputSchema( 'get-content', $read );
+		$this->assertSame( 'original', $read['content'] );
+		$this->assertSame( 'proposed', $read['autosave']['content'] );
+		$this->assertTrue( $read['autosave']['newer'] );
+		$second = $this->call( 'save-content', array( 'post_id' => $created['id'], 'content' => $read['autosave']['content'] . ' and more', 'expected_content_sha256' => $read['content_sha256'] ) );
+		$this->assertTrue( $second['staged'] );
+		$this->assertSame( 'proposed and more', $this->call( 'get-content', array( 'post_id' => $created['id'], 'autosave_content' => true ) )['autosave']['content'] );
 		$this->assertSame( 'stage_unsupported', $this->call( 'save-content', array( 'post_id' => $created['id'], 'slug' => 'moved', 'expected_content_sha256' => $created['content_sha256'] ) )->get_error_code() );
 		$live = $this->call( 'save-content', array( 'post_id' => $created['id'], 'content' => 'proposed', 'status' => 'publish', 'expected_content_sha256' => $created['content_sha256'] ) );
 		$this->assertFalse( $live['staged'] );
 		$this->assertSame( 'proposed', $live['content'] );
+		// Once the live post moves past the autosave, it is no longer the newer copy to build on.
+		$this->assertFalse( $live['autosave']['newer'] );
+	}
+
+	public function test_templates_are_edited_directly_not_staged(): void {
+		$id = wp_insert_post(
+			array(
+				'post_type'    => 'wp_template',
+				'post_status'  => 'publish',
+				'post_name'    => 'site-agent-test-template',
+				'post_title'   => 'Site Agent test template',
+				'post_content' => 'before',
+			)
+		);
+		wp_set_object_terms( $id, get_stylesheet(), 'wp_theme' );
+		try {
+			$read = $this->call( 'get-content', array( 'post_id' => $id ) );
+			$this->assertSame( 'stage_unsupported', $this->call( 'save-content', array( 'post_id' => $id, 'content' => 'staged', 'expected_content_sha256' => $read['content_sha256'] ) )->get_error_code() );
+			$live = $this->call( 'save-content', array( 'post_id' => $id, 'content' => 'after', 'status' => 'publish', 'expected_content_sha256' => $read['content_sha256'] ) );
+			$this->assertSame( 'after', $live['content'] );
+		} finally {
+			wp_delete_post( $id, true );
+		}
 	}
 
 	public function test_scheduling_requires_a_future_date(): void {

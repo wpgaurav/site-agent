@@ -3,7 +3,7 @@ Contributors: wpgaurav
 Tags: mcp, developer-tools, ai, automation
 Requires at least: 6.9
 Requires PHP: 8.0
-Stable tag: 0.2.0
+Stable tag: 0.3.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -11,7 +11,7 @@ Connect an MCP client directly to WordPress with independently enabled developer
 
 == Description ==
 
-Site Agent provides WordPress context, content, term and media discovery, content and media writes, source inspection, source editing, PHP execution, and foreground WP-CLI commands. Bundled builder skills explain to the connected client how to work with Gutenberg, GenerateBlocks, Elementor, Bricks and Divi layouts. It is distributed independently through gauravtiwari.org.
+Site Agent provides WordPress context, content, term and media discovery, content and media writes, source inspection, source editing, PHP execution, and foreground WP-CLI commands. Bundled builder skills explain to the connected client how to work with Gutenberg, GenerateBlocks, Elementor, Bricks and Divi layouts, and an opt-in Bricks tools group serves Bricks Builder's own abilities (Bricks 2.4+) on the same connection. It is distributed independently through gauravtiwari.org.
 
 Access starts disabled. Open Tools > Site Agent to choose the tool groups, then connect with a dedicated WordPress Application Password. Each password can be limited to some of the enabled groups. Remote requests require HTTPS. Administrators can connect; multisite requires a super administrator. Source/developer tools also respect WordPress's file modification restrictions. The settings page includes connection diagnostics and a Test connection button.
 
@@ -58,6 +58,15 @@ Disable Site Agent or revoke its Application Password. An emergency SITE_AGENT_D
 Get the free checkout license from https://gauravtiwari.org/product/site-agent/ and activate it under Tools > Site Agent. FluentCart supplies automatic updates through protected HTTPS packages. The Update URI protects against unrelated WordPress.org slug matches. Manual release ZIP updates remain available. Licensing never disables the developer tools.
 
 == Changelog ==
+
+= 0.3.0 =
+* Bundle read-only builder skills for Gutenberg, GenerateBlocks, Elementor, Bricks and Divi, with list-skills and get-skill tools, active builders in site-context and the storing builder in get-content.
+* Add an opt-in Bricks tools group that serves Bricks 2.4+ abilities on Site Agent's endpoint: Bricks' fast-path tools under their own names, bricks-abilities and run-bricks-ability, with per-password limits, audit history and a PHP execution requirement for Bricks' PHP ability.
+* Refuse Elementor, Bricks and Divi layout meta in content writes, because raw writes skip each builder's validation and cache refresh.
+* Return the text of the user's autosave from get-content on request, and whether it is newer than the post, so staged edits can be verified and chained.
+* Refuse to stage edits to templates and template parts, which core cannot autosave by post ID, with a clear error instead of a REST failure.
+* Detect Bricks layouts without an editor mode, GenerateBlocks Pro blocks and GenerateBlocks global styles and conditions.
+* Fix the documented default page size of list-terms.
 
 = 0.2.0 =
 * Revert PHP file writes, moves and deletes that make the site fail with a fatal error, using WordPress's edit-scrape check; compile-check PHP with a matching PHP binary before writing.

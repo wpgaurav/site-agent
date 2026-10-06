@@ -107,7 +107,7 @@ final class Content {
 
 	public static function read( array $input ) {
 		$post = self::find( $input );
-		return is_wp_error( $post ) ? $post : self::data( $post );
+		return is_wp_error( $post ) ? $post : self::data( $post, ! empty( $input['autosave_content'] ) );
 	}
 
 	/**
@@ -142,7 +142,13 @@ final class Content {
 		return $post;
 	}
 
-	private static function data( \WP_Post $post ): array {
+	/**
+	 * Post fields returned by the content tools.
+	 *
+	 * @param \WP_Post $post             Post.
+	 * @param bool     $autosave_content Include the autosave's title, content and excerpt.
+	 */
+	private static function data( \WP_Post $post, bool $autosave_content = false ): array {
 		$terms = array();
 		foreach ( get_object_taxonomies( $post->post_type, 'objects' ) as $taxonomy ) {
 			if ( $taxonomy->show_in_rest ) {
@@ -160,6 +166,20 @@ final class Content {
 			}
 		}
 		$autosave = wp_get_post_autosave( $post->ID, get_current_user_id() );
+		if ( $autosave ) {
+			$staged = array(
+				'id'             => $autosave->ID,
+				'modified_gmt'   => $autosave->post_modified_gmt,
+				// The same test the editor uses before offering to restore an autosave.
+				'newer'          => mysql2date( 'U', $autosave->post_modified_gmt, false ) > mysql2date( 'U', $post->post_modified_gmt, false ),
+				'title'          => $autosave->post_title,
+				'content_sha256' => hash( 'sha256', $autosave->post_content ),
+			);
+			if ( $autosave_content ) {
+				$staged['content'] = $autosave->post_content;
+				$staged['excerpt'] = $autosave->post_excerpt;
+			}
+		}
 		return array(
 			'id'             => $post->ID,
 			'type'           => $post->post_type,
@@ -176,13 +196,8 @@ final class Content {
 			// Objects keep empty maps as {} rather than [] in JSON.
 			'terms'          => (object) $terms,
 			'meta'           => (object) $meta,
-			'autosave'       => $autosave ? array(
-				'id'             => $autosave->ID,
-				'modified_gmt'   => $autosave->post_modified_gmt,
-				'title'          => $autosave->post_title,
-				'content_sha256' => hash( 'sha256', $autosave->post_content ),
-			) : null,
-			// Elementor, Bricks and Divi 4 keep the real layout outside post_content.
+			'autosave'       => $autosave ? $staged : null,
+			// Elementor and Bricks keep the layout in post meta; Divi keeps it in post_content.
 			'builder'        => Skills::post_builder( $post ),
 			'content_sha256' => hash( 'sha256', $post->post_content ),
 		);
@@ -296,6 +311,10 @@ final class Content {
 
 	/** Save title, content and excerpt changes to a live post as the user's autosave, through core's REST controller. */
 	private static function stage( \WP_Post $post, \WP_Post_Type $type, array $input ) {
+		// Core's template autosave route addresses templates as theme//slug, not by post ID.
+		if ( in_array( $type->name, array( 'wp_template', 'wp_template_part' ), true ) ) {
+			return new \WP_Error( 'stage_unsupported', __( 'Templates and template parts cannot be staged as autosaves. Pass status to change the live template directly, after keeping a copy of its current content.', 'site-agent' ) );
+		}
 		foreach ( array( 'slug', 'date_gmt', 'terms', 'featured_media', 'meta' ) as $field ) {
 			if ( isset( $input[ $field ] ) ) {
 				return new \WP_Error( 'stage_unsupported', __( 'Only title, content and excerpt changes can be staged. Pass status to update this live post directly.', 'site-agent' ) );

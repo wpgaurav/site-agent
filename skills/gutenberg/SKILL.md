@@ -7,6 +7,8 @@ description: Read, write and repair WordPress core block (Gutenberg) markup on a
 
 Core blocks live in `post_content` as HTML with `<!-- wp:name {json} -->` comment delimiters. The block editor validates each static block by running its JavaScript `save()` and comparing the result with the stored HTML, so a write that looks fine in a diff can still open with "This block contains unexpected or invalid content". Treat every write as byte-sensitive.
 
+Tool names below omit the `site-agent-` prefix your client shows: `get-content` is `site-agent-get-content`.
+
 For the block-by-block syntax (paragraph, heading, list, image, buttons, group, columns, cover, embed, gallery, details and more), read [references/block-markup.md](references/block-markup.md). It also covers nesting rules, dynamic blocks and the validation and deprecation model.
 
 ## Confirm this is the right skill
@@ -23,8 +25,9 @@ For the block-by-block syntax (paragraph, heading, list, image, buttons, group, 
 1. **Read raw.** `get-content` returns raw `content` and `content_sha256`. Never write back rendered HTML; it has no block delimiters and destroys the page structure.
 2. **Snapshot.** Keep the raw content you read before the first write to a post you did not create. Site Agent creates revisions through core APIs where the post type supports them, but a local copy is the cheapest rollback.
 3. **Splice, do not regenerate.** Insert or replace only the blocks the task covers and keep every other byte unchanged: existing attribute order, whitespace between blocks, custom classes, anchors, shortcodes, `[year]` style placeholders and HTML inside Custom HTML blocks.
-4. **Write.** `save-content` with the complete `content` and `expected_content_sha256` from your latest read. New posts default to drafts. Edits to a published, private or scheduled post are stored as your autosave for review unless you pass `status`. On a hash conflict, re-read and reconcile; never retry blindly.
-5. **Read back.** Call `get-content` again and confirm the region you wrote is byte-identical to what you sent. If it is not, something on the write path (a filter, a plugin) changed it. Stop and report the difference.
+4. **Write.** `save-content` with the complete `content` and `expected_content_sha256` from your latest read. New posts default to drafts. Edits to a published, private or scheduled post are stored as your autosave for review unless you pass `status`; the result then shows `staged: true` and the live `content` is unchanged. On a hash conflict, re-read and reconcile; never retry blindly.
+5. **Read back.** Call `get-content` again and confirm the region you wrote is byte-identical to what you sent: in `content` for a draft or a save with `status`, and for a staged edit in `autosave.content`, which `get-content` returns when you pass `autosave_content: true`. If it is not identical, something on the write path (a filter, a plugin) changed it. Stop and report the difference.
+   - **Several staged edits to one live post.** Each staged save replaces your previous autosave. Build the next edit on `autosave.content` while `autosave.newer` is true, and keep passing the live `content_sha256` as `expected_content_sha256`. Building on the live `content` instead discards the earlier staged edits.
 6. **Check structure.** With PHP execution enabled, the snippet below finds content that fell outside any block and lists the block tree. Without it, check that every opening delimiter has a matching closer and that nothing but whitespace sits between top-level blocks.
 7. **Editor check.** Static checks cannot run block `save()` functions. For new block types or unfamiliar attributes, ask the user to open the post in the editor once, or say that editor validity is unverified.
 
@@ -55,12 +58,13 @@ $walk( parse_blocks( $content ) );
 - **Lists** need `wp:list-item` children. **Buttons** need a `wp:buttons` wrapper. **Columns** contain only `wp:column` blocks.
 - **Images.** Use `list-media` to find an existing attachment, then set the same ID in the JSON (`"id":123`) and in the class (`wp-image-123`). Import new images with `upload-media`; never hotlink them.
 - **Dynamic blocks** (latest posts, query, navigation, site title and similar) are usually self-closing (`<!-- wp:latest-posts {"postsToShow":3} /-->`) because PHP renders them.
-- **Custom HTML blocks** (`wp:html`) are not validated against a `save()` function, but administrators without `unfiltered_html` (multisite) will have scripts and some markup stripped.
+- **Custom HTML blocks** (`wp:html`) are not validated against a `save()` function. When the site sets `DISALLOW_UNFILTERED_HTML`, even administrators lose `unfiltered_html`, and scripts and some markup are stripped on save. (Site Agent requires a super administrator on multisite, who keeps it otherwise.)
 
 ## Patterns, template parts and templates
 
 - A synced pattern appears as `<!-- wp:block {"ref":123} /-->`. Its content is post 123 of type `wp_block`; editing that post changes every page that uses it. Edit the referencing page only when the change should be local, by replacing the reference with the pattern's blocks.
-- Block themes store customized templates and template parts as `wp_template` and `wp_template_part` posts. Use `list-content` with that `post_type` to find them. A template that has no post yet is still the theme's file (`templates/*.html`, `parts/*.html`); with source inspection enabled, read it with `read-file`. Saving a customized copy as a post overrides the file for this site.
+- Block themes store customized templates and template parts as `wp_template` and `wp_template_part` posts, linked to the theme by a `wp_theme` term. Use `list-content` with that `post_type` to find them, and edit one with `save-content` plus `status: "publish"`: templates cannot be staged as autosaves, so keep the content you read as the rollback copy.
+- A template that has no post yet is still the theme's file (`templates/*.html`, `parts/*.html`); with source inspection enabled, read it with `read-file`. `save-content` cannot create the override, because the `wp_theme` term it needs is not REST-enabled and a post without it is ignored. Ask the user to customize the template once in the Site Editor (which creates the post), then edit that post.
 - Navigation menus in block themes are `wp_navigation` posts referenced by `{"ref":ID}` from the navigation block.
 
 ## Completion report
