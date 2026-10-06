@@ -52,7 +52,7 @@ The main body sits between the opening and closing shortcode for `accordion_item
 | `_et_pb_page_layout` | `et_right_sidebar`, `et_left_sidebar`, `et_full_width_page` or `et_no_sidebar`. |
 | `_et_pb_custom_css` | Page-level custom CSS. |
 
-Only `_et_pb_use_builder` and `_et_pb_old_content` are registered for REST (when Divi's block editor integration has loaded), so most of these need `execute-php` to change. Use `update_post_meta()` with `wp_slash()` on values containing backslashes.
+Site Agent's `save-content` refuses Divi layout meta (`_et_*` keys), so change these with `execute-php`, preferring Divi's own functions such as `et_builder_enable_for_post()`. Use `update_post_meta()` with `wp_slash()` on values containing backslashes.
 
 ## Library and Theme Builder
 

@@ -168,10 +168,14 @@ class GB_Block_Migrator {
         $migrated = $this->migrate_content( $content );
 
         if ( $migrated !== $content ) {
-            wp_update_post( array(
+            // Keep the first original only, so a rerun cannot overwrite the rollback copy.
+            add_post_meta( $post_id, '_gb_original_content', wp_slash( $content ), true );
+            // wp_update_post() unslashes its input; without wp_slash() every
+            // escaped sequence in block comment JSON loses its backslash.
+            wp_update_post( wp_slash( array(
                 'ID'           => $post_id,
                 'post_content' => $migrated,
-            ) );
+            ) ) );
 
             // Log migration
             update_post_meta( $post_id, '_gb_migrated', current_time( 'mysql' ) );
@@ -699,8 +703,9 @@ function migrate_batch( $batch_size = 10 ) {
 
 ```php
 <?php
-// Store original content before migration
-update_post_meta( $post_id, '_gb_original_content', $original_content );
+// Store original content before migration. update_post_meta() unslashes its
+// value, so slash it or the backup loses the backslashes in block JSON.
+update_post_meta( $post_id, '_gb_original_content', wp_slash( $original_content ) );
 update_post_meta( $post_id, '_gb_migration_version', '2.0' );
 ```
 
@@ -729,10 +734,10 @@ function rollback_migration( $post_id ) {
     $original = get_post_meta( $post_id, '_gb_original_content', true );
 
     if ( $original ) {
-        wp_update_post( array(
+        wp_update_post( wp_slash( array(
             'ID'           => $post_id,
             'post_content' => $original,
-        ) );
+        ) ) );
 
         delete_post_meta( $post_id, '_gb_migrated' );
         delete_post_meta( $post_id, '_gb_original_content' );

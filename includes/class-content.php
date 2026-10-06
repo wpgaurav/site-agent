@@ -13,6 +13,8 @@ defined( 'ABSPATH' ) || exit;
 final class Content {
 	const LIVE     = array( 'publish', 'private', 'future' );
 	const STATUSES = array( 'publish', 'draft', 'pending', 'private', 'future' );
+	/** Elementor, Bricks and Divi layout meta. Raw writes skip each builder's validation and cache refresh. */
+	const BUILDER_META = '/^_(elementor|bricks|et)_/';
 
 	public static function context(): array {
 		if ( ! function_exists( 'get_plugins' ) ) {
@@ -188,7 +190,7 @@ final class Content {
 
 	/**
 	 * Post meta keys the content tools read and write: SEO fields of active SEO plugins plus
-	 * single, scalar meta registered with show_in_rest.
+	 * single, scalar meta registered with show_in_rest, except page builder layout meta.
 	 *
 	 * @return string[]
 	 */
@@ -201,7 +203,7 @@ final class Content {
 			$keys = array_merge( $keys, array( '_yoast_wpseo_title', '_yoast_wpseo_metadesc', '_yoast_wpseo_focuskw' ) );
 		}
 		foreach ( array_merge( get_registered_meta_keys( 'post' ), get_registered_meta_keys( 'post', $post_type ) ) as $key => $args ) {
-			if ( ! empty( $args['show_in_rest'] ) && ! empty( $args['single'] ) && in_array( $args['type'] ?? '', array( 'string', 'integer', 'number', 'boolean' ), true ) ) {
+			if ( ! empty( $args['show_in_rest'] ) && ! empty( $args['single'] ) && in_array( $args['type'] ?? '', array( 'string', 'integer', 'number', 'boolean' ), true ) && ! preg_match( self::BUILDER_META, $key ) ) {
 				$keys[] = $key;
 			}
 		}
@@ -363,6 +365,10 @@ final class Content {
 		if ( isset( $input['meta'] ) ) {
 			$allowed = self::meta_keys( $type->name );
 			foreach ( (array) $input['meta'] as $key => $value ) {
+				if ( ! in_array( $key, $allowed, true ) && preg_match( self::BUILDER_META, (string) $key ) ) {
+					/* translators: %s: meta key. */
+					return new \WP_Error( 'builder_meta', sprintf( __( '%s is page builder layout data. Writing it directly skips the builder\'s validation and cache refresh; follow the builder\'s skill from get-skill instead.', 'site-agent' ), $key ) );
+				}
 				if ( ! in_array( $key, $allowed, true ) || ! is_scalar( $value ) ) {
 					/* translators: 1: meta key, 2: allowed meta keys. */
 					return new \WP_Error( 'invalid_meta', sprintf( __( 'The meta key %1$s cannot be written. Allowed keys: %2$s.', 'site-agent' ), $key, $allowed ? implode( ', ', $allowed ) : __( 'none', 'site-agent' ) ) );

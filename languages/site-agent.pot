@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-06T12:14:03+00:00\n"
+"POT-Creation-Date: 2026-10-06T13:25:52+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: site-agent\n"
@@ -877,92 +877,98 @@ msgstr ""
 msgid "Activation sends the license key, site URL, plugin version, WordPress version and PHP version to gauravtiwari.org. Credentials are encrypted and bound to this site. Activated licenses are checked when WordPress checks updates."
 msgstr ""
 
-#: includes/class-content.php:70
+#: includes/class-content.php:72
 msgid "This post type is unavailable or inaccessible."
 msgstr ""
 
-#: includes/class-content.php:135
+#: includes/class-content.php:137
 msgid "Supply post_id, url or slug."
 msgstr ""
 
-#: includes/class-content.php:138
-#: includes/class-content.php:221
+#: includes/class-content.php:140
+#: includes/class-content.php:223
 #: includes/class-media.php:66
 msgid "The post is unavailable or inaccessible."
 msgstr ""
 
-#: includes/class-content.php:225
+#: includes/class-content.php:227
 msgid "This post type cannot be edited with the content tool."
 msgstr ""
 
-#: includes/class-content.php:228
+#: includes/class-content.php:230
 msgid "You cannot create this post type."
 msgstr ""
 
-#: includes/class-content.php:231
+#: includes/class-content.php:233
 msgid "Read the post again and supply its current content hash before updating."
 msgstr ""
 
-#: includes/class-content.php:239
+#: includes/class-content.php:241
 msgid "You cannot publish this post type."
 msgstr ""
 
-#: includes/class-content.php:251
+#: includes/class-content.php:253
 msgid "Use an ISO 8601 date such as 2026-10-05T09:00:00Z for date_gmt."
 msgstr ""
 
-#: includes/class-content.php:261
+#: includes/class-content.php:263
 msgid "Scheduling needs a future date_gmt."
 msgstr ""
 
-#: includes/class-content.php:299
+#: includes/class-content.php:301
 msgid "Only title, content and excerpt changes can be staged. Pass status to update this live post directly."
 msgstr ""
 
-#: includes/class-content.php:304
+#: includes/class-content.php:306
 msgid "Supply a title, content or excerpt to stage, or pass status to change the live post."
 msgstr ""
 
 #. translators: %s: taxonomy name.
-#: includes/class-content.php:329
+#: includes/class-content.php:331
 #, php-format
 msgid "Terms cannot be assigned in the %s taxonomy for this post type."
 msgstr ""
 
 #. translators: 1: term ID, 2: taxonomy name.
-#: includes/class-content.php:337
+#: includes/class-content.php:339
 #, php-format
 msgid "Term %1$d does not exist in %2$s."
 msgstr ""
 
 #. translators: 1: term name, 2: taxonomy name.
-#: includes/class-content.php:351
+#: includes/class-content.php:353
 #, php-format
 msgid "The term \"%1$s\" does not exist in %2$s and cannot be created."
 msgstr ""
 
-#: includes/class-content.php:359
+#: includes/class-content.php:361
 msgid "Use an image attachment ID, or 0 to remove the featured image, on a post type that supports featured images."
 msgstr ""
 
+#. translators: %s: meta key.
+#: includes/class-content.php:370
+#, php-format
+msgid "%s is page builder layout data. Writing it directly skips the builder's validation and cache refresh; follow the builder's skill from get-skill instead."
+msgstr ""
+
 #. translators: 1: meta key, 2: allowed meta keys.
-#: includes/class-content.php:368
+#: includes/class-content.php:374
 #, php-format
 msgid "The meta key %1$s cannot be written. Allowed keys: %2$s."
 msgstr ""
 
 #. translators: 1: meta key, 2: allowed meta keys.
-#: includes/class-content.php:368
+#: includes/class-content.php:374
 msgid "none"
 msgstr ""
 
 #. translators: %s: error message.
-#: includes/class-content.php:419
+#: includes/class-content.php:425
 #, php-format
 msgid "The post was saved, but its terms could not be set: %s"
 msgstr ""
 
-#: includes/class-content.php:425
+#: includes/class-content.php:431
 msgid "This taxonomy is unavailable or inaccessible."
 msgstr ""
 
@@ -1386,7 +1392,7 @@ msgid "The media item is unavailable or inaccessible."
 msgstr ""
 
 #. translators: 1: requested path, 2: skill name.
-#: includes/class-skills.php:144
+#: includes/class-skills.php:147
 #, php-format
 msgid "%1$s is not a file of the %2$s skill. Call list-skills for its files."
 msgstr ""

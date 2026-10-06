@@ -15,7 +15,7 @@ Read [references/data-format.md](references/data-format.md) before writing eleme
 
 1. **Advice or JSON for the user (no write tools).** Describe the change, or produce an Elementor template export file (`{content, page_settings, version, title, type}`) the user imports under Templates > Saved Templates > Import. Elementor regenerates element IDs on import.
 2. **Direct change (needs PHP execution).** Save through Elementor's `Document::save()` with `execute-php`, using the procedure below. This is the only route that validates elements, regenerates `post_content`, records a revision, and clears the page's CSS and element cache.
-3. **Never write `_elementor_data` as raw meta**, including through the `meta` field of `save-content` (Elementor registers that key for REST, so it can appear there). A raw write skips validation and kses, leaves the old CSS file in place, and the element cache keeps serving the old HTML for up to 24 hours by default. If something already wrote raw data, clear caches as described in the site reference.
+3. **Never write `_elementor_data` as raw meta.** Site Agent's `save-content` refuses Elementor, Bricks and Divi layout meta with a `builder_meta` error for this reason; do not work around it with `update_post_meta()`. A raw write skips validation and kses, leaves the old CSS file in place, and the element cache keeps serving the old HTML for up to 24 hours by default. If something already wrote raw data, clear caches as described in the site reference.
 
 ## Workflow
 

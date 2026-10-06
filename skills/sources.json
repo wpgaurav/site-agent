@@ -3,17 +3,17 @@
   "sources": {
     "bricks-skills": {
       "repository": "https://github.com/wpgaurav/bricks-skills",
-      "commit": "d7878ab2abfe4bf0bf982e0f149e122130a62de7",
+      "commit": "97c3608e33e57db88b7909a219571ebb1cce402a",
       "license": "MIT"
     },
     "generateblocks-skills": {
       "repository": "https://github.com/wpgaurav/generateblocks-skills",
-      "commit": "5c6dc66821b641637ca83a35555890a841ba7463",
+      "commit": "b57b6c2438e7e96fe493cef9ac7b6b6c5fd89e46",
       "license": "MIT"
     },
     "WordPress-skills": {
       "repository": "https://github.com/wpgaurav/WordPress-skills",
-      "commit": "8c5bad0d1846182bf9b2b3802fc3f4ac64f156dc",
+      "commit": "bb26fc959a0e6673ba7edbce0c217e8e5ad13330",
       "license": "MIT"
     }
   },
@@ -166,7 +166,7 @@
     "bricks/references/json-formats.md": {
       "source": "bricks-skills",
       "path": "references/json-formats.md",
-      "sha256": "73fbb674a3833ac16c18a595d162509c87e8f24fdbaf319f31a9587642e438e0"
+      "sha256": "6c2ee44077e2e5caf5046f945087c144d9de827dc894dd621d33bfa403c05a3a"
     },
     "bricks/references/layout-recipes.md": {
       "source": "bricks-skills",
@@ -196,7 +196,7 @@
     "bricks/references/templates.md": {
       "source": "bricks-skills",
       "path": "references/templates.md",
-      "sha256": "e4826a761f92fedff39b89b899f321accd23d0cb7c51434d7ba00346f6a61b6e"
+      "sha256": "3c3fd72510b2a68df825bc597e3e56bcda01c56d1a2ffdb9cc99eeda03b4aa37"
     },
     "bricks/references/theme-styles.md": {
       "source": "bricks-skills",
@@ -316,7 +316,7 @@
     "generateblocks/references/migrations.md": {
       "source": "generateblocks-skills",
       "path": "skills/generateblocks-layouts/references/migrations.md",
-      "sha256": "554b794c4e1b3da6047492b7e470ab5d2dc82fcd9817326e348b4c14246abd2b"
+      "sha256": "06a82689fc533c3e75a733c6417969cded8cb9fa49177341f743bbf1b66b3608"
     },
     "generateblocks/references/patterns.md": {
       "source": "generateblocks-skills",

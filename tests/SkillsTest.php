@@ -150,6 +150,54 @@ final class SkillsTest extends TestCase {
 		$this->assertTrue( rest_validate_value_from_schema( $context, Abilities::definitions()['site-context']['output'], 'output' ) );
 	}
 
+	public function test_builder_layout_meta_stays_out_of_content_tools(): void {
+		update_option( Config::OPTION, array_merge( Config::defaults(), array( 'enabled' => true, 'content_write' => true ) ), false );
+		// Elementor registers its layout meta for REST, which would otherwise make it writable here.
+		$args = array(
+			'show_in_rest'  => true,
+			'single'        => true,
+			'type'          => 'string',
+			'auth_callback' => '__return_true',
+		);
+		register_post_meta( 'post', '_elementor_data', $args );
+		register_post_meta( 'post', 'site_agent_plain_note', $args );
+		$id = $this->post( array( 'post_content' => '<p>Fallback</p>' ), array( '_elementor_data' => '[]', '_elementor_edit_mode' => 'builder' ) );
+		try {
+			$read = Abilities::execute( 'get-content', array( 'post_id' => $id ) );
+			$this->assertArrayNotHasKey( '_elementor_data', (array) $read['meta'] );
+			$refused = Abilities::execute(
+				'save-content',
+				array(
+					'post_id'                 => $id,
+					'meta'                    => array( '_elementor_data' => '[{"id":"abc1234"}]' ),
+					'expected_content_sha256' => $read['content_sha256'],
+				)
+			);
+			$this->assertSame( 'builder_meta', $refused->get_error_code() );
+			$this->assertSame( '[]', get_post_meta( $id, '_elementor_data', true ) );
+			$saved = Abilities::execute(
+				'save-content',
+				array(
+					'post_id'                 => $id,
+					'meta'                    => array( 'site_agent_plain_note' => 'kept' ),
+					'expected_content_sha256' => $read['content_sha256'],
+				)
+			);
+			$this->assertSame( 'kept', $saved['meta']->site_agent_plain_note );
+			// Developers can still opt a key in explicitly.
+			$opt_in = static function ( $keys ) {
+				$keys[] = '_elementor_data';
+				return $keys;
+			};
+			add_filter( 'site_agent_post_meta_keys', $opt_in );
+			$this->assertContains( '_elementor_data', SiteAgent\Content::meta_keys( 'post' ) );
+			remove_filter( 'site_agent_post_meta_keys', $opt_in );
+		} finally {
+			unregister_post_meta( 'post', '_elementor_data' );
+			unregister_post_meta( 'post', 'site_agent_plain_note' );
+		}
+	}
+
 	public function test_generateblocks_escapes_survive_a_save_round_trip(): void {
 		update_option( Config::OPTION, array_merge( Config::defaults(), array( 'enabled' => true, 'content_write' => true ) ), false );
 		// The canary from the generateblocks skill: custom properties, clamp(), inline markup and an ampersand.

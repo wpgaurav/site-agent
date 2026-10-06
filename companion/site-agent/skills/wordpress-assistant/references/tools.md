@@ -25,7 +25,7 @@ Reference source: wpgaurav/site-agent 0.2.0 with the builder skills from main, i
 
 Content/media/term limit is 1-100. File listing limit is 1-200. Save statuses are draft, pending, publish, private and future; future needs a future date_gmt. Omitted update fields remain unchanged. Updating a published, private or scheduled post without status saves an autosave for human review and returns staged true; pass status (for example publish) only when the user asked to change the live post.
 
-Terms replace the post's terms per taxonomy and accept IDs or names (missing names are created). Meta accepts only the keys the site allows, typically Rank Math or Yoast SEO title, description and focus keyword; an empty string deletes a value. Prefer existing media over uploads, and always provide meaningful alt text.
+Terms replace the post's terms per taxonomy and accept IDs or names (missing names are created). Meta accepts only the keys the site allows, typically Rank Math or Yoast SEO title, description and focus keyword; an empty string deletes a value. Page builder layout meta (Elementor, Bricks, Divi) is refused with builder_meta; use the matching builder skill instead. Prefer existing media over uploads, and always provide meaningful alt text.
 
 Tool groups are disabled by default. Base reads require Site Agent enabled. Content writes, source inspection, source editing, PHP and WP-CLI each require their relevant opt-in, and an Application Password can be limited to fewer groups, so a connection may see fewer tools than the site enables. Tools return errors with the underlying message; do not infer success from transport completion.
 
