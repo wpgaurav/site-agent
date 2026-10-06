@@ -60,6 +60,9 @@ final class Audit {
 		if ( isset( $input['from'], $input['to'] ) && is_string( $input['from'] ) && is_string( $input['to'] ) ) {
 			return $input['from'] . ' -> ' . $input['to'];
 		}
+		if ( isset( $input['skill'] ) && is_string( $input['skill'] ) ) {
+			return 'skill ' . $input['skill'] . '/' . ( isset( $input['path'] ) && is_string( $input['path'] ) ? $input['path'] : 'SKILL.md' );
+		}
 		if ( isset( $input['path'] ) && is_string( $input['path'] ) ) {
 			return $input['path'];
 		}

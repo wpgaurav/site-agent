@@ -10,7 +10,7 @@ mkdir -p "$site_agent_stage/site-agent"
 for file in site-agent.php uninstall.php readme.txt LICENSE; do
   cp "$file" "$site_agent_stage/site-agent/"
 done
-for directory in assets includes languages runtime; do
+for directory in assets includes languages runtime skills; do
   cp -R "$directory" "$site_agent_stage/site-agent/"
 done
 site_agent_version=$(sed -n 's/^ \* Version: //p' site-agent.php)

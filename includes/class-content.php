@@ -34,6 +34,10 @@ final class Content {
 				$tools[] = $name;
 			}
 		}
+		$builders = array();
+		foreach ( Skills::detected() as $skill => $builder ) {
+			$builders[] = array( 'skill' => $skill ) + $builder;
+		}
 		return array(
 			'site_name'     => get_bloginfo( 'name' ),
 			'site_url'      => home_url( '/' ),
@@ -50,6 +54,7 @@ final class Content {
 			'post_types'    => array_values( get_post_types( array( 'show_in_rest' => true ) ) ),
 			'taxonomies'    => array_values( get_taxonomies( array( 'show_in_rest' => true ) ) ),
 			'enabled_tools' => $tools,
+			'builders'      => $builders,
 		);
 	}
 
@@ -175,6 +180,8 @@ final class Content {
 				'title'          => $autosave->post_title,
 				'content_sha256' => hash( 'sha256', $autosave->post_content ),
 			) : null,
+			// Elementor, Bricks and Divi 4 keep the real layout outside post_content.
+			'builder'        => Skills::post_builder( $post ),
 			'content_sha256' => hash( 'sha256', $post->post_content ),
 		);
 	}

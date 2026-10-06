@@ -1,0 +1,392 @@
+{
+  "note": "Files listed under files are imported verbatim by bin/sync-skills.py. Every other file under skills/ is authored for Site Agent. All sources are written by the Site Agent author and published under the MIT license; they are distributed here as part of a GPL-2.0-or-later plugin.",
+  "sources": {
+    "bricks-skills": {
+      "repository": "https://github.com/wpgaurav/bricks-skills",
+      "commit": "d7878ab2abfe4bf0bf982e0f149e122130a62de7",
+      "license": "MIT"
+    },
+    "generateblocks-skills": {
+      "repository": "https://github.com/wpgaurav/generateblocks-skills",
+      "commit": "5c6dc66821b641637ca83a35555890a841ba7463",
+      "license": "MIT"
+    },
+    "WordPress-skills": {
+      "repository": "https://github.com/wpgaurav/WordPress-skills",
+      "commit": "8c5bad0d1846182bf9b2b3802fc3f4ac64f156dc",
+      "license": "MIT"
+    }
+  },
+  "files": {
+    "bricks/patterns/INDEX.md": {
+      "source": "bricks-skills",
+      "path": "patterns/INDEX.md",
+      "sha256": "441a8237cc8d8d9434da1e113d0c459665725a09b4fc43da6d565f7a0957860b"
+    },
+    "bricks/patterns/bem-card-grid.json": {
+      "source": "bricks-skills",
+      "path": "patterns/bem-card-grid.json",
+      "sha256": "a078ef6f0974e5be3068510e2eb0224fddd89251b008eb155d08a0b26c7f6f5b"
+    },
+    "bricks/patterns/bem-hero.json": {
+      "source": "bricks-skills",
+      "path": "patterns/bem-hero.json",
+      "sha256": "a1e349f16273d28204f1c0ed7ca5c7f5a6c3f973f083e825504e630ffe3a6ec8"
+    },
+    "bricks/patterns/bem-pricing.json": {
+      "source": "bricks-skills",
+      "path": "patterns/bem-pricing.json",
+      "sha256": "e4162cf01d8c6e328824b1d222a00e2df6c60c274bc49c84a3b0588fa2831f92"
+    },
+    "bricks/patterns/blog-archive-filters.json": {
+      "source": "bricks-skills",
+      "path": "patterns/blog-archive-filters.json",
+      "sha256": "095df29ff69e851b627684b7ae513f095e0291131b85953c15eb0f0e745464d9"
+    },
+    "bricks/patterns/contact-section.json": {
+      "source": "bricks-skills",
+      "path": "patterns/contact-section.json",
+      "sha256": "bb7e400dfb183cbf50898ac24747057865c5b8770a05e8ad85cc117356272a7b"
+    },
+    "bricks/patterns/cta-section.json": {
+      "source": "bricks-skills",
+      "path": "patterns/cta-section.json",
+      "sha256": "bdb7e1eb01a85012e68be9be90c1d3bb3c6ad65d448f9e8b8751805e5ba48503"
+    },
+    "bricks/patterns/faq-accordion.json": {
+      "source": "bricks-skills",
+      "path": "patterns/faq-accordion.json",
+      "sha256": "d2bc98e9d48c76f524b9db566617c41a26be131c7a6a57c25352bcd5129493fb"
+    },
+    "bricks/patterns/feature-grid.json": {
+      "source": "bricks-skills",
+      "path": "patterns/feature-grid.json",
+      "sha256": "7e3c47ad85dca9fc8c876b5a6cdfbc1624ffa2f1ad088d6176e8b80824367b81"
+    },
+    "bricks/patterns/footer-template.json": {
+      "source": "bricks-skills",
+      "path": "patterns/footer-template.json",
+      "sha256": "a7a498d64588a8f05bb450d6195aa94789aa37225a9b04d97536b5f74db9ad0b"
+    },
+    "bricks/patterns/header-template.json": {
+      "source": "bricks-skills",
+      "path": "patterns/header-template.json",
+      "sha256": "288c116aa490a3cae4f575584569463c5b9666a0365e3b03c10a1cacdbf7c7ac"
+    },
+    "bricks/patterns/hero-centered.json": {
+      "source": "bricks-skills",
+      "path": "patterns/hero-centered.json",
+      "sha256": "0c44006663645e953ffa7280ecec9a1ab9bf5db9ee9525b52d3d5b72c033b1b6"
+    },
+    "bricks/patterns/hero-split-image.json": {
+      "source": "bricks-skills",
+      "path": "patterns/hero-split-image.json",
+      "sha256": "7cd49d52cf524e8cfae1064e59f750e29b83631ac0f8bdaa0bd571ebf807356b"
+    },
+    "bricks/patterns/logo-strip.json": {
+      "source": "bricks-skills",
+      "path": "patterns/logo-strip.json",
+      "sha256": "4e0969e4a3eea8deed2a7bd2b28e6afaf1541c41a101a6a9caf5675c2d4c2a73"
+    },
+    "bricks/patterns/popup-newsletter.json": {
+      "source": "bricks-skills",
+      "path": "patterns/popup-newsletter.json",
+      "sha256": "dc87783ef690a549c014291c17fcf8ee9fd2e86af8b6cba2f5fd2452b6c5a035"
+    },
+    "bricks/patterns/pricing-table.json": {
+      "source": "bricks-skills",
+      "path": "patterns/pricing-table.json",
+      "sha256": "81ce2a6a54dd60494dc64fc229013d0cfa4fb859847075cae007713d80635222"
+    },
+    "bricks/patterns/team-grid-acf.json": {
+      "source": "bricks-skills",
+      "path": "patterns/team-grid-acf.json",
+      "sha256": "beb07f621d2a4f2cbe76d2de4221598fc3e0a14c7edce5f5ef6183f4c304e88f"
+    },
+    "bricks/patterns/testimonials-slider.json": {
+      "source": "bricks-skills",
+      "path": "patterns/testimonials-slider.json",
+      "sha256": "c43fe09402a008a7399f5457f2a1af3b6b786a352d1cd189b7fc324490fd74d2"
+    },
+    "bricks/references/acf-providers.md": {
+      "source": "bricks-skills",
+      "path": "references/acf-providers.md",
+      "sha256": "62d362574677116e77561798bc87d7b668ba1b28af3f10468958f9ccf5aad7b8"
+    },
+    "bricks/references/assets-permissions.md": {
+      "source": "bricks-skills",
+      "path": "references/assets-permissions.md",
+      "sha256": "caee6d9b42d0abd41ca2b5589d63a97845cc5dbb6489c043f6f171466f53dcff"
+    },
+    "bricks/references/components-classes.md": {
+      "source": "bricks-skills",
+      "path": "references/components-classes.md",
+      "sha256": "7a089bf43c298f648a849ee7b0789d847510d5d02726ee616a9ab7e5c90f62a6"
+    },
+    "bricks/references/conditions.md": {
+      "source": "bricks-skills",
+      "path": "references/conditions.md",
+      "sha256": "10e50b76e80971bb20b8c5021cfea60ab4c2485dcd19358a21f734ee4f215684"
+    },
+    "bricks/references/custom-elements.md": {
+      "source": "bricks-skills",
+      "path": "references/custom-elements.md",
+      "sha256": "a29ce101a6800d1a7b363dd47f693538d20203db3168ba3e82a091ad39d1c407"
+    },
+    "bricks/references/dynamic-data.md": {
+      "source": "bricks-skills",
+      "path": "references/dynamic-data.md",
+      "sha256": "a8130af988b8eeddebb14372e01836ae69d44e8de158f8c504d14bdabb556121"
+    },
+    "bricks/references/elements.md": {
+      "source": "bricks-skills",
+      "path": "references/elements.md",
+      "sha256": "439a3f47370191589dc2c61dad6953af25f0e24bd3037c7e57ada4d44837d5a8"
+    },
+    "bricks/references/external-assets.md": {
+      "source": "bricks-skills",
+      "path": "references/external-assets.md",
+      "sha256": "31aaf43b16e0ed8d1b2d40a2cb10c26e06c93c42b8e0d85f4dfabb834a2660aa"
+    },
+    "bricks/references/forms.md": {
+      "source": "bricks-skills",
+      "path": "references/forms.md",
+      "sha256": "37487be82190844dd6d78b995228ee71bfa986d91c266a711bbe7ef42e59b82d"
+    },
+    "bricks/references/hooks.md": {
+      "source": "bricks-skills",
+      "path": "references/hooks.md",
+      "sha256": "34f3a13d6e0124c95ac40924ee7e6e31187fca073fd63f013f93ccfea4204245"
+    },
+    "bricks/references/interactions.md": {
+      "source": "bricks-skills",
+      "path": "references/interactions.md",
+      "sha256": "24964f2840c190cfd13567fd3719fe08a1f42a55e605538ed3ea3fe33babbb55"
+    },
+    "bricks/references/json-formats.md": {
+      "source": "bricks-skills",
+      "path": "references/json-formats.md",
+      "sha256": "73fbb674a3833ac16c18a595d162509c87e8f24fdbaf319f31a9587642e438e0"
+    },
+    "bricks/references/layout-recipes.md": {
+      "source": "bricks-skills",
+      "path": "references/layout-recipes.md",
+      "sha256": "869e8236edd3d240054cb67f69c860d1a88e8a9f527bafa4ccefbe72dba9e5e0"
+    },
+    "bricks/references/popups.md": {
+      "source": "bricks-skills",
+      "path": "references/popups.md",
+      "sha256": "cf8de472085f2f4f81ac1d43b8e519981445c49364a1b1c3a05790158ad542fc"
+    },
+    "bricks/references/query-filters.md": {
+      "source": "bricks-skills",
+      "path": "references/query-filters.md",
+      "sha256": "c18e640cbf6a6062c3af3cd3fd6174364612acf034a160e8b8d6fe767796177d"
+    },
+    "bricks/references/query-loops.md": {
+      "source": "bricks-skills",
+      "path": "references/query-loops.md",
+      "sha256": "80c020dc01dde957461db34a19b0623c844498349d832a99f9a3aa0cecde7c13"
+    },
+    "bricks/references/style-settings.md": {
+      "source": "bricks-skills",
+      "path": "references/style-settings.md",
+      "sha256": "4626dbd9d6773bcd0de208576f9c919904c5b7bdc50a2b2189e672ac4b1d7a6a"
+    },
+    "bricks/references/templates.md": {
+      "source": "bricks-skills",
+      "path": "references/templates.md",
+      "sha256": "e4826a761f92fedff39b89b899f321accd23d0cb7c51434d7ba00346f6a61b6e"
+    },
+    "bricks/references/theme-styles.md": {
+      "source": "bricks-skills",
+      "path": "references/theme-styles.md",
+      "sha256": "fa2ef600a34dea6205e1883a7410ef3298393973d31fef8bbd08eafe31cb6a04"
+    },
+    "bricks/references/woocommerce.md": {
+      "source": "bricks-skills",
+      "path": "references/woocommerce.md",
+      "sha256": "c8f85972e6bf01a959dffa05bd15fb262f0d49877c8f5c963a2d8a5280fb89f3"
+    },
+    "generateblocks/examples/basic/buttons.html": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/examples/basic/buttons.html",
+      "sha256": "705b984e78a6722b06979c0464f59c0d7f75fbdb060844b77ba98a21819bd40f"
+    },
+    "generateblocks/examples/basic/containers.html": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/examples/basic/containers.html",
+      "sha256": "e2fb6f6c692c9f2f4c090144398784134ab648cabfc6b21b2fca103998ec7524"
+    },
+    "generateblocks/examples/basic/text-icons.html": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/examples/basic/text-icons.html",
+      "sha256": "c7b5c90e6b3d8b5bdab38ce15d90b3b1358c90d0cfd9b15459f239d468603d60"
+    },
+    "generateblocks/examples/compound/cards.html": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/examples/compound/cards.html",
+      "sha256": "0ae16f29ca2a1a6d4bd364d6af654130e2376831a396d250f6b8ee7e0c19d989"
+    },
+    "generateblocks/examples/layouts/hero-section.html": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/examples/layouts/hero-section.html",
+      "sha256": "bfff33762c39795e7d316b7435394c0eee3c7684eb5840afd58429b069277ead"
+    },
+    "generateblocks/examples/layouts/query-blog-grid.html": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/examples/layouts/query-blog-grid.html",
+      "sha256": "8c9ec484822268b1d8bf7bdcea28a7338bdd9649bbb808c9fbbbaa5243b4ab60"
+    },
+    "generateblocks/examples/svg/icons.html": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/examples/svg/icons.html",
+      "sha256": "201f6319a5edcbfc4aeb6aa30f6325298752c6351c57b5a64a46fd2f66ea664c"
+    },
+    "generateblocks/references/_index.md": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/references/_index.md",
+      "sha256": "5da5db9019c54df0d239b485ea38b0fae65674da9fb979aad7ca5d8e7a7517ef"
+    },
+    "generateblocks/references/acf-and-custom-fields.md": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/references/acf-and-custom-fields.md",
+      "sha256": "68bfdd5cf9cefcf1ff134f7f8330893a30ad35c899792cb7412e42be46ae63c8"
+    },
+    "generateblocks/references/animations.md": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/references/animations.md",
+      "sha256": "1922f53a1ec9136454c853f020db0454e8fb151e7b9de519ad595641535f9e24"
+    },
+    "generateblocks/references/authoring-contract.md": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/references/authoring-contract.md",
+      "sha256": "1d3bcf213d0ad2139c4ffd5667078a227005d7106fd7bd0edd7a246aeca90896"
+    },
+    "generateblocks/references/block-types.md": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/references/block-types.md",
+      "sha256": "e2e10e631a55108720b6e8e955b2bc1dc1829797c72f2eca7e5680754e08aef0"
+    },
+    "generateblocks/references/conditions.md": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/references/conditions.md",
+      "sha256": "754c2103ede4388531964f04e08f2a6174a556a4f4092b94d0ba38739aa6020d"
+    },
+    "generateblocks/references/css-mode.md": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/references/css-mode.md",
+      "sha256": "52c48f0fc604c21736ccbae777f06db3beba4a8adec8eb4d35f230ba07b6118f"
+    },
+    "generateblocks/references/css-patterns.md": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/references/css-patterns.md",
+      "sha256": "21da6c212f7e69d2017a496336aca3f894dc1123dee4a514ae6720de12b73745"
+    },
+    "generateblocks/references/design-quality.md": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/references/design-quality.md",
+      "sha256": "a783fbbd63d13bfca7c833c9dc84fe1b54b890c29069c05fa9be665541e9eeb6"
+    },
+    "generateblocks/references/design-systems-beta.md": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/references/design-systems-beta.md",
+      "sha256": "592e45f2728d9ce9050e0020ad59131a5bd1d2b1acfa4e0e62942bf537a0e4a4"
+    },
+    "generateblocks/references/dynamic-tags.md": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/references/dynamic-tags.md",
+      "sha256": "655d789f51f934f8a6d273f2b8b8d06ba1fe9fb213da6282fcdbb40009b92b00"
+    },
+    "generateblocks/references/field-notes.md": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/references/field-notes.md",
+      "sha256": "8ed416c20a0a234e420e0253a2bc2938077ca558ad81afac4c6ef85c41934547"
+    },
+    "generateblocks/references/gb-pro.md": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/references/gb-pro.md",
+      "sha256": "e3dc287ea0827b1bb00ec0633ee8855c8cacd2516849506e537b886a19f0e7ee"
+    },
+    "generateblocks/references/global-styles.md": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/references/global-styles.md",
+      "sha256": "78583b0bef92bd9b97bd4f16594957169a6f0709578246c51f03a56022815e3d"
+    },
+    "generateblocks/references/migrations.md": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/references/migrations.md",
+      "sha256": "554b794c4e1b3da6047492b7e470ab5d2dc82fcd9817326e348b4c14246abd2b"
+    },
+    "generateblocks/references/patterns.md": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/references/patterns.md",
+      "sha256": "50f6e23cf886b4a142525da1ade1b6c575129a20732b7be0376e2391de695c8b"
+    },
+    "generateblocks/references/performance.md": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/references/performance.md",
+      "sha256": "9e6d67778e604caabf18ab7b2c9c9767b6ef904c1c57c6b14f63d1b66d9a4c19"
+    },
+    "generateblocks/references/pro-forms.md": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/references/pro-forms.md",
+      "sha256": "d2f7de265e1271536d49886122d01fd46914edc136baf099eb12f2f148f23cd4"
+    },
+    "generateblocks/references/pro-interactive.md": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/references/pro-interactive.md",
+      "sha256": "fbf023ae621a7454ea9c392c783ab627bb9563ce2fc0ad8c7ea91dd2d67a9619"
+    },
+    "generateblocks/references/query-block.md": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/references/query-block.md",
+      "sha256": "a42fc3d454e653d67619598e2429b1e81116d470deb7477f81713713e645faf4"
+    },
+    "generateblocks/references/query-loops.md": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/references/query-loops.md",
+      "sha256": "414c3ba7c3a9cd34c15a0bb25a38775635327a3a589513077aedfaedd44700e6"
+    },
+    "generateblocks/references/recovery-rules.md": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/references/recovery-rules.md",
+      "sha256": "ebbaeac1a739235c9addb30296204724513c77ee513a61716db17d0f7f160525"
+    },
+    "generateblocks/references/responsive-legacy.md": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/references/responsive-legacy.md",
+      "sha256": "dd21281d5fe6f5a94a3460ffcf30ad42f5fc9a45d6fe75e50594cbd001692178"
+    },
+    "generateblocks/references/responsive.md": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/references/responsive.md",
+      "sha256": "91a6ffd48e5d67c8b6ec0e4500d94efba38b8462b669347fffa4e2e483813d82"
+    },
+    "generateblocks/references/styling-scope.md": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/references/styling-scope.md",
+      "sha256": "d8d69a030a2a231f00c229b726a83a10a9f5ad624d2186ef6cc64e249400424e"
+    },
+    "generateblocks/references/svg-icons.md": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/references/svg-icons.md",
+      "sha256": "f6ca98ac33ecba3249fce7d697162165ca413bbf014fee8f2a3156068288d4a1"
+    },
+    "generateblocks/references/template-authoring.md": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/references/template-authoring.md",
+      "sha256": "ead1176e6e92faa6c7e0008d4bb4fadadead1964b9257b9e1d304a001a81bb46"
+    },
+    "generateblocks/references/troubleshooting.md": {
+      "source": "generateblocks-skills",
+      "path": "skills/generateblocks-layouts/references/troubleshooting.md",
+      "sha256": "359e6ef9af24d420d1652f59f0064eb3d5f90a53bf05deceacfa0df1717124d2"
+    },
+    "gutenberg/references/block-markup.md": {
+      "source": "WordPress-skills",
+      "path": "skills/wordpress/wp-block-markup/SKILL.md",
+      "sha256": "8e4f0a58be336761dfbd0f71d15088eddb8c4b7be118d8edbcdc1dc2dbaf1388"
+    }
+  }
+}

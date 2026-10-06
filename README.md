@@ -44,11 +44,13 @@ define( 'SITE_AGENT_DISABLED', true );
 
 | Tool | Opt-in group | Behavior |
 | --- | --- | --- |
-| `site-agent-site-context` | Enable Site Agent | WordPress/PHP versions, plugins, theme, REST post types and taxonomies, tools available to this connection |
+| `site-agent-site-context` | Enable Site Agent | WordPress/PHP versions, plugins, theme, active page builders, REST post types and taxonomies, tools available to this connection |
 | `site-agent-list-content` | Enable Site Agent | Search and paginate accessible content, most recently modified first |
-| `site-agent-get-content` | Enable Site Agent | Read by ID, URL or slug: raw content, terms, featured image, SEO meta, newer autosave, content hash |
+| `site-agent-get-content` | Enable Site Agent | Read by ID, URL or slug: raw content, terms, featured image, SEO meta, newer autosave, the builder that stores the layout, content hash |
 | `site-agent-list-terms` | Enable Site Agent | Find categories, tags and other taxonomy terms |
 | `site-agent-list-media` | Enable Site Agent | Existing media URLs, MIME types, dimensions, and alt text |
+| `site-agent-list-skills` | Enable Site Agent | Bundled page builder skills, whether each builder is active, and each skill's files |
+| `site-agent-get-skill` | Enable Site Agent | Read a builder skill's SKILL.md, references, patterns or examples |
 | `site-agent-save-content` | Content writes | Create drafts or update posts, terms, featured image, slug, schedule and SEO meta through core APIs |
 | `site-agent-upload-media` | Content writes | Import a public URL or base64 file into the media library with alt text |
 | `site-agent-update-media` | Content writes | Set media title, alt text, caption and description |
@@ -78,6 +80,14 @@ WP-CLI runs without a shell, on the current WordPress installation, and as the a
 `DISALLOW_FILE_EDIT` and `DISALLOW_FILE_MODS` block source inspection, source editing, PHP execution, and WP-CLI entry points. Setting `SITE_AGENT_ALLOW_EXECUTION` to `false` in `wp-config.php` blocks source editing, PHP execution and WP-CLI on that site while leaving content tools and source inspection available. Each Application Password can be limited to a subset of the enabled tool groups under Tools → Site Agent; limited passwords do not see other tools in `tools/list`. Every ability checks authenticated administration rights, its group setting and the password's limit again at execution time. Abilities remain private to the Site Agent server, with no public exposure through the default adapter or core REST ability routes.
 
 The settings page shows diagnostics for HTTPS detection (including proxies that hide HTTPS), Application Password availability, WP-CLI, PHP compile checks and symlinked folders. Its Test connection button calls the MCP endpoint from the browser with the generated token, without cookies, and names the likely cause of a failure. Refused MCP requests carry an `X-Site-Agent-Auth` header with a coarse reason such as `unauthenticated` or `https_required`.
+
+## Builder Skills
+
+Site Agent bundles read-only skills for Gutenberg, GenerateBlocks, Elementor, Bricks and Divi under `skills/`. An MCP client reads them with `site-agent-list-skills` and `site-agent-get-skill`; they need only the base Enable Site Agent switch and contain no site data. Each skill explains where that builder stores layouts, how to read and change them through Site Agent's tools, and how to verify the result.
+
+`site-agent-site-context` lists the active builders, and `site-agent-get-content` reports a post's `builder`: `gutenberg`, `generateblocks`, `elementor`, `bricks`, `divi` or `classic`. Elementor, Bricks and Divi 4 keep the visible layout outside the block markup that `save-content` writes. Their skills either produce paste or import files for the builder's own interface or, when the user asks for a direct change, use the opt-in PHP or WP-CLI tools with a snapshot, a hash check and a read-back. Skills are guidance for the client, not a safety layer; the tool groups and their limits still decide what a connection can do.
+
+The Bricks and GenerateBlocks skills are adapted from the author's [bricks-skills](https://github.com/wpgaurav/bricks-skills) and [generateblocks-skills](https://github.com/wpgaurav/generateblocks-skills) repositories, and the Gutenberg block reference from [WordPress-skills](https://github.com/wpgaurav/WordPress-skills). `skills/sources.json` pins each source commit and the SHA-256 of every imported file. `python3 bin/sync-skills.py` validates the bundled skills offline, and `--pull` re-imports the pinned files.
 
 ## Runtime Provenance
 
@@ -113,6 +123,7 @@ composer runtime
 composer lint
 vendor/bin/phpcs
 SITE_AGENT_WP_DIR=/path/to/disposable/wordpress vendor/bin/phpunit
+python3 bin/sync-skills.py
 bash bin/build.sh
 ```
 

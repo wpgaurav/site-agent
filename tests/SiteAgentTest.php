@@ -38,7 +38,7 @@ final class SiteAgentTest extends TestCase {
 		$this->assertTrue( Permissions::allowed( 'file_read' ) );
 		$this->assertFalse( Permissions::allowed( 'php_execute' ) );
 		$this->assertFalse( Permissions::allowed( 'file_write' ) );
-		$this->assertCount( 7, Abilities::enabled_definitions() );
+		$this->assertCount( 9, Abilities::enabled_definitions() );
 		update_option( Config::OPTION, Config::defaults(), false );
 		$this->assertFalse( Permissions::allowed( 'file_read' ) );
 	}

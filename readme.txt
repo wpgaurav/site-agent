@@ -11,7 +11,7 @@ Connect an MCP client directly to WordPress with independently enabled developer
 
 == Description ==
 
-Site Agent provides WordPress context, content, term and media discovery, content and media writes, source inspection, source editing, PHP execution, and foreground WP-CLI commands. It is distributed independently through gauravtiwari.org.
+Site Agent provides WordPress context, content, term and media discovery, content and media writes, source inspection, source editing, PHP execution, and foreground WP-CLI commands. Bundled builder skills explain to the connected client how to work with Gutenberg, GenerateBlocks, Elementor, Bricks and Divi layouts. It is distributed independently through gauravtiwari.org.
 
 Access starts disabled. Open Tools > Site Agent to choose the tool groups, then connect with a dedicated WordPress Application Password. Each password can be limited to some of the enabled groups. Remote requests require HTTPS. Administrators can connect; multisite requires a super administrator. Source/developer tools also respect WordPress's file modification restrictions. The settings page includes connection diagnostics and a Test connection button.
 
