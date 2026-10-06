@@ -3,7 +3,7 @@
  * Plugin Name: Site Agent
  * Plugin URI: https://gauravtiwari.org/product/site-agent/
  * Description: Connect an MCP client directly to WordPress with independently enabled developer tools.
- * Version: 0.2.0
+ * Version: 0.3.0
  * Requires at least: 6.9
  * Requires PHP: 8.0
  * Author: Gaurav Tiwari
@@ -21,7 +21,7 @@ namespace SiteAgent;
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'SITE_AGENT_VERSION', '0.2.0' );
+define( 'SITE_AGENT_VERSION', '0.3.0' );
 define( 'SITE_AGENT_DIR', __DIR__ . '/' );
 define( 'SITE_AGENT_FILE', __FILE__ );
 
@@ -61,6 +61,9 @@ add_action(
 		// Keep this private, scoped adapter independent of other MCP plugins.
 		add_filter( 'site_agent_mcp_adapter_create_default_server', '__return_false' );
 		add_filter( 'site_agent_mcp_adapter_tools_list', array( Abilities::class, 'visible_tools' ), 10, 2 );
+		// Bricks' direct tools on this server: the Bricks tools group, password limits and audit.
+		add_filter( 'site_agent_mcp_adapter_pre_tool_call', array( Bricks::class, 'before_call' ), 10, 4 );
+		add_filter( 'site_agent_mcp_adapter_tool_call_result', array( Bricks::class, 'after_call' ), 10, 5 );
 		Vendor\WP\MCP\Plugin::instance();
 		add_action( 'wp_abilities_api_categories_init', array( Abilities::class, 'register_category' ) );
 		add_action( 'wp_abilities_api_init', array( Abilities::class, 'register' ) );

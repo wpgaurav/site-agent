@@ -60,6 +60,10 @@ final class Audit {
 		if ( isset( $input['from'], $input['to'] ) && is_string( $input['from'] ) && is_string( $input['to'] ) ) {
 			return $input['from'] . ' -> ' . $input['to'];
 		}
+		if ( isset( $input['ability_name'] ) && is_string( $input['ability_name'] ) ) {
+			$inner = isset( $input['parameters'] ) && is_array( $input['parameters'] ) ? self::target( $input['parameters'] ) : '';
+			return trim( $input['ability_name'] . ' ' . $inner );
+		}
 		if ( isset( $input['skill'] ) && is_string( $input['skill'] ) ) {
 			return 'skill ' . $input['skill'] . '/' . ( isset( $input['path'] ) && is_string( $input['path'] ) ? $input['path'] : 'SKILL.md' );
 		}
@@ -79,6 +83,7 @@ final class Audit {
 		}
 		foreach ( array(
 			'post_id' => 'post',
+			'postId'  => 'post',
 			'id'      => 'attachment',
 		) as $key => $label ) {
 			if ( isset( $input[ $key ] ) && is_int( $input[ $key ] ) ) {

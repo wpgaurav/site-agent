@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 final class Scopes {
 	const OPTION = 'site_agent_token_scopes';
 	/** Groups a password can be limited to. Read-only content tools stay available to every administrator password. */
-	const GROUPS = array( 'content_write', 'file_read', 'file_write', 'php_execute', 'cli_execute' );
+	const GROUPS = array( 'content_write', 'file_read', 'file_write', 'php_execute', 'cli_execute', 'bricks' );
 
 	/**
 	 * Stored limits keyed by Application Password UUID. A missing UUID means unrestricted.

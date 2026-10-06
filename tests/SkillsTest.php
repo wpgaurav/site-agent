@@ -135,6 +135,10 @@ final class SkillsTest extends TestCase {
 		$cases = array(
 			array( 'elementor', $this->post( array( 'post_content' => '<p>Fallback</p>' ), array( '_elementor_edit_mode' => 'builder' ) ) ),
 			array( 'bricks', $this->post( array( 'post_content' => '' ), array( '_bricks_editor_mode' => 'bricks' ) ) ),
+			// Bricks renders its data unless the mode is "wordpress"; older or imported pages have no mode.
+			array( 'bricks', $this->post( array( 'post_content' => '' ), array( '_bricks_page_content_2' => array( array( 'id' => 'abc123', 'name' => 'section' ) ) ) ) ),
+			array( 'classic', $this->post( array( 'post_content' => '<p>Kept</p>' ), array( '_bricks_editor_mode' => 'wordpress', '_bricks_page_content_2' => array( array( 'id' => 'abc123', 'name' => 'section' ) ) ) ) ),
+			array( 'generateblocks', $this->post( array( 'post_content' => '<!-- wp:generateblocks-pro/accordion {"uniqueId":"a1b2c3d5"} --><div class="gb-accordion"></div><!-- /wp:generateblocks-pro/accordion -->' ) ) ),
 			array( 'divi', $this->post( array( 'post_content' => '[et_pb_section][/et_pb_section]' ), array( '_et_pb_use_builder' => 'on' ) ) ),
 			array( 'divi', $this->post( array( 'post_content' => '<!-- wp:divi/placeholder --><!-- wp:divi/section --><!-- /wp:divi/section --><!-- /wp:divi/placeholder -->' ) ) ),
 			array( 'generateblocks', $this->post( array( 'post_content' => '<!-- wp:generateblocks/text {"uniqueId":"a1b2c3d4","tagName":"p"} --><p class="gb-text">Hi</p><!-- /wp:generateblocks/text -->' ) ) ),
@@ -145,6 +149,15 @@ final class SkillsTest extends TestCase {
 			$read = Abilities::execute( 'get-content', array( 'post_id' => $id ) );
 			$this->assertSame( $builder, $read['builder'], $builder . ' post ' . $id );
 		}
+		// GenerateBlocks Pro keeps global styles and conditions in post meta of its own post types.
+		$style = new WP_Post(
+			(object) array(
+				'ID'           => 0,
+				'post_type'    => 'gblocks_styles',
+				'post_content' => '',
+			)
+		);
+		$this->assertSame( 'generateblocks', Skills::post_builder( $style ) );
 		$context = Abilities::execute( 'site-context', array() );
 		$this->assertSame( 'gutenberg', $context['builders'][0]['skill'] );
 		$this->assertTrue( rest_validate_value_from_schema( $context, Abilities::definitions()['site-context']['output'], 'output' ) );

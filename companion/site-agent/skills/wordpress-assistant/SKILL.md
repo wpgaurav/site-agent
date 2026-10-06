@@ -19,19 +19,23 @@ Use the connected Site Agent server, preserving the site's code and publishing c
 
 Search and paginate accessible content. Read raw content before auditing or editing; summaries and listing titles do not contain the full post.
 
-Preserve Gutenberg comments, block attributes, ACF fields, shortcodes, HTML, links, metadata, placeholders and unrelated content. Never replace [year] or [monthyear]. Reuse existing media only when appropriate; list-media discovers media but does not import or upload it. Import new media with an authorized supported integration, never hotlink it.
+Preserve Gutenberg comments, block attributes, ACF fields, shortcodes, HTML, links, metadata, placeholders and unrelated content. Never replace [year] or [monthyear]. Reuse existing media when it fits; list-media finds it. Import new media into the library with upload-media (a public URL or base64 data) and meaningful alt text; never hotlink it.
 
-Create new posts as drafts unless publication is explicit. When asked to prepare a revision of a published post without publishing, present the revision or create a separate draft; saving content into a published post changes its public output even when status is omitted. Do not unpublish the original to make a draft. For an authorized direct edit, preserve the existing status and omit untouched fields.
+Create new posts as drafts unless publication is explicit. Saving title, content or excerpt changes to a published, private or scheduled post without status stores them as your autosave for review and returns staged true; the public page does not change until someone publishes. Pass status only when the user asked to change the live post, and never unpublish the original to make a draft. For an authorized direct edit, preserve the existing status and omit untouched fields.
 
 Use expected_content_sha256 from the latest read for updates. On conflict, re-read and reconcile with the current version; never force or blindly retry. If a write times out, inspect the post before retrying so duplicate drafts are not created.
 
-After saving, read the post again. Compare intended fields, status and raw block markup. For public edits, inspect cache-aware public output through an available supported read tool. State when public rendering cannot be verified.
+After saving, read the post again. Compare intended fields, status and raw block markup: content for a draft or a save with status, or autosave.content (get-content with autosave_content true) for a staged edit. For a second staged edit to the same post, build on autosave.content while autosave.newer is true and keep passing the live content_sha256. For public edits, inspect cache-aware public output through an available supported read tool. State when public rendering cannot be verified.
 
-The content tool exposes title, content, excerpt and status, not arbitrary SEO metadata, taxonomies, featured images or custom fields. Do not claim those changed unless a separate authorized operation and readback prove it.
+save-content also sets the slug, publish date, terms, featured image and allowlisted meta (usually the active SEO plugin's title, description and focus keyword). These are refused while an edit is staged, and other custom fields are not writable. Do not claim a field changed unless the readback proves it.
 
 ## Page builders
 
 Before creating or changing a layout, check where it is stored. site-context lists active builders, and get-content returns builder for each post. When builder is elementor, bricks or divi, the visible layout is not the content field; editing it there changes nothing or is overwritten. Call list-skills, then get-skill for the matching builder, and follow its workflow. Do the same for gutenberg and generateblocks layout work, because block markup must stay byte-exact to avoid editor recovery errors. If those tools are missing, the site runs an older Site Agent; say so instead of guessing the builder's data format.
+
+## Bricks
+
+On Bricks 2.4+ sites with Bricks tools enabled, the connection also lists Bricks' own tools (bricks-*), bricks-abilities and run-bricks-ability. Start with bricks-start-here and the bricks skill. Where Bricks guidance names mcp-adapter-execute-ability or mcp-adapter-discover-abilities, use run-bricks-ability or bricks-abilities with the same ability_name and parameters.
 
 ## Audits and writing
 

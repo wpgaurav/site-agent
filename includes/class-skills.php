@@ -26,7 +26,7 @@ final class Skills {
 	/**
 	 * Builders active on this site, keyed by skill name.
 	 *
-	 * @return array<string, array{name: string, version: string, pro_version: string}>
+	 * @return array<string, array{name: string, version: string, pro_version: string, abilities?: bool}>
 	 */
 	public static function detected(): array {
 		$template = get_template();
@@ -56,6 +56,8 @@ final class Skills {
 				'name'        => 'Bricks',
 				'version'     => defined( 'BRICKS_VERSION' ) ? (string) BRICKS_VERSION : (string) wp_get_theme( 'bricks' )->get( 'Version' ),
 				'pro_version' => '',
+				// Bricks 2.4+ registers its own abilities; Site Agent serves them with the Bricks tools group.
+				'abilities'   => Bricks::available(),
 			);
 		}
 		$divi_theme = in_array( $template, array( 'Divi', 'Extra' ), true );
@@ -75,17 +77,32 @@ final class Skills {
 		if ( 'builder' === get_post_meta( $post->ID, '_elementor_edit_mode', true ) ) {
 			return 'elementor';
 		}
-		if ( 'bricks' === get_post_meta( $post->ID, '_bricks_editor_mode', true ) ) {
+		// Bricks renders its data unless the editor mode is the classic editor; layouts saved before
+		// Bricks 2.0 or written programmatically often have no mode at all.
+		$bricks_mode = get_post_meta( $post->ID, '_bricks_editor_mode', true );
+		if ( 'bricks' === $bricks_mode || ( 'wordpress' !== $bricks_mode && self::has_bricks_data( $post->ID ) ) ) { // phpcs:ignore WordPress.WP.CapitalPDangit.MisspelledInText -- Bricks stores the lowercase slug.
 			return 'bricks';
 		}
 		// Divi 4 keeps shortcodes in post_content; Divi 5 uses divi/* blocks, sometimes without the flag.
 		if ( 'on' === get_post_meta( $post->ID, '_et_pb_use_builder', true ) || false !== strpos( $post->post_content, '<!-- wp:divi/' ) ) {
 			return 'divi';
 		}
-		if ( false !== strpos( $post->post_content, '<!-- wp:generateblocks/' ) ) {
+		// GenerateBlocks Pro global styles, conditions and other records keep their data in post meta.
+		if ( 0 === strpos( $post->post_type, 'gblocks_' )
+			|| false !== strpos( $post->post_content, '<!-- wp:generateblocks/' )
+			|| false !== strpos( $post->post_content, '<!-- wp:generateblocks-pro/' ) ) {
 			return 'generateblocks';
 		}
 		return has_blocks( $post->post_content ) ? 'gutenberg' : 'classic';
+	}
+
+	private static function has_bricks_data( int $post_id ): bool {
+		foreach ( array( '_bricks_page_content_2', '_bricks_page_header_2', '_bricks_page_footer_2' ) as $key ) {
+			if ( get_post_meta( $post_id, $key, true ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

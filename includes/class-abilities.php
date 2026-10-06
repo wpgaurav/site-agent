@@ -48,12 +48,12 @@ final class Abilities {
 		);
 	}
 
-	private static function paging( int $max = 100 ): array {
+	private static function paging( int $max = 100, int $fallback = 20 ): array {
 		return array(
 			'limit'  => self::field(
 				'integer',
-				/* translators: %d: maximum page size. */
-				sprintf( __( 'Results per page, 1 to %d. Default 20.', 'site-agent' ), $max ),
+				/* translators: 1: maximum page size, 2: default page size. */
+				sprintf( __( 'Results per page, 1 to %1$d. Default %2$d.', 'site-agent' ), $max, $fallback ),
 				array(
 					'minimum' => 1,
 					'maximum' => $max,
@@ -145,7 +145,7 @@ final class Abilities {
 		);
 		$timeout   = Developer::cli_timeout();
 		return array(
-			'site-context'     => array(
+			'site-context'       => array(
 				'label'       => __( 'Site context', 'site-agent' ),
 				'description' => __( 'Inspect WordPress, PHP, active plugins, theme, page builders, post types, taxonomies and the tools this connection can use. Start here.', 'site-agent' ),
 				'group'       => '',
@@ -168,7 +168,7 @@ final class Abilities {
 				),
 				'readonly'    => true,
 			),
-			'list-content'     => array(
+			'list-content'       => array(
 				'label'       => __( 'List content', 'site-agent' ),
 				'description' => __( 'Search and paginate posts in a REST-enabled post type, most recently modified first.', 'site-agent' ),
 				'group'       => '',
@@ -202,22 +202,23 @@ final class Abilities {
 				),
 				'readonly'    => true,
 			),
-			'get-content'      => array(
+			'get-content'        => array(
 				'label'       => __( 'Read content', 'site-agent' ),
-				'description' => __( 'Read a post by ID, URL or slug: raw Gutenberg markup, terms, featured image, SEO meta, your newer autosave if any, and the content hash needed for updates.', 'site-agent' ),
+				'description' => __( 'Read a post by ID, URL or slug: raw Gutenberg markup, terms, featured image, SEO meta, the builder that stores its layout, your autosave if any, and the content hash needed for updates. Pass autosave_content to read the text of your staged autosave.', 'site-agent' ),
 				'group'       => '',
 				'callback'    => array( Content::class, 'read' ),
 				'input'       => array(
-					'post_id'   => $post_id,
-					'url'       => self::string( __( 'Permalink of the post, as an alternative to post_id.', 'site-agent' ), 2048 ),
-					'slug'      => self::string( __( 'Post slug, as an alternative to post_id. Combine with post_type for pages or custom types.', 'site-agent' ), 200 ),
-					'post_type' => $post_type,
+					'post_id'          => $post_id,
+					'url'              => self::string( __( 'Permalink of the post, as an alternative to post_id.', 'site-agent' ), 2048 ),
+					'slug'             => self::string( __( 'Post slug, as an alternative to post_id. Combine with post_type for pages or custom types.', 'site-agent' ), 200 ),
+					'post_type'        => $post_type,
+					'autosave_content' => self::field( 'boolean', __( 'Also return the title, content and excerpt of your autosave. Edits to live posts are staged there, so read it back after such a save.', 'site-agent' ) ),
 				),
 				'required'    => array(),
 				'output'      => self::post_output(),
 				'readonly'    => true,
 			),
-			'save-content'     => array(
+			'save-content'       => array(
 				'label'       => __( 'Save content', 'site-agent' ),
 				'description' => __( 'Create a draft or update a post through WordPress. Updates need the current content hash from get-content. Edits to a published, private or scheduled post are saved as your autosave for review unless you pass status (for example publish) to change the live post. Publishing or scheduling always requires status.', 'site-agent' ),
 				'group'       => 'content_write',
@@ -262,12 +263,12 @@ final class Abilities {
 				'output'      => self::post_output(),
 				'readonly'    => false,
 			),
-			'list-terms'       => array(
+			'list-terms'         => array(
 				'label'       => __( 'List terms', 'site-agent' ),
 				'description' => __( 'Find categories, tags or other taxonomy terms and their IDs.', 'site-agent' ),
 				'group'       => '',
 				'callback'    => array( Content::class, 'terms' ),
-				'input'       => self::paging() + array(
+				'input'       => self::paging( 100, 50 ) + array(
 					'taxonomy' => self::string( __( 'REST-enabled taxonomy such as category or post_tag. Default category.', 'site-agent' ), 64 ),
 				),
 				'required'    => array(),
@@ -280,7 +281,7 @@ final class Abilities {
 				),
 				'readonly'    => true,
 			),
-			'list-media'       => array(
+			'list-media'         => array(
 				'label'       => __( 'List media', 'site-agent' ),
 				'description' => __( 'Find existing media library items with their URLs, alt text and dimensions. Prefer existing media over new uploads.', 'site-agent' ),
 				'group'       => '',
@@ -298,7 +299,7 @@ final class Abilities {
 				),
 				'readonly'    => true,
 			),
-			'list-skills'      => array(
+			'list-skills'        => array(
 				'label'       => __( 'List builder skills', 'site-agent' ),
 				'description' => __( 'List the bundled page builder skills (Gutenberg, GenerateBlocks, Elementor, Bricks, Divi), whether each builder is active here, and each skill\'s files. Read the matching skill before creating or editing builder layouts.', 'site-agent' ),
 				'group'       => '',
@@ -324,7 +325,7 @@ final class Abilities {
 				),
 				'readonly'    => true,
 			),
-			'get-skill'        => array(
+			'get-skill'          => array(
 				'label'       => __( 'Read builder skill', 'site-agent' ),
 				'description' => __( 'Read a bundled page builder skill. Start with its SKILL.md, which explains the workflow and which reference files to read next.', 'site-agent' ),
 				'group'       => '',
@@ -345,7 +346,59 @@ final class Abilities {
 				),
 				'readonly'    => true,
 			),
-			'upload-media'     => array(
+			'bricks-abilities'   => array(
+				'label'       => __( 'List Bricks abilities', 'site-agent' ),
+				'description' => __( 'List Bricks Builder\'s own abilities on this site: name, label, one-line summary, readonly and destructive hints, and the tool name of those also served directly (bricks-*). Pass ability_name for the full description and the input and output schemas. Use this where Bricks guidance names mcp-adapter-discover-abilities or mcp-adapter-get-ability-info.', 'site-agent' ),
+				'group'       => 'bricks',
+				'callback'    => array( Bricks::class, 'listing' ),
+				'input'       => array(
+					'ability_name' => self::string( __( 'A Bricks ability, for example bricks/get-page-elements, to return in full with its schemas.', 'site-agent' ), 100, array( 'pattern' => Bricks::NAME ) ),
+					'search'       => self::string( __( 'Only list abilities whose name, label or description contains this text.', 'site-agent' ), 100 ),
+				),
+				'required'    => array(),
+				'output'      => self::object(
+					array(
+						'version'   => array( 'type' => 'string' ),
+						'abilities' => self::list_of(
+							self::object(
+								array(
+									'name'          => array( 'type' => 'string' ),
+									'label'         => array( 'type' => 'string' ),
+									'description'   => array( 'type' => 'string' ),
+									'direct_tool'   => array( 'type' => 'string' ),
+									'readonly'      => array( 'type' => 'boolean' ),
+									'destructive'   => array( 'type' => 'boolean' ),
+									'input_schema'  => array( 'type' => 'object' ),
+									'output_schema' => array( 'type' => 'object' ),
+								),
+								array( 'name', 'description' )
+							)
+						),
+					),
+					array( 'abilities' )
+				),
+				'readonly'    => true,
+			),
+			'run-bricks-ability' => array(
+				'label'       => __( 'Run Bricks ability', 'site-agent' ),
+				'description' => __( 'Run one of Bricks Builder\'s own abilities with its parameters. Use this where Bricks guidance names mcp-adapter-execute-ability; ability_name and parameters work the same way. Bricks checks its own permissions and validates the parameters against the ability\'s input schema. Abilities that are not readonly change the site: follow Bricks\' readback and revision guidance.', 'site-agent' ),
+				'group'       => 'bricks',
+				'callback'    => array( Bricks::class, 'run' ),
+				'input'       => array(
+					'ability_name' => self::string( __( 'Bricks ability name from bricks-abilities, for example bricks/get-page-elements.', 'site-agent' ), 100, array( 'pattern' => Bricks::NAME ) ),
+					'parameters'   => self::field( 'object', __( 'The ability\'s input, matching its input schema. Omit for abilities that take no input.', 'site-agent' ) ),
+				),
+				'required'    => array( 'ability_name' ),
+				'output'      => self::object(
+					array(
+						'ability_name' => array( 'type' => 'string' ),
+						'result'       => array( 'type' => array( 'object', 'array', 'string', 'number', 'integer', 'boolean', 'null' ) ),
+					),
+					array( 'ability_name' )
+				),
+				'readonly'    => false,
+			),
+			'upload-media'       => array(
 				'label'       => __( 'Upload media', 'site-agent' ),
 				'description' => __( 'Import a file into the media library from a public URL or base64 data, with alt text. WordPress checks the file type. Use the returned ID as featured_media or the URL in content.', 'site-agent' ),
 				'group'       => 'content_write',
@@ -361,7 +414,7 @@ final class Abilities {
 				'readonly'    => false,
 				'destructive' => false,
 			),
-			'update-media'     => array(
+			'update-media'       => array(
 				'label'       => __( 'Update media', 'site-agent' ),
 				'description' => __( 'Set the title, alt text, caption or description of an existing media item.', 'site-agent' ),
 				'group'       => 'content_write',
@@ -372,7 +425,7 @@ final class Abilities {
 				'readonly'    => false,
 				'idempotent'  => true,
 			),
-			'list-files'       => array(
+			'list-files'         => array(
 				'label'       => __( 'List source files', 'site-agent' ),
 				'description' => __( 'Browse plugin, theme and must-use plugin directories. Hidden files, credential files and symlinks are hidden.', 'site-agent' ),
 				'group'       => 'file_read',
@@ -399,7 +452,7 @@ final class Abilities {
 				),
 				'readonly'    => true,
 			),
-			'read-file'        => array(
+			'read-file'          => array(
 				'label'       => __( 'Read source file', 'site-agent' ),
 				'description' => __( 'Read a UTF-8 plugin or theme source file up to 256 KiB and obtain the SHA-256 hash needed to change it.', 'site-agent' ),
 				'group'       => 'file_read',
@@ -417,7 +470,7 @@ final class Abilities {
 				),
 				'readonly'    => true,
 			),
-			'write-file'       => array(
+			'write-file'         => array(
 				'label'       => __( 'Write source file', 'site-agent' ),
 				'description' => __( 'Create or replace a plugin or theme source file. Supply its current hash, or new for a new file. PHP is syntax- and compile-checked first; after saving, the site is loaded and a change that causes a fatal error is reverted. This changes executable code.', 'site-agent' ),
 				'group'       => 'file_write',
@@ -439,7 +492,7 @@ final class Abilities {
 				),
 				'readonly'    => false,
 			),
-			'create-directory' => array(
+			'create-directory'   => array(
 				'label'       => __( 'Create directory', 'site-agent' ),
 				'description' => __( 'Create a directory, and any missing parents, inside plugins/, themes/ or mu-plugins/.', 'site-agent' ),
 				'group'       => 'file_write',
@@ -457,7 +510,7 @@ final class Abilities {
 				'destructive' => false,
 				'idempotent'  => true,
 			),
-			'delete-file'      => array(
+			'delete-file'        => array(
 				'label'       => __( 'Delete source file', 'site-agent' ),
 				'description' => __( 'Delete a plugin or theme file whose hash still matches, or an empty directory. Deleting PHP that breaks the site is undone.', 'site-agent' ),
 				'group'       => 'file_write',
@@ -477,7 +530,7 @@ final class Abilities {
 				),
 				'readonly'    => false,
 			),
-			'move-file'        => array(
+			'move-file'          => array(
 				'label'       => __( 'Move source file', 'site-agent' ),
 				'description' => __( 'Rename or move a plugin or theme file whose hash still matches. The destination must not exist. A PHP move that breaks the site is undone.', 'site-agent' ),
 				'group'       => 'file_write',
@@ -498,7 +551,7 @@ final class Abilities {
 				),
 				'readonly'    => false,
 			),
-			'execute-php'      => array(
+			'execute-php'        => array(
 				'label'       => __( 'Execute PHP', 'site-agent' ),
 				'description' => __( 'Run PHP statements in the loaded WordPress request with full server privileges; not sandboxed. No PHP tags and no exit or die. Echo output and a JSON-serializable return value are captured; errors include their message and line.', 'site-agent' ),
 				'group'       => 'php_execute',
@@ -514,7 +567,7 @@ final class Abilities {
 				),
 				'readonly'    => false,
 			),
-			'run-wp-cli'       => array(
+			'run-wp-cli'         => array(
 				'label'       => __( 'Run WP-CLI', 'site-agent' ),
 				/* translators: %d: time limit in seconds. */
 				'description' => sprintf( __( 'Run WP-CLI on this installation as the authenticated user, with arguments as an array and no shell. Full developer access; foreground commands have a %d-second limit.', 'site-agent' ), $timeout ),
@@ -610,21 +663,28 @@ final class Abilities {
 	}
 
 	public static function register_server( $adapter ): void {
-		$tools = array_map(
+		$definitions = self::enabled_definitions();
+		$tools       = array_map(
 			static function ( $name ) {
 				return 'site-agent/' . $name;
 			},
-			array_keys( self::enabled_definitions() )
+			array_keys( $definitions )
 		);
 		if ( ! $tools ) {
 			return;
+		}
+		$instructions = 'WordPress developer access through explicitly enabled tools.';
+		if ( isset( $definitions['run-bricks-ability'] ) ) {
+			// Bricks' fast-path abilities keep their own tool names, so Bricks' guidance applies as written.
+			$tools         = array_merge( $tools, Bricks::direct() );
+			$instructions .= ' Tools named bricks-* are Bricks Builder\'s own abilities. Where Bricks guidance names mcp-adapter-discover-abilities, mcp-adapter-get-ability-info or mcp-adapter-execute-ability, use site-agent-bricks-abilities and site-agent-run-bricks-ability with the same ability_name and parameters.';
 		}
 		$adapter->create_server(
 			'site-agent',
 			'site-agent/v1',
 			'mcp',
 			'Site Agent',
-			'WordPress developer access through explicitly enabled tools.',
+			$instructions,
 			SITE_AGENT_VERSION,
 			array( Vendor\WP\MCP\Transport\HttpTransport::class ),
 			Vendor\WP\MCP\Infrastructure\ErrorHandling\NullMcpErrorHandler::class,
@@ -653,7 +713,10 @@ final class Abilities {
 				$tools,
 				static function ( $tool ) use ( $definitions ) {
 					$name = is_object( $tool ) && method_exists( $tool, 'get' ) ? (string) $tool->get( 'name' ) : '';
-					$key  = 0 === strpos( $name, 'site-agent-' ) ? substr( $name, strlen( 'site-agent-' ) ) : '';
+					if ( 0 === strpos( $name, 'bricks-' ) ) {
+						return Permissions::allowed( 'bricks' );
+					}
+					$key = 0 === strpos( $name, 'site-agent-' ) ? substr( $name, strlen( 'site-agent-' ) ) : '';
 					return ! isset( $definitions[ $key ] ) || Permissions::allowed( $definitions[ $key ]['group'] );
 				}
 			)
