@@ -11,7 +11,7 @@
   "object": "site-agent-0.3.0.zip",
   "size": 709982,
   "sha256": "3f6f333e066337c199374500200f0f66e8132b082606995b0d0353c4f39f8729",
-  "published_content_sha256": "71f93a4620ef761d8927a6d381f8b87d79b69f914e547775ca80436cc3cfde2f",
+  "published_content_sha256": "f13b12febc699f4ec92413213983b09f67197ec0c9d677b20970dd4f2f6ef761",
   "primary_accent": "#1b2733",
   "branding_media": {
     "icon": {
@@ -30,13 +30,13 @@
       "alt": "Site Agent icon and wordmark with WordPress MCP Tools on a dark blue background"
     }
   },
-  "rollback_revision": 1180342,
+  "rollback_revision": 1180365,
   "files": 377,
   "rollback_release": {
     "version": "0.2.0",
     "download_id": 331
   },
-  "production_version": "0.2.0",
+  "production_version": "0.3.0",
   "companion": {
     "file": "site-agent-companion-0.3.0.zip",
     "version": "0.3.0",

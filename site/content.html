@@ -1,80 +1,281 @@
 <section class="sa-hero" aria-labelledby="sa-title">
-  <div class="sa-hero-grid-art" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <div class="sa-wrap sa-hero-inner">
     <h1 id="sa-title">Site Agent <img src="{{ICON}}" alt="" width="72" height="72"><br>WordPress MCP Tools.</h1>
-    <p class="sa-lead">Connect your coding agent to the WordPress site you're working on. Site Agent is my free MCP plugin for reading content and working with the site's code.</p>
-    <p class="sa-intro-note">Access starts off. You decide which tools your agent can use.</p>
-    <div class="sa-actions"><a class="sa-button sa-button-primary" href="{{CHECKOUT}}" data-sa-cta="hero">Get Site Agent <span aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sa-icon" aria-hidden="true" focusable="false" > <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M17 7l-10 10" /> <path d="M8 7l9 0l0 9" /> </svg></span></a><a class="sa-button sa-button-ghost" href="#sa-tools">Explore the Tools <span aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sa-icon" aria-hidden="true" focusable="false" > <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M12 5l0 14" /> <path d="M18 13l-6 6" /> <path d="M6 13l6 6" /> </svg></span></a></div>
-    <p class="sa-meta">Free and open source, with a free license for updates.</p>
-    <div class="sa-hero-window">    <div class="sa-console" data-sa-console aria-label="Interactive MCP examples, no live site connection"><div class="sa-window-bar"><div><img class="sa-window-logo" src="{{ICON}}" alt="" width="36" height="36"><strong>Site Agent</strong><span>Example MCP Session</span></div><span class="sa-window-state">Direct to WordPress</span></div>
-      <div class="sa-console-tabs" role="tablist" aria-label="Tool examples">
-        <button id="sa-tab-content" role="tab" aria-selected="true" aria-controls="sa-example" data-sa-example="content" tabindex="0">Content</button>
-        <button id="sa-tab-source" role="tab" aria-selected="false" aria-controls="sa-example" data-sa-example="source" tabindex="-1">Source</button>
-        <button id="sa-tab-php" role="tab" aria-selected="false" aria-controls="sa-example" data-sa-example="php" tabindex="-1">PHP</button>
-        <button id="sa-tab-cli" role="tab" aria-selected="false" aria-controls="sa-example" data-sa-example="cli" tabindex="-1">WP-CLI</button>
-      </div>
-      <div class="sa-example-grid" id="sa-example" role="tabpanel" aria-labelledby="sa-tab-content" tabindex="0">
-        <div class="sa-example-description"><h3 data-sa-example-title>Read a Post Before Editing</h3><p data-sa-example-copy>Your agent gets the stored content and its SHA-256 hash. An update must include that hash so the plugin can detect a change made since the read.</p><span class="sa-access-label" data-sa-example-access>Read access</span><p class="sa-small" data-sa-example-limit>New content starts as a draft. Publishing needs an explicit request.</p></div>
-        <div class="sa-example-code"><span class="sa-code-label">MCP tool call</span><pre><code data-sa-example-code>{
-  "name": "site-agent-get-content",
+    <p class="sa-lead">An AI agent that can't see your WordPress site works from guesses and pasted snippets. Site Agent is my free plugin that connects your AI client to the site itself, so the agent reads the real content and code before it changes anything.</p>
+    <div class="sa-actions"><a class="sa-button sa-button-primary" href="{{CHECKOUT}}" data-sa-cta="hero">Get Site Agent <span aria-hidden="true">{{icon:arrow-up-right}}</span></a><a class="sa-button sa-button-ghost" href="#sa-connect">Connect Your Client <span aria-hidden="true">{{icon:arrow-down}}</span></a></div>
+    <p class="sa-meta">Site Agent is free and open source. Every tool that changes something stays off until you switch it on.</p>
+    <ul class="sa-clients" aria-label="Setup guides on this page"><li>ChatGPT</li><li>Claude</li><li>Gemini</li><li>Cursor</li><li>VS Code</li><li>Codex</li><li>Zed</li></ul>
+    <div class="sa-hero-window">
+      <div class="sa-console" aria-label="Example MCP tool calls. These examples are not connected to a live site.">
+        <div class="sa-window-bar"><div><img class="sa-window-logo" src="{{ICON}}" alt="" width="36" height="36"><strong>Site Agent</strong><span>Example tool calls</span></div><span>Direct to WordPress</span></div>
+        <div class="sa-console-tabs" role="tablist" aria-label="Tool examples">
+          <button id="sa-tab-content" role="tab" aria-selected="true" aria-controls="sa-example" data-sa-example="content" tabindex="0">Content</button>
+          <button id="sa-tab-media" role="tab" aria-selected="false" aria-controls="sa-example" data-sa-example="media" tabindex="-1">Media</button>
+          <button id="sa-tab-source" role="tab" aria-selected="false" aria-controls="sa-example" data-sa-example="source" tabindex="-1">Source</button>
+          <button id="sa-tab-php" role="tab" aria-selected="false" aria-controls="sa-example" data-sa-example="php" tabindex="-1">PHP</button>
+          <button id="sa-tab-cli" role="tab" aria-selected="false" aria-controls="sa-example" data-sa-example="cli" tabindex="-1">WP-CLI</button>
+          <button id="sa-tab-bricks" role="tab" aria-selected="false" aria-controls="sa-example" data-sa-example="bricks" tabindex="-1">Bricks</button>
+        </div>
+        <div class="sa-example-grid" id="sa-example" role="tabpanel" aria-labelledby="sa-tab-content" tabindex="0">
+          <div class="sa-example-description"><h3 data-sa-example-title>Stage an Edit to a Live Post</h3><p data-sa-example-copy>The agent sends the new content with the hash it got when it read the post. The post is published and no status is passed, so WordPress saves the change as an autosave for you to review.</p><span class="sa-access-label" data-sa-example-access>Content writes</span><p class="sa-small" data-sa-example-limit>The live post changes only when the agent passes a status such as publish.</p></div>
+          <div class="sa-example-code"><span class="sa-code-label">MCP tool call</span><pre><code data-sa-example-code>{
+  "name": "site-agent-save-content",
   "arguments": {
-    "post_id": 42
+    "post_id": 42,
+    "content": "&lt;!-- wp:paragraph --&gt;&lt;p&gt;A clearer intro.&lt;/p&gt;&lt;!-- /wp:paragraph --&gt;",
+    "expected_content_sha256": "9f2c6a..."
   }
-}</code></pre><button type="button" class="sa-copy" data-sa-copy><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sa-icon" aria-hidden="true" focusable="false" > <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M7 9.667a2.667 2.667 0 0 1 2.667 -2.667h8.666a2.667 2.667 0 0 1 2.667 2.667v8.666a2.667 2.667 0 0 1 -2.667 2.667h-8.666a2.667 2.667 0 0 1 -2.667 -2.667l0 -8.666" /> <path d="M4.012 16.737a2.005 2.005 0 0 1 -1.012 -1.737v-10c0 -1.1 .9 -2 2 -2h10c.75 0 1.158 .385 1.5 1" /> </svg>Copy Example</button><span class="sa-copy-status" role="status" data-sa-copy-status></span></div>
+}</code></pre><div class="sa-copy-row"><button type="button" class="sa-copy" data-sa-copy-example>{{icon:copy}}Copy Example</button><span class="sa-copy-status" role="status" data-sa-copy-status></span></div></div>
+        </div>
       </div>
     </div>
-</div>
   </div>
 </section>
 
-<section class="sa-mechanism" aria-labelledby="sa-mechanism-title">
-  <div class="sa-wrap sa-centered"><h2 id="sa-mechanism-title">Work With the Site's Content and Code</h2><p class="sa-section-lead">Your agent can inspect the WordPress environment before proposing a change. You can then enable the tools that change requires.</p></div>
-  <div class="sa-wrap sa-bento-grid">
-    <article class="sa-bento sa-bento-lavender"><div class="sa-bento-visual sa-code-stack" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sa-icon" aria-hidden="true" focusable="false" > <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M4 6a8 3 0 1 0 16 0a8 3 0 1 0 -16 0" /> <path d="M4 6v6a8 3 0 0 0 16 0v-6" /> <path d="M4 12v6a8 3 0 0 0 16 0v-6" /> </svg><span>site-agent-site-context</span><div><b>WordPress</b><em>Theme + plugins</em></div><div><b>Content</b><em>Raw block markup</em></div><div><b>Tools</b><em>Explicit access</em></div></div><h3>Understand the Site</h3><p>The site-context tool reports the active theme and plugins so your agent can work with what's installed.</p></article>
-    <article class="sa-bento sa-bento-mint"><div class="sa-bento-visual sa-file-visual" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sa-icon" aria-hidden="true" focusable="false" > <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M14 3v4a1 1 0 0 0 1 1h4" /> <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" /> <path d="M10 13l-1 2l1 2" /> <path d="M14 13l1 2l-1 2" /> </svg><span>your-theme / style.css</span><div><i></i><i></i><i></i><i></i></div><strong>Read → Hash → Write</strong></div><h3>Work With Source</h3><p>Your agent can read theme and plugin files. File writes check for intervening changes and validate PHP syntax before saving.</p></article>
-    <article class="sa-bento sa-bento-peach"><div class="sa-bento-visual sa-terminal-visual" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sa-icon" aria-hidden="true" focusable="false" > <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M8 9l3 3l-3 3" /> <path d="M13 15l3 0" /> <path d="M3 6a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2l0 -12" /> </svg><code>wp plugin list</code><div><b>PHP</b><b>WP-CLI</b></div></div><h3>Use Developer Tools</h3><p>PHP runs with WordPress loaded. WP-CLI runs foreground commands on your server. Each needs a separate opt-in.</p></article>
-  </div>
-  <div class="sa-wrap sa-fact-strip"><div><strong>WordPress Abilities</strong><span>Named operations</span></div><div><strong>Streamable HTTP</strong><span>Direct MCP connection</span></div><div><strong>Application Passwords</strong><span>Native authentication</span></div><div><strong>Public Source</strong><span>GPL-licensed</span></div></div>
-</section>
-
-<section class="sa-workbench sa-alt" id="sa-tools" aria-labelledby="sa-tools-title">
+<section class="sa-tools-section" id="sa-tools" aria-labelledby="sa-tools-title">
   <div class="sa-wrap">
-    <div class="sa-section-grid sa-tools-heading"><div><h2 id="sa-tools-title">WordPress MCP Tools</h2><p class="sa-section-lead">Site Agent exposes 10 tools through WordPress Abilities and the official MCP Adapter.</p></div><p>You can start with site and content reads. Content writes and developer tools stay off until you enable their access groups in Tools → Site Agent.</p></div>
-    <div class="sa-tool-index" aria-label="All Site Agent tools">
-      <div><h3><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sa-icon" aria-hidden="true" focusable="false" > <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M4 6a8 3 0 1 0 16 0a8 3 0 1 0 -16 0" /> <path d="M4 6v6a8 3 0 0 0 16 0v-6" /> <path d="M4 12v6a8 3 0 0 0 16 0v-6" /> </svg>Read WordPress</h3><ul><li>Site context</li><li>Content search</li><li>Raw content</li><li>Media discovery</li></ul></div>
-      <div><h3><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sa-icon" aria-hidden="true" focusable="false" > <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M14 3v4a1 1 0 0 0 1 1h4" /> <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" /> <path d="M10 13l-1 2l1 2" /> <path d="M14 13l1 2l-1 2" /> </svg>Change Content</h3><ul><li>Create drafts</li><li>Update accessible posts and pages</li><li>Preserve omitted fields and block markup</li></ul></div>
-      <div><h3><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sa-icon" aria-hidden="true" focusable="false" > <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M8 9l3 3l-3 3" /> <path d="M13 15l3 0" /> <path d="M3 6a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2l0 -12" /> </svg>Use Developer Tools</h3><ul><li>Browse and read source</li><li>Edit theme and plugin files</li><li>Execute PHP</li><li>Run foreground WP-CLI</li></ul></div>
+    <div class="sa-head sa-head--split"><h2 id="sa-tools-title">WordPress MCP Tools</h2><p>Site Agent gives your agent 18 tools, and on Bricks sites it can add Bricks' own abilities too. The read tools work as soon as Site Agent is enabled. Every tool that changes something sits behind its own switch in Tools &gt; Site Agent.</p></div>
+    <div class="sa-groups">
+      <div class="sa-group">
+        <div class="sa-group-head"><span class="sa-tile" aria-hidden="true">{{icon:database}}</span><h3>Read the Site</h3><span class="sa-switch sa-switch--on">On with Site Agent</span></div>
+        <dl class="sa-tools">
+          <div><dt>Site context <code>site-context</code></dt><dd>WordPress, PHP, theme, plugins, page builders, post types and the tools this connection can use.</dd></div>
+          <div><dt>List content <code>list-content</code></dt><dd>Search posts and pages, with the latest edits first.</dd></div>
+          <div><dt>Read content <code>get-content</code></dt><dd>Block markup, terms, featured image, SEO fields and the builder that stores the layout, by ID, URL or slug.</dd></div>
+          <div><dt>List terms <code>list-terms</code></dt><dd>Categories, tags and other terms with their IDs.</dd></div>
+          <div><dt>List media <code>list-media</code></dt><dd>Library items with URLs, dimensions and alt text.</dd></div>
+          <div><dt>List skills <code>list-skills</code></dt><dd>The builder skills that ship with the plugin, and which builders this site runs.</dd></div>
+          <div><dt>Read skill <code>get-skill</code></dt><dd>A builder's workflow and reference files, read before the agent writes.</dd></div>
+        </dl>
+      </div>
+      <div class="sa-group">
+        <div class="sa-group-head"><span class="sa-tile" aria-hidden="true">{{icon:pencil}}</span><h3>Publish Content</h3><span class="sa-switch">Content writes</span></div>
+        <dl class="sa-tools">
+          <div><dt>Save content <code>save-content</code></dt><dd>Drafts and updates, with terms, featured image, slug, schedule and SEO meta.</dd></div>
+          <div><dt>Upload media <code>upload-media</code></dt><dd>Import an image from a URL or file data, with alt text.</dd></div>
+          <div><dt>Update media <code>update-media</code></dt><dd>Fix titles, alt text, captions and descriptions.</dd></div>
+        </dl>
+      </div>
+      <div class="sa-group">
+        <div class="sa-group-head"><span class="sa-tile" aria-hidden="true">{{icon:eye}}</span><h3>Inspect Source</h3><span class="sa-switch">Source inspection</span></div>
+        <dl class="sa-tools">
+          <div><dt>List files <code>list-files</code></dt><dd>Browse plugins, themes and must-use plugins.</dd></div>
+          <div><dt>Read file <code>read-file</code></dt><dd>Source code with the hash needed to change it.</dd></div>
+        </dl>
+      </div>
+      <div class="sa-group">
+        <div class="sa-group-head"><span class="sa-tile" aria-hidden="true">{{icon:file-code}}</span><h3>Edit Source</h3><span class="sa-switch">Source editing</span></div>
+        <dl class="sa-tools">
+          <div><dt>Write file <code>write-file</code></dt><dd>Create or replace a file. A PHP change that breaks the site is reverted.</dd></div>
+          <div><dt>Create directory <code>create-directory</code></dt><dd>Start a new plugin or theme folder.</dd></div>
+          <div><dt>Move file <code>move-file</code></dt><dd>Rename or move a file that still matches its hash.</dd></div>
+          <div><dt>Delete file <code>delete-file</code></dt><dd>Remove a file or an empty folder, with the same checks.</dd></div>
+        </dl>
+      </div>
+      <div class="sa-group">
+        <div class="sa-group-head"><span class="sa-tile" aria-hidden="true">{{icon:terminal}}</span><h3>Run Code</h3><span class="sa-switch">PHP and WP-CLI</span></div>
+        <dl class="sa-tools">
+          <div><dt>Execute PHP <code>execute-php</code></dt><dd>Run PHP with WordPress loaded and get the output and return value.</dd></div>
+          <div><dt>Run WP-CLI <code>run-wp-cli</code></dt><dd>Foreground commands as the signed-in user, without a shell.</dd></div>
+        </dl>
+      </div>
+      <div class="sa-group">
+        <div class="sa-group-head"><span class="sa-tile" aria-hidden="true">{{icon:code}}</span><h3>Bricks Builder</h3><span class="sa-switch">Bricks tools</span></div>
+        <dl class="sa-tools">
+          <div><dt>Bricks fast path <code>bricks-*</code></dt><dd>Bricks' own tools for page edits, imports and design context, under their own names.</dd></div>
+          <div><dt>List Bricks abilities <code>bricks-abilities</code></dt><dd>Every other ability Bricks offers on this site, with its schema on request.</dd></div>
+          <div><dt>Run Bricks ability <code>run-bricks-ability</code></dt><dd>Run any of them, with Bricks' own permission and input checks.</dd></div>
+        </dl>
+      </div>
     </div>
   </div>
 </section>
 
-<section class="sa-boundaries" aria-labelledby="sa-boundaries-title">
-  <div class="sa-wrap sa-boundary-grid">
-    <div><h2 id="sa-boundaries-title">Choose Your Agent's Access</h2><p class="sa-section-lead">Every tool call checks the WordPress user's permissions and the access groups you've enabled.</p><p>You can stop the connection by disabling Site Agent or revoking its dedicated Application Password. These controls remain in your WordPress admin.</p><a class="sa-text-link" href="{{GITHUB}}#security-and-access" target="_blank" rel="noopener nofollow">Read the Access Model <span aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sa-icon" aria-hidden="true" focusable="false" > <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M17 7l-10 10" /> <path d="M8 7l9 0l0 9" /> </svg></span></a></div>
-    <div class="sa-permission-matrix"><div class="sa-matrix-head"><span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sa-icon" aria-hidden="true" focusable="false" > <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" /> <path d="M11 11a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /> <path d="M12 12l0 2.5" /> </svg> Entry point</span><span>Default</span></div><div><span>Content writes</span><span>Off</span></div><div><span>Source inspection</span><span>Off</span></div><div><span>Source editing</span><span>Off</span></div><div><span>PHP execution</span><span>Off</span></div><div><span>WP-CLI execution</span><span>Off</span></div><div class="sa-matrix-note">Connections are also off until enabled.</div></div>
+<section class="sa-builders" id="sa-builders" aria-labelledby="sa-builders-title">
+  <div class="sa-wrap">
+    <div class="sa-head sa-head--split"><h2 id="sa-builders-title">Works With Your Page Builder</h2><p>An agent that writes block markup into an Elementor or Bricks page changes nothing visitors see, because the real layout lives somewhere else. Site Agent tells the agent where each layout lives and how that builder expects it to be changed.</p></div>
+    <div class="sa-matrix sa-builders-matrix">
+      <table>
+        <caption class="screen-reader-text">Page builders, where each one stores its layouts and how the agent changes them</caption>
+        <thead><tr><th scope="col">Builder</th><th scope="col">Layout lives in</th><th scope="col">How the agent changes it</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Gutenberg</th><td>Block markup in the post</td><td>Content writes, then a byte-exact read-back</td></tr>
+          <tr><th scope="row">GenerateBlocks</th><td>Block markup with its own CSS</td><td>Content writes, after a serializer check</td></tr>
+          <tr><th scope="row">Elementor</th><td>JSON in post meta</td><td>Elementor's own save, sent as small patches</td></tr>
+          <tr><th scope="row">Bricks</th><td>Element arrays in post meta</td><td>Bricks' own abilities on Bricks 2.4 and later</td></tr>
+          <tr><th scope="row">Divi</th><td>Shortcodes or Divi 5 blocks in the post</td><td>Content writes, or exact fragment edits</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="sa-cards">
+      <article class="sa-card"><span class="sa-tile" aria-hidden="true">{{icon:file-code}}</span><h3>A Skill for Each Builder</h3><p>Five builder skills ship with the plugin. The agent reads the matching one before it writes, so it follows that builder's storage and escaping rules instead of guessing.</p></article>
+      <article class="sa-card"><span class="sa-tile" aria-hidden="true">{{icon:lock}}</span><h3>Layout Data Stays Intact</h3><p>Content writes refuse raw Elementor, Bricks and Divi layout data. Writing it directly skips the builder's validation and leaves stale CSS behind, so the skills use each builder's own save.</p></article>
+      <article class="sa-card"><span class="sa-tile" aria-hidden="true">{{icon:code}}</span><h3>Bricks on the Same Connection</h3><p>On Bricks 2.4 and later, switch on Bricks tools and your agent gets Bricks' own abilities next to Site Agent's: page summaries, revisions and CSS regeneration, with Bricks' permissions still in charge.</p></article>
+    </div>
   </div>
-  <div class="sa-wrap sa-privilege-note"><h3>Developer Tools Need a Trusted Client</h3><div><p>I recommend a development or staging site with a current backup. These tools have server privileges and aren't a sandbox:</p><ul><li>PHP can change the database and files.</li><li>Source edits can change executable code.</li><li>WP-CLI can change the WordPress installation.</li></ul></div></div>
 </section>
 
-<section class="sa-setup" id="sa-setup" aria-labelledby="sa-setup-title">
-  <div class="sa-wrap sa-section-grid"><div><h2 id="sa-setup-title">Connect Your WordPress Site</h2><p class="sa-section-lead">Your MCP client needs Streamable HTTP and a custom Authorization header. Site Agent uses WordPress Application Passwords for authentication.</p></div><ul class="sa-requirements"><li>WordPress 6.9 or newer</li><li>PHP 8.0 or newer</li><li>HTTPS for remote connections</li><li>Administrator access; super administrator on multisite</li></ul></div>
-  <div class="sa-wrap sa-steps"><div><span>1</span><h3>Install the Plugin</h3><p>Upload the complete ZIP in WordPress. Open Tools → Site Agent.</p></div><div><span>2</span><h3>Select the Tools</h3><p>Enable access and the groups your task needs. Save the settings.</p></div><div><span>3</span><h3>Create a Password</h3><p>Create a dedicated Application Password in your WordPress profile.</p></div><div><span>4</span><h3>Connect the Client</h3><p>Use the endpoint and authentication template shown in Site Agent.</p></div></div>
-  <div class="sa-wrap sa-endpoint"><span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sa-icon" aria-hidden="true" focusable="false" > <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M7 12l5 5l-1.5 1.5a3.536 3.536 0 1 1 -5 -5l1.5 -1.5" /> <path d="M17 12l-5 -5l1.5 -1.5a3.536 3.536 0 1 1 5 5l-1.5 1.5" /> <path d="M3 21l2.5 -2.5" /> <path d="M18.5 5.5l2.5 -2.5" /> <path d="M10 11l-2 2" /> <path d="M13 14l-2 2" /> </svg> Endpoint</span><code>https://your-site.com/wp-json/site-agent/v1/mcp</code><span>Use the exact URL shown on your site.</span></div>
+<section class="sa-safety sa-alt" aria-labelledby="sa-safety-title">
+  <div class="sa-wrap">
+    <div class="sa-head sa-head--center"><h2 id="sa-safety-title">Safety Checks on Every Change</h2><p>An agent with write access will get something wrong sooner or later. I built Site Agent so the common mistakes are caught, or easy to undo, before your visitors see them.</p></div>
+    <div class="sa-cards">
+      <article class="sa-card"><span class="sa-tile" aria-hidden="true">{{icon:shield-check}}</span><h3>Live Posts Stay Live</h3><p>When the agent edits a published post, the change is saved as an autosave you review in the editor, and the agent can read it back to check it. The live post changes only when the agent passes a status.</p></article>
+      <article class="sa-card"><span class="sa-tile" aria-hidden="true">{{icon:arrow-back-up}}</span><h3>Broken PHP Gets Reverted</h3><p>PHP is checked for syntax and compile errors first. After saving, Site Agent loads your site and puts the old file back if the change causes a fatal error.</p></article>
+      <article class="sa-card"><span class="sa-tile" aria-hidden="true">{{icon:lock}}</span><h3>No Silent Overwrites</h3><p>Every update needs the hash from the agent's last read. If you or another tool changed the post or file since then, the write is refused.</p></article>
+      <article class="sa-card"><span class="sa-tile" aria-hidden="true">{{icon:alert-circle}}</span><h3>Errors the Agent Can Fix</h3><p>Failed PHP and tool calls return the real message and line number, so the agent can correct its own code instead of guessing.</p></article>
+      <article class="sa-card"><span class="sa-tile" aria-hidden="true">{{icon:key}}</span><h3>Limits per Password</h3><p>Each Application Password can be limited to the tools it needs, such as content writes for a chat app and developer tools for your local coding agent.</p></article>
+      <article class="sa-card"><span class="sa-tile" aria-hidden="true">{{icon:history}}</span><h3>A Record of Every Call</h3><p>The audit history keeps the last 100 calls with the tool, target, password name and result. It never stores content, code or credentials.</p></article>
+    </div>
+    <figure class="sa-shot"><a class="sa-shot-open" href="https://r2.gauravtiwari.org/wp-content/uploads/2026/10/site-agent-application-password-limits.png"><img src="https://r2.gauravtiwari.org/wp-content/uploads/2026/10/site-agent-application-password-limits.png" alt="Site Agent Application Password access table where each password can be limited to content writes, source inspection, source editing, PHP execution or WP-CLI execution, with password names redacted" width="2360" height="900" loading="lazy" decoding="async"></a><figcaption>Tap the screenshot to open it at full size.</figcaption></figure>
+  </div>
+</section>
+
+<section class="sa-access" aria-labelledby="sa-access-title">
+  <div class="sa-wrap">
+    <div class="sa-access-grid">
+      <div class="sa-access-copy">
+        <h2 id="sa-access-title">Choose Your Agent's Access</h2>
+        <p>Access starts switched off. You turn on Site Agent, pick the tool groups the task needs and save.</p>
+        <p>Every tool call then checks:</p>
+        <ul class="sa-bullets">
+          <li>an administrator account (a super administrator on multisite)</li>
+          <li>the switch for that tool group</li>
+          <li>the limit on the Application Password, if you set one</li>
+        </ul>
+        <p>Revoking the Application Password ends that connection everywhere, including sessions that are already open.</p>
+        <a class="sa-text-link" href="{{GITHUB}}#security-and-access" target="_blank" rel="noopener nofollow">Read the Access Model <span aria-hidden="true">{{icon:arrow-up-right}}</span></a>
+      </div>
+      <div class="sa-matrix">
+        <table>
+          <caption class="screen-reader-text">Tool groups, their default state and the number of tools in each</caption>
+          <thead><tr><th scope="col">Tool group</th><th scope="col">Default</th><th scope="col">Tools</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Read the site</th><td><span class="sa-state sa-state--on">On</span></td><td>7</td></tr>
+            <tr><th scope="row">Content writes</th><td><span class="sa-state">Off</span></td><td>3</td></tr>
+            <tr><th scope="row">Source inspection</th><td><span class="sa-state">Off</span></td><td>2</td></tr>
+            <tr><th scope="row">Source editing</th><td><span class="sa-state">Off</span></td><td>4</td></tr>
+            <tr><th scope="row">PHP execution</th><td><span class="sa-state">Off</span></td><td>1</td></tr>
+            <tr><th scope="row">WP-CLI execution</th><td><span class="sa-state">Off</span></td><td>1</td></tr>
+            <tr><th scope="row">Bricks tools</th><td><span class="sa-state">Off</span></td><td>2+</td></tr>
+          </tbody>
+        </table>
+        <div class="sa-constants">
+          <p><code>SITE_AGENT_DISABLED</code> in wp-config.php blocks every tool.</p>
+          <p><code>SITE_AGENT_ALLOW_EXECUTION</code> set to false blocks the tools that change code. Content tools and source inspection keep working.</p>
+          <p><code>DISALLOW_FILE_EDIT</code> blocks every source and developer tool.</p>
+          <p>Bricks tools need Bricks 2.4 or later with its AI/MCP abilities switched on, and add Bricks' own fast-path tools to the 2 listed.</p>
+        </div>
+      </div>
+    </div>
+    <figure class="sa-shot"><a class="sa-shot-open" href="https://r2.gauravtiwari.org/wp-content/uploads/2026/10/site-agent-tool-group-switches.png"><img src="https://r2.gauravtiwari.org/wp-content/uploads/2026/10/site-agent-tool-group-switches.png" alt="Site Agent settings screen in WordPress with a separate switch for Site Agent, URL authentication, content writes, source inspection, source editing, PHP execution, WP-CLI execution and audit history" width="2360" height="1702" loading="lazy" decoding="async"></a><figcaption>Tap the screenshot to open it at full size.</figcaption></figure>
+    <div class="sa-note">
+      <h3>Developer Tools Need a Trusted Client</h3>
+      <div><p>I recommend a staging site with a current backup for the developer tools. They run with server privileges and aren't a sandbox:</p><ul class="sa-bullets"><li>PHP can change the database and files.</li><li>Source edits change executable code.</li><li>WP-CLI can change the WordPress installation.</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section class="sa-connect sa-alt" id="sa-connect" aria-labelledby="sa-connect-title">
+  <div class="sa-wrap">
+    <div class="sa-head sa-head--split"><h2 id="sa-connect-title">Connect Your AI Client</h2><p>Setup is 4 steps on your site and a few lines of configuration in your client. The Site Agent screen builds the token and tests the connection for you.</p></div>
+    <ol class="sa-steps">
+      <li><h3>Install the Plugin</h3><p>Upload the ZIP from your account in Plugins &gt; Add New, then open Tools &gt; Site Agent.</p></li>
+      <li><h3>Choose the Tools</h3><p>Enable Site Agent and the tool groups your task needs, then save.</p></li>
+      <li><h3>Create a Password</h3><p>Create a dedicated Application Password in your WordPress profile for each client.</p></li>
+      <li><h3>Test the Connection</h3><p>Paste it into the token builder and click Test connection. It names the problem if something blocks the request.</p></li>
+    </ol>
+    <figure class="sa-shot"><a class="sa-shot-open" href="https://r2.gauravtiwari.org/wp-content/uploads/2026/10/site-agent-connection-diagnostics.png"><img src="https://r2.gauravtiwari.org/wp-content/uploads/2026/10/site-agent-connection-diagnostics.png" alt="Site Agent diagnostics panel listing checks for the MCP runtime, the endpoint, HTTPS, Application Passwords and the PHP compile check" width="2360" height="650" loading="lazy" decoding="async"></a><figcaption>Tap the screenshot to open it at full size.</figcaption></figure>
+    <div class="sa-methods">
+      <div class="sa-method"><span class="sa-tile" aria-hidden="true">{{icon:code}}</span><h3>Authorization Header</h3><p>This is the safer option. Coding tools that let you add headers send <code>Authorization: Basic BASE64_TOKEN</code> with every request, and the token never appears in a URL.</p></div>
+      <div class="sa-method"><span class="sa-tile" aria-hidden="true">{{icon:world}}</span><h3>Authenticated URL</h3><p>Apps that only accept a URL get the endpoint with <code>?auth=BASE64_TOKEN</code> added. URLs can end up in logs and browser history, and MCP's authorization guidance discourages tokens in them, so give this route a dedicated password you can revoke.</p></div>
+    </div>
+    <div class="sa-guide">
+      <div class="sa-guide-intro"><h3>Setup by Client</h3><p>Replace your-site.com with your domain and BASE64_TOKEN with the token from the Site Agent screen. The URL route works with Site Agent itself, but I haven't verified it inside every web app yet.</p></div>
+      <div class="sa-client-tabs" role="tablist" aria-label="AI clients"><button id="sa-client-tab-chatgpt" role="tab" aria-selected="true" aria-controls="sa-client-chatgpt" data-sa-client="chatgpt" tabindex="0">ChatGPT<small>URL</small></button><button id="sa-client-tab-claude" role="tab" aria-selected="false" aria-controls="sa-client-claude" data-sa-client="claude" tabindex="-1">Claude<small>URL</small></button><button id="sa-client-tab-gemini" role="tab" aria-selected="false" aria-controls="sa-client-gemini" data-sa-client="gemini" tabindex="-1">Gemini<small>Header</small></button><button id="sa-client-tab-claude-code" role="tab" aria-selected="false" aria-controls="sa-client-claude-code" data-sa-client="claude-code" tabindex="-1">Claude Code<small>Header</small></button><button id="sa-client-tab-cursor" role="tab" aria-selected="false" aria-controls="sa-client-cursor" data-sa-client="cursor" tabindex="-1">Cursor<small>Header</small></button><button id="sa-client-tab-vscode" role="tab" aria-selected="false" aria-controls="sa-client-vscode" data-sa-client="vscode" tabindex="-1">VS Code<small>Header</small></button><button id="sa-client-tab-codex" role="tab" aria-selected="false" aria-controls="sa-client-codex" data-sa-client="codex" tabindex="-1">Codex<small>Header</small></button><button id="sa-client-tab-zed" role="tab" aria-selected="false" aria-controls="sa-client-zed" data-sa-client="zed" tabindex="-1">Zed<small>Header</small></button></div>
+      <div class="sa-client-panels"><div class="sa-client" id="sa-client-chatgpt" role="tabpanel" aria-labelledby="sa-client-tab-chatgpt" tabindex="0"><div class="sa-client-steps"><h3>ChatGPT</h3><p>ChatGPT connects to MCP servers in developer mode on paid plans. It can't send a custom header, so it uses the authenticated URL.</p><ol><li>Turn on URL authentication in Tools &gt; Site Agent and copy the authenticated endpoint.</li><li>In ChatGPT, open Settings and turn on Developer mode. OpenAI's guide lists the switch under Security and login.</li><li>Add a new app with the plus button, name it Site Agent, paste the authenticated endpoint as the MCP server URL and choose No Authentication.</li><li>In a chat, pick Developer mode from the + menu and select Site Agent.</li></ol><p class="sa-small">OpenAI offers developer mode to Plus, Pro, Business, Enterprise and Education accounts on the web. ChatGPT connects from OpenAI's servers, so your site must be public over HTTPS. I haven't verified that ChatGPT keeps the auth part of the URL on every request yet, so use a Header client if the connection fails.</p></div><div class="sa-client-code"><span class="sa-code-label">MCP server URL</span><pre><code id="sa-code-chatgpt">https://your-site.com/wp-json/site-agent/v1/mcp?auth=BASE64_TOKEN</code></pre><div class="sa-copy-row"><button type="button" class="sa-copy" data-sa-copy-target="sa-code-chatgpt">{{icon:copy}}Copy</button><span class="sa-copy-status" role="status"></span></div></div></div><div class="sa-client" id="sa-client-claude" role="tabpanel" aria-labelledby="sa-client-tab-claude" tabindex="0" hidden><div class="sa-client-steps"><h3>Claude</h3><p>Claude.ai, Claude Desktop and the Claude mobile apps share custom connectors. Most plans can't send a custom header, so they use the authenticated URL.</p><ol><li>Turn on URL authentication in Tools &gt; Site Agent and copy the authenticated endpoint.</li><li>In Claude, open Customize &gt; Connectors and choose Add custom connector. On Team and Enterprise plans, an owner adds it from Organization settings &gt; Connectors.</li><li>Paste the authenticated endpoint as the URL, choose No sign-in when Claude asks about authentication, then add it.</li><li>Turn Site Agent on for a chat from the tools menu.</li></ol><p class="sa-small">Claude connects from Anthropic's servers, so the site must be public over HTTPS and your firewall must let Anthropic's addresses through. The Free plan allows one custom connector. Organizations in Anthropic's request-header beta can send the Authorization header instead.</p></div><div class="sa-client-code"><span class="sa-code-label">Remote MCP server URL</span><pre><code id="sa-code-claude">https://your-site.com/wp-json/site-agent/v1/mcp?auth=BASE64_TOKEN</code></pre><div class="sa-copy-row"><button type="button" class="sa-copy" data-sa-copy-target="sa-code-claude">{{icon:copy}}Copy</button><span class="sa-copy-status" role="status"></span></div></div></div><div class="sa-client" id="sa-client-gemini" role="tabpanel" aria-labelledby="sa-client-tab-gemini" tabindex="0" hidden><div class="sa-client-steps"><h3>Gemini CLI</h3><p>Gemini CLI connects with a header. Gemini Code Assist's agent mode in VS Code reads the same settings file.</p><ol><li>Copy the Base64 token from Tools &gt; Site Agent.</li><li>Add the server to <code>~/.gemini/settings.json</code>, or to <code>.gemini/settings.json</code> in one project.</li><li>Restart Gemini CLI and run /mcp to check the tools.</li></ol><p class="sa-small">The Gemini app on the web can add custom MCP apps for personal accounts in the US, but it links accounts through sign-in, and I haven't verified it with the authenticated URL.</p></div><div class="sa-client-code"><span class="sa-code-label">~/.gemini/settings.json</span><pre><code id="sa-code-gemini">{
+  "mcpServers": {
+    "site-agent": {
+      "httpUrl": "https://your-site.com/wp-json/site-agent/v1/mcp",
+      "headers": {
+        "Authorization": "Basic BASE64_TOKEN"
+      }
+    }
+  }
+}</code></pre><div class="sa-copy-row"><button type="button" class="sa-copy" data-sa-copy-target="sa-code-gemini">{{icon:copy}}Copy</button><span class="sa-copy-status" role="status"></span></div></div></div><div class="sa-client" id="sa-client-claude-code" role="tabpanel" aria-labelledby="sa-client-tab-claude-code" tabindex="0" hidden><div class="sa-client-steps"><h3>Claude Code</h3><p>Claude Code adds a remote server with one command and sends the Authorization header on every request.</p><ol><li>Copy the Base64 token from Tools &gt; Site Agent.</li><li>Run the command below in your project folder.</li><li>Run /mcp inside Claude Code to confirm Site Agent is connected.</li></ol><p class="sa-small">Add <code>--scope user</code> to use the server in every project.</p></div><div class="sa-client-code"><span class="sa-code-label">Terminal</span><pre><code id="sa-code-claude-code">claude mcp add --transport http site-agent https://your-site.com/wp-json/site-agent/v1/mcp \
+  --header "Authorization: Basic BASE64_TOKEN"</code></pre><div class="sa-copy-row"><button type="button" class="sa-copy" data-sa-copy-target="sa-code-claude-code">{{icon:copy}}Copy</button><span class="sa-copy-status" role="status"></span></div></div></div><div class="sa-client" id="sa-client-cursor" role="tabpanel" aria-labelledby="sa-client-tab-cursor" tabindex="0" hidden><div class="sa-client-steps"><h3>Cursor</h3><p>Cursor reads MCP servers from mcp.json and sends the headers you set.</p><ol><li>Copy the Base64 token from Tools &gt; Site Agent.</li><li>Add the server to <code>~/.cursor/mcp.json</code>, or to <code>.cursor/mcp.json</code> in one project.</li><li>Check that Site Agent appears in Cursor's MCP settings with its tools.</li></ol><p class="sa-small">Cursor can read the value from an environment variable with <code>${env:SITE_AGENT_AUTH}</code>, which keeps the token out of the file.</p></div><div class="sa-client-code"><span class="sa-code-label">~/.cursor/mcp.json</span><pre><code id="sa-code-cursor">{
+  "mcpServers": {
+    "site-agent": {
+      "url": "https://your-site.com/wp-json/site-agent/v1/mcp",
+      "headers": {
+        "Authorization": "Basic BASE64_TOKEN"
+      }
+    }
+  }
+}</code></pre><div class="sa-copy-row"><button type="button" class="sa-copy" data-sa-copy-target="sa-code-cursor">{{icon:copy}}Copy</button><span class="sa-copy-status" role="status"></span></div></div></div><div class="sa-client" id="sa-client-vscode" role="tabpanel" aria-labelledby="sa-client-tab-vscode" tabindex="0" hidden><div class="sa-client-steps"><h3>VS Code</h3><p>VS Code uses MCP servers in GitHub Copilot agent mode. An input variable keeps the token out of the file.</p><ol><li>Copy the Base64 token from Tools &gt; Site Agent.</li><li>Add the configuration to <code>.vscode/mcp.json</code> in your workspace.</li><li>Start the server from the file, paste the token when VS Code asks and pick the tools in agent mode.</li></ol><p class="sa-small">On Copilot Business and Enterprise, an admin has to allow MCP servers in Copilot first.</p></div><div class="sa-client-code"><span class="sa-code-label">.vscode/mcp.json</span><pre><code id="sa-code-vscode">{
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "site-agent-token",
+      "description": "Site Agent Base64 token",
+      "password": true
+    }
+  ],
+  "servers": {
+    "site-agent": {
+      "type": "http",
+      "url": "https://your-site.com/wp-json/site-agent/v1/mcp",
+      "headers": {
+        "Authorization": "Basic ${input:site-agent-token}"
+      }
+    }
+  }
+}</code></pre><div class="sa-copy-row"><button type="button" class="sa-copy" data-sa-copy-target="sa-code-vscode">{{icon:copy}}Copy</button><span class="sa-copy-status" role="status"></span></div></div></div><div class="sa-client" id="sa-client-codex" role="tabpanel" aria-labelledby="sa-client-tab-codex" tabindex="0" hidden><div class="sa-client-steps"><h3>Codex</h3><p>The Codex CLI, the Codex IDE extension and the ChatGPT desktop app share one config file, and it can send a header to an HTTP server.</p><ol><li>Copy the Base64 token from Tools &gt; Site Agent.</li><li>Add the server to <code>~/.codex/config.toml</code>. The <code>codex mcp add</code> command can't set this header, so edit the file.</li><li>Restart Codex and run /mcp to check the tools.</li></ol><p class="sa-small">Use <code>env_http_headers</code> instead to read the value from an environment variable.</p></div><div class="sa-client-code"><span class="sa-code-label">~/.codex/config.toml</span><pre><code id="sa-code-codex">[mcp_servers.site-agent]
+url = "https://your-site.com/wp-json/site-agent/v1/mcp"
+http_headers = { "Authorization" = "Basic BASE64_TOKEN" }</code></pre><div class="sa-copy-row"><button type="button" class="sa-copy" data-sa-copy-target="sa-code-codex">{{icon:copy}}Copy</button><span class="sa-copy-status" role="status"></span></div></div></div><div class="sa-client" id="sa-client-zed" role="tabpanel" aria-labelledby="sa-client-tab-zed" tabindex="0" hidden><div class="sa-client-steps"><h3>Zed</h3><p>Zed adds remote MCP servers as context servers in its settings file and sends the headers you set.</p><ol><li>Copy the Base64 token from Tools &gt; Site Agent.</li><li>Open Zed's <code>settings.json</code> and add the server under <code>context_servers</code>.</li><li>Open the agent panel and check that Site Agent's tools are listed.</li></ol><p class="sa-small">Without an Authorization header, Zed tries OAuth, which Site Agent doesn't offer.</p></div><div class="sa-client-code"><span class="sa-code-label">settings.json</span><pre><code id="sa-code-zed">{
+  "context_servers": {
+    "site-agent": {
+      "url": "https://your-site.com/wp-json/site-agent/v1/mcp",
+      "headers": {
+        "Authorization": "Basic BASE64_TOKEN"
+      }
+    }
+  }
+}</code></pre><div class="sa-copy-row"><button type="button" class="sa-copy" data-sa-copy-target="sa-code-zed">{{icon:copy}}Copy</button><span class="sa-copy-status" role="status"></span></div></div></div></div>
+    </div>
+    <div class="sa-requirements">
+      <div><strong>WordPress 6.9+</strong><span>With the Abilities API</span></div>
+      <div><strong>PHP 8.0+</strong><span>On the web server</span></div>
+      <div><strong>HTTPS</strong><span>Required for remote clients</span></div>
+      <div><strong>Administrator</strong><span>Super administrator on multisite</span></div>
+    </div>
+  </div>
 </section>
 
 <section class="sa-offer sa-alt" id="sa-download" aria-labelledby="sa-download-title">
-  <div class="sa-wrap sa-offer-grid"><div><h2 id="sa-download-title">Site Agent Is Free</h2><p class="sa-section-lead">The free checkout includes the complete plugin and a license for automatic updates.</p><p>The code is public and GPL-licensed. All tools work without license activation. The license connects your installation to the update service.</p></div><div class="sa-offer-action"><div class="sa-price"><strong>$0</strong><span>Free plugin + update license</span></div><a class="sa-button sa-button-primary" href="{{CHECKOUT}}" data-sa-cta="offer">Get Site Agent <span aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sa-icon" aria-hidden="true" focusable="false" > <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M17 7l-10 10" /> <path d="M8 7l9 0l0 9" /> </svg></span></a><p class="sa-small">Complete the free checkout to get the download and license key in your account.</p><a class="sa-text-link" href="{{GITHUB}}" target="_blank" rel="noopener nofollow">Browse the Source on GitHub <span aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sa-icon" aria-hidden="true" focusable="false" > <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M17 7l-10 10" /> <path d="M8 7l9 0l0 9" /> </svg></span></a></div></div>
+  <div class="sa-wrap sa-offer-grid">
+    <div class="sa-offer-copy"><h2 id="sa-download-title">Site Agent Is Free</h2><p>The free checkout gives you the complete plugin and a license for automatic updates.</p><p>The code is public and GPL-licensed, and every tool works without activating the license. The license only connects your site to the update service, so new versions arrive in your Plugins screen.</p><a class="sa-text-link" href="{{GITHUB}}" target="_blank" rel="noopener nofollow">Browse the Source on GitHub <span aria-hidden="true">{{icon:arrow-up-right}}</span></a></div>
+    <div class="sa-offer-action">
+      <div class="sa-price"><strong>$0</strong><span>Plugin and update license</span></div>
+      <ul class="sa-bullets sa-includes"><li>All 18 tools and the safety checks</li><li>Skills for Gutenberg, GenerateBlocks, Elementor, Bricks and Divi</li><li>Bricks' own abilities on Bricks 2.4 and later</li><li>Automatic updates with the free license</li><li>WordPress 6.9 or newer and PHP 8.0 or newer</li></ul>
+      <a class="sa-button sa-button-primary" href="{{CHECKOUT}}" data-sa-cta="offer">Get Site Agent <span aria-hidden="true">{{icon:arrow-up-right}}</span></a>
+      <p class="sa-small">The download and license key appear in your account after the free checkout.</p>
+    </div>
+  </div>
 </section>
 
 <section class="sa-faq" aria-labelledby="sa-faq-title">
-  <div class="sa-wrap sa-section-grid"><div><h2 id="sa-faq-title">Before You Connect</h2><p class="sa-section-lead">Check the client, privacy and developer-access boundaries before enabling tools.</p></div><div class="sa-questions">
-    <details><summary>Which AI clients can connect?<span aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sa-icon" aria-hidden="true" focusable="false" > <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M12 5l0 14" /> <path d="M5 12l14 0" /> </svg></span></summary><p>Use a client with Streamable HTTP and custom Authorization headers, or a compatible Application Password bridge. Site Agent doesn't include OAuth. Clients that require an OAuth-only connection need a bridge.</p></details>
-    <details><summary>Where does my site's data go?<span aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sa-icon" aria-hidden="true" focusable="false" > <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M12 5l0 14" /> <path d="M5 12l14 0" /> </svg></span></summary><p>Your MCP client connects directly to WordPress. Site Agent has no hosted MCP proxy or telemetry. The client or AI provider handles tool results under its own privacy policy.</p><p>Automatic updates contact gauravtiwari.org with your license credentials, site URL and version information. PHP and WP-CLI can also make outbound requests when instructed.</p></details>
-    <details><summary>Can I use developer tools on production?<span aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sa-icon" aria-hidden="true" focusable="false" > <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M12 5l0 14" /> <path d="M5 12l14 0" /> </svg></span></summary><p>Use a backed-up development or staging site for PHP execution, file editing and WP-CLI. These tools run with server privileges and can break a site. Syntax checks and access switches don't contain arbitrary code or replace backups.</p></details>
-    <details><summary>What can the file tools reach?<span aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sa-icon" aria-hidden="true" focusable="false" > <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M12 5l0 14" /> <path d="M5 12l14 0" /> </svg></span></summary><p>File tools are limited to theme and plugin directories. Hidden, configuration, credential and symlink paths are blocked. Source files can still contain sensitive data. Writes require the current file hash, or an explicit new-file value, and PHP syntax is checked before a write.</p></details>
-    <details><summary>How do automatic updates work?<span aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sa-icon" aria-hidden="true" focusable="false" > <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M12 5l0 14" /> <path d="M5 12l14 0" /> </svg></span></summary><p>Complete the free checkout, then activate the license in Site Agent. FluentCart supplies update metadata and the protected download. The license affects automatic updates only. You can also install a complete release ZIP manually.</p></details>
-    <details><summary>What isn't included?<span aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sa-icon" aria-hidden="true" focusable="false" > <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M12 5l0 14" /> <path d="M5 12l14 0" /> </svg></span></summary><p>This version doesn't include OAuth, an AI chat interface, background WP-CLI jobs or a recoverable PHP sandbox. The bundled official MCP Adapter is a pinned 0.7.0 prerelease. PHP runs in the WordPress request and isn't isolated from the site.</p></details>
-  </div></div>
+  <div class="sa-wrap sa-faq-grid">
+    <div class="sa-faq-intro"><h2 id="sa-faq-title">Before You Connect</h2><p>These are the questions worth settling before you give an agent access to a site.</p></div>
+    <div class="sa-questions">
+      <details><summary>Which AI clients can connect?<span aria-hidden="true">{{icon:plus}}</span></summary><p>Any client that supports remote MCP servers over Streamable HTTP can connect, in one of two ways:</p><ul class="sa-bullets"><li>Coding tools that let you add headers send an Authorization header.</li><li>Apps that only take a URL use the authenticated URL.</li></ul><p>Site Agent doesn't provide OAuth. A client that only accepts OAuth needs a compatible bridge.</p></details>
+      <details><summary>Is it safe to give an AI agent write access?<span aria-hidden="true">{{icon:plus}}</span></summary><p>It is safe enough for content work on most sites, because edits to live posts are staged and every update is checked against the last read. The developer tools are a different matter. They run with server privileges, so I'd keep them on a staging site with a backup and give production passwords content access only.</p></details>
+      <details><summary>What happens when the agent edits a published post?<span aria-hidden="true">{{icon:plus}}</span></summary><p>The change is saved as your autosave. WordPress shows it in the editor next to the live version, and you decide whether to restore and publish it. The agent can update the live post directly only by passing a status, and it should do that only when you've asked for it.</p></details>
+      <details><summary>Does it work with Elementor, Bricks or Divi?<span aria-hidden="true">{{icon:plus}}</span></summary><p>Yes. Site Agent tells the agent which builder stores each page's layout, and the matching skill explains how to change it. Content writes refuse raw Elementor, Bricks and Divi layout data, because writing it directly skips the builder's validation and cache refresh.</p><ul class="sa-bullets"><li>On Bricks 2.4 and later, switch on Bricks tools and the agent works through Bricks' own abilities.</li><li>Elementor changes need the PHP tool, because Elementor's own save runs in PHP.</li><li>Divi pages are edited like other post content.</li></ul></details>
+      <details><summary>Where does my site's data go?<span aria-hidden="true">{{icon:plus}}</span></summary><p>Your AI client connects directly to WordPress. Site Agent has no hosted proxy and no telemetry. The client and its AI provider handle tool results under their own privacy policy.</p><p>Automatic updates send gauravtiwari.org:</p><ul class="sa-bullets"><li>your license key and activation</li><li>your site URL</li><li>the plugin, WordPress and PHP versions</li></ul><p>PHP and WP-CLI can also make outbound requests when the agent asks them to.</p></details>
+      <details><summary>What can the file tools reach?<span aria-hidden="true">{{icon:plus}}</span></summary><p>The file tools work only inside these folders in wp-content:</p><ul class="sa-bullets"><li><code>plugins</code></li><li><code>themes</code></li><li><code>mu-plugins</code></li></ul><p>Hidden files and symlinks are blocked, and so are credential files such as wp-config.php and auth.json. Site Agent can't edit its own files. Source code can still contain secrets, which is why source inspection has its own switch.</p></details>
+      <details><summary>How do updates work?<span aria-hidden="true">{{icon:plus}}</span></summary><p>Complete the free checkout, then activate the license on the Site Agent screen. New versions then appear in your Plugins screen like any other update. The license controls updates only, and you can always install a release ZIP by hand.</p></details>
+    </div>
+  </div>
 </section>
 
-<section class="sa-close" aria-labelledby="sa-close-title"><div class="sa-wrap"><h2 id="sa-close-title">Start With a Development Site</h2><p>Connect your agent, check what it can read and enable more tools when your task needs them.</p><div class="sa-actions"><a class="sa-button sa-button-primary" href="{{CHECKOUT}}" data-sa-cta="close">Get Site Agent <span aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sa-icon" aria-hidden="true" focusable="false" > <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M17 7l-10 10" /> <path d="M8 7l9 0l0 9" /> </svg></span></a><a class="sa-button sa-button-ghost" href="{{GITHUB}}" target="_blank" rel="noopener nofollow">View the Source <span aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sa-icon" aria-hidden="true" focusable="false" > <path stroke="none" d="M0 0h24v24H0z" fill="none" /> <path d="M17 7l-10 10" /> <path d="M8 7l9 0l0 9" /> </svg></span></a></div><p class="sa-meta">Site Agent is free and open source. Access starts disabled.</p></div></section>
+<section class="sa-close" aria-labelledby="sa-close-title"><div class="sa-wrap"><h2 id="sa-close-title">Start With a Staging Site</h2><p>Connect your agent, check what it can read, then switch on more tools when the task needs them.</p><div class="sa-actions"><a class="sa-button sa-button-primary" href="{{CHECKOUT}}" data-sa-cta="close">Get Site Agent <span aria-hidden="true">{{icon:arrow-up-right}}</span></a><a class="sa-button sa-button-ghost" href="{{GITHUB}}" target="_blank" rel="noopener nofollow">View the Source <span aria-hidden="true">{{icon:arrow-up-right}}</span></a></div></div></section>
