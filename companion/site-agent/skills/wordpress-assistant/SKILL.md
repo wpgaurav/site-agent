@@ -29,6 +29,10 @@ After saving, read the post again. Compare intended fields, status and raw block
 
 The content tool exposes title, content, excerpt and status, not arbitrary SEO metadata, taxonomies, featured images or custom fields. Do not claim those changed unless a separate authorized operation and readback prove it.
 
+## Page builders
+
+Before creating or changing a layout, check where it is stored. site-context lists active builders, and get-content returns builder for each post. When builder is elementor, bricks or divi, the visible layout is not the content field; editing it there changes nothing or is overwritten. Call list-skills, then get-skill for the matching builder, and follow its workflow. Do the same for gutenberg and generateblocks layout work, because block markup must stay byte-exact to avoid editor recovery errors. If those tools are missing, the site runs an older Site Agent; say so instead of guessing the builder's data format.
+
 ## Audits and writing
 
 Lead with concrete findings, prioritized by reader or site impact. Separate verified facts from assumptions. Verify current prices, versions, policies and technical claims with primary sources when available.

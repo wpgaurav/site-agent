@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-01T04:16:48+00:00\n"
+"POT-Creation-Date: 2026-10-06T13:25:52+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: site-agent\n"
@@ -60,318 +60,342 @@ msgstr ""
 msgid "Optional search text."
 msgstr ""
 
-#: includes/class-abilities.php:134
+#: includes/class-abilities.php:135
 msgid "Post ID."
 msgstr ""
 
-#: includes/class-abilities.php:135
+#: includes/class-abilities.php:136
 msgid "REST-enabled post type such as post or page. Default post."
 msgstr ""
 
-#: includes/class-abilities.php:136
+#: includes/class-abilities.php:137
 msgid "Path relative to wp-content, for example plugins/my-plugin/my-plugin.php or themes/my-theme/style.css."
 msgstr ""
 
-#: includes/class-abilities.php:137
+#: includes/class-abilities.php:138
 msgid "SHA-256 from read-file, proving you edit the current version."
 msgstr ""
 
-#: includes/class-abilities.php:138
+#: includes/class-abilities.php:139
 msgid "Attachment ID."
 msgstr ""
 
-#: includes/class-abilities.php:140
+#: includes/class-abilities.php:141
 msgid "Media title."
 msgstr ""
 
-#: includes/class-abilities.php:141
+#: includes/class-abilities.php:142
 msgid "Alternative text describing the image for screen readers."
 msgstr ""
 
-#: includes/class-abilities.php:142
+#: includes/class-abilities.php:143
 msgid "Caption shown with the media."
 msgstr ""
 
-#: includes/class-abilities.php:143
+#: includes/class-abilities.php:144
 msgid "Attachment page description."
 msgstr ""
 
-#: includes/class-abilities.php:148
+#: includes/class-abilities.php:149
 msgid "Site context"
 msgstr ""
 
-#: includes/class-abilities.php:149
-msgid "Inspect WordPress, PHP, active plugins, theme, post types, taxonomies and the tools this connection can use. Start here."
+#: includes/class-abilities.php:150
+msgid "Inspect WordPress, PHP, active plugins, theme, page builders, post types, taxonomies and the tools this connection can use. Start here."
 msgstr ""
 
-#: includes/class-abilities.php:170
+#: includes/class-abilities.php:172
 msgid "List content"
 msgstr ""
 
-#: includes/class-abilities.php:171
+#: includes/class-abilities.php:173
 msgid "Search and paginate posts in a REST-enabled post type, most recently modified first."
 msgstr ""
 
-#: includes/class-abilities.php:178
+#: includes/class-abilities.php:180
 msgid "Only this status. Default: every status except trash."
 msgstr ""
 
-#: includes/class-abilities.php:183
+#: includes/class-abilities.php:185
 msgid "Sort field. Default modified."
 msgstr ""
 
-#: includes/class-abilities.php:188
+#: includes/class-abilities.php:190
 msgid "Sort direction. Default desc (asc for title)."
 msgstr ""
 
-#: includes/class-abilities.php:204
+#: includes/class-abilities.php:206
 msgid "Read content"
 msgstr ""
 
-#: includes/class-abilities.php:205
+#: includes/class-abilities.php:207
 msgid "Read a post by ID, URL or slug: raw Gutenberg markup, terms, featured image, SEO meta, your newer autosave if any, and the content hash needed for updates."
 msgstr ""
 
-#: includes/class-abilities.php:210
+#: includes/class-abilities.php:212
 msgid "Permalink of the post, as an alternative to post_id."
 msgstr ""
 
-#: includes/class-abilities.php:211
+#: includes/class-abilities.php:213
 msgid "Post slug, as an alternative to post_id. Combine with post_type for pages or custom types."
 msgstr ""
 
-#: includes/class-abilities.php:219
+#: includes/class-abilities.php:221
 msgid "Save content"
 msgstr ""
 
-#: includes/class-abilities.php:220
+#: includes/class-abilities.php:222
 msgid "Create a draft or update a post through WordPress. Updates need the current content hash from get-content. Edits to a published, private or scheduled post are saved as your autosave for review unless you pass status (for example publish) to change the live post. Publishing or scheduling always requires status."
 msgstr ""
 
-#: includes/class-abilities.php:224
+#: includes/class-abilities.php:226
 msgid "Post to update. Omit to create a post."
 msgstr ""
 
-#: includes/class-abilities.php:225
+#: includes/class-abilities.php:227
 msgid "Post type for a new post. Default post."
 msgstr ""
 
-#: includes/class-abilities.php:226
+#: includes/class-abilities.php:228
 msgid "Plain-text title."
 msgstr ""
 
-#: includes/class-abilities.php:227
+#: includes/class-abilities.php:229
 msgid "Complete post content, usually serialized Gutenberg block markup. Replaces the existing content."
 msgstr ""
 
-#: includes/class-abilities.php:228
+#: includes/class-abilities.php:230
 msgid "Manual excerpt."
 msgstr ""
 
-#: includes/class-abilities.php:231
+#: includes/class-abilities.php:233
 msgid "New status. Omit to keep drafts as drafts and stage edits to live posts. future needs a future date_gmt."
 msgstr ""
 
-#: includes/class-abilities.php:234
+#: includes/class-abilities.php:236
 msgid "URL slug. WordPress makes it unique."
 msgstr ""
 
-#: includes/class-abilities.php:235
+#: includes/class-abilities.php:237
 msgid "Publish date in UTC, ISO 8601, for example 2026-10-05T09:00:00Z. A future date with status publish or future schedules the post."
 msgstr ""
 
-#: includes/class-abilities.php:238
+#: includes/class-abilities.php:240
 msgid "Replace terms per taxonomy, for example {\"category\": [3], \"post_tag\": [\"seo\", 12]}. Integers are term IDs; strings are names, created when missing. Use list-terms to find IDs."
 msgstr ""
 
-#: includes/class-abilities.php:248
+#: includes/class-abilities.php:250
 msgid "Image attachment ID for the featured image, or 0 to remove it."
 msgstr ""
 
-#: includes/class-abilities.php:251
+#: includes/class-abilities.php:253
 msgid "Post meta to set, for example SEO title and description fields. Only keys listed in get-content meta support are accepted; an empty string deletes the value."
 msgstr ""
 
-#: includes/class-abilities.php:257
+#: includes/class-abilities.php:259
 msgid "content_sha256 from get-content. Required for updates."
 msgstr ""
 
-#: includes/class-abilities.php:264
+#: includes/class-abilities.php:266
 msgid "List terms"
 msgstr ""
 
-#: includes/class-abilities.php:265
+#: includes/class-abilities.php:267
 msgid "Find categories, tags or other taxonomy terms and their IDs."
 msgstr ""
 
-#: includes/class-abilities.php:269
+#: includes/class-abilities.php:271
 msgid "REST-enabled taxonomy such as category or post_tag. Default category."
 msgstr ""
 
-#: includes/class-abilities.php:282
+#: includes/class-abilities.php:284
 msgid "List media"
 msgstr ""
 
-#: includes/class-abilities.php:283
+#: includes/class-abilities.php:285
 msgid "Find existing media library items with their URLs, alt text and dimensions. Prefer existing media over new uploads."
 msgstr ""
 
-#: includes/class-abilities.php:287
+#: includes/class-abilities.php:289
 msgid "Filter by MIME type or family, for example image or image/png."
 msgstr ""
 
-#: includes/class-abilities.php:300
-msgid "Upload media"
+#: includes/class-abilities.php:302
+msgid "List builder skills"
 msgstr ""
 
-#: includes/class-abilities.php:301
-msgid "Import a file into the media library from a public URL or base64 data, with alt text. WordPress checks the file type. Use the returned ID as featured_media or the URL in content."
-msgstr ""
-
-#: includes/class-abilities.php:305
-msgid "Public http(s) URL to import. Private and loopback addresses are refused."
-msgstr ""
-
-#: includes/class-abilities.php:306
-msgid "File contents as base64, up to 10 MiB. Requires filename."
-msgstr ""
-
-#: includes/class-abilities.php:307
-msgid "File name with extension, for example hero.png. Required with data_base64."
-msgstr ""
-
-#: includes/class-abilities.php:308
-msgid "Optional post to attach the media to."
-msgstr ""
-
-#: includes/class-abilities.php:316
-msgid "Update media"
-msgstr ""
-
-#: includes/class-abilities.php:317
-msgid "Set the title, alt text, caption or description of an existing media item."
-msgstr ""
-
-#: includes/class-abilities.php:327
-msgid "List source files"
+#: includes/class-abilities.php:303
+msgid "List the bundled page builder skills (Gutenberg, GenerateBlocks, Elementor, Bricks, Divi), whether each builder is active here, and each skill's files. Read the matching skill before creating or editing builder layouts."
 msgstr ""
 
 #: includes/class-abilities.php:328
-msgid "Browse plugin, theme and must-use plugin directories. Hidden files, credential files and symlinks are hidden."
+msgid "Read builder skill"
 msgstr ""
 
-#: includes/class-abilities.php:332
-msgid "Directory relative to wp-content, for example plugins or themes/my-theme."
+#: includes/class-abilities.php:329
+msgid "Read a bundled page builder skill. Start with its SKILL.md, which explains the workflow and which reference files to read next."
 msgstr ""
 
 #: includes/class-abilities.php:333
-msgid "Entries to skip. Default 0."
+msgid "Skill name from list-skills."
 msgstr ""
 
-#: includes/class-abilities.php:336
-msgid "Entries to return, 1 to 200. Default 100."
+#: includes/class-abilities.php:334
+msgid "File within the skill, for example references/elements.md. Default SKILL.md."
+msgstr ""
+
+#: includes/class-abilities.php:349
+msgid "Upload media"
+msgstr ""
+
+#: includes/class-abilities.php:350
+msgid "Import a file into the media library from a public URL or base64 data, with alt text. WordPress checks the file type. Use the returned ID as featured_media or the URL in content."
 msgstr ""
 
 #: includes/class-abilities.php:354
-msgid "Read source file"
+msgid "Public http(s) URL to import. Private and loopback addresses are refused."
 msgstr ""
 
 #: includes/class-abilities.php:355
+msgid "File contents as base64, up to 10 MiB. Requires filename."
+msgstr ""
+
+#: includes/class-abilities.php:356
+msgid "File name with extension, for example hero.png. Required with data_base64."
+msgstr ""
+
+#: includes/class-abilities.php:357
+msgid "Optional post to attach the media to."
+msgstr ""
+
+#: includes/class-abilities.php:365
+msgid "Update media"
+msgstr ""
+
+#: includes/class-abilities.php:366
+msgid "Set the title, alt text, caption or description of an existing media item."
+msgstr ""
+
+#: includes/class-abilities.php:376
+msgid "List source files"
+msgstr ""
+
+#: includes/class-abilities.php:377
+msgid "Browse plugin, theme and must-use plugin directories. Hidden files, credential files and symlinks are hidden."
+msgstr ""
+
+#: includes/class-abilities.php:381
+msgid "Directory relative to wp-content, for example plugins or themes/my-theme."
+msgstr ""
+
+#: includes/class-abilities.php:382
+msgid "Entries to skip. Default 0."
+msgstr ""
+
+#: includes/class-abilities.php:385
+msgid "Entries to return, 1 to 200. Default 100."
+msgstr ""
+
+#: includes/class-abilities.php:403
+msgid "Read source file"
+msgstr ""
+
+#: includes/class-abilities.php:404
 msgid "Read a UTF-8 plugin or theme source file up to 256 KiB and obtain the SHA-256 hash needed to change it."
 msgstr ""
 
-#: includes/class-abilities.php:372
+#: includes/class-abilities.php:421
 msgid "Write source file"
 msgstr ""
 
-#: includes/class-abilities.php:373
+#: includes/class-abilities.php:422
 msgid "Create or replace a plugin or theme source file. Supply its current hash, or new for a new file. PHP is syntax- and compile-checked first; after saving, the site is loaded and a change that causes a fatal error is reverted. This changes executable code."
 msgstr ""
 
-#: includes/class-abilities.php:378
+#: includes/class-abilities.php:427
 msgid "Complete new file contents."
 msgstr ""
 
-#: includes/class-abilities.php:379
+#: includes/class-abilities.php:428
 msgid "sha256 from read-file, or new to create a file that must not exist yet."
 msgstr ""
 
-#: includes/class-abilities.php:394
+#: includes/class-abilities.php:443
 msgid "Create directory"
 msgstr ""
 
-#: includes/class-abilities.php:395
+#: includes/class-abilities.php:444
 msgid "Create a directory, and any missing parents, inside plugins/, themes/ or mu-plugins/."
 msgstr ""
 
-#: includes/class-abilities.php:398
+#: includes/class-abilities.php:447
 msgid "Directory relative to wp-content, for example plugins/my-plugin/includes."
 msgstr ""
 
-#: includes/class-abilities.php:412
+#: includes/class-abilities.php:461
 msgid "Delete source file"
 msgstr ""
 
-#: includes/class-abilities.php:413
+#: includes/class-abilities.php:462
 msgid "Delete a plugin or theme file whose hash still matches, or an empty directory. Deleting PHP that breaks the site is undone."
 msgstr ""
 
-#: includes/class-abilities.php:418
+#: includes/class-abilities.php:467
 msgid "sha256 from read-file, or directory to delete an empty directory."
 msgstr ""
 
-#: includes/class-abilities.php:432
+#: includes/class-abilities.php:481
 msgid "Move source file"
 msgstr ""
 
-#: includes/class-abilities.php:433
+#: includes/class-abilities.php:482
 msgid "Rename or move a plugin or theme file whose hash still matches. The destination must not exist. A PHP move that breaks the site is undone."
 msgstr ""
 
-#: includes/class-abilities.php:437
+#: includes/class-abilities.php:486
 msgid "Current path relative to wp-content."
 msgstr ""
 
-#: includes/class-abilities.php:438
+#: includes/class-abilities.php:487
 msgid "New path relative to wp-content. Its directory must exist."
 msgstr ""
 
-#: includes/class-abilities.php:453
+#: includes/class-abilities.php:502
 msgid "Execute PHP"
 msgstr ""
 
-#: includes/class-abilities.php:454
+#: includes/class-abilities.php:503
 msgid "Run PHP statements in the loaded WordPress request with full server privileges; not sandboxed. No PHP tags and no exit or die. Echo output and a JSON-serializable return value are captured; errors include their message and line."
 msgstr ""
 
-#: includes/class-abilities.php:457
+#: includes/class-abilities.php:506
 msgid "PHP statements without <?php, for example: return get_option( \"blogname\" );"
 msgstr ""
 
-#: includes/class-abilities.php:469
+#: includes/class-abilities.php:518
 msgid "Run WP-CLI"
 msgstr ""
 
 #. translators: %d: time limit in seconds.
-#: includes/class-abilities.php:471
+#: includes/class-abilities.php:520
 #, php-format
 msgid "Run WP-CLI on this installation as the authenticated user, with arguments as an array and no shell. Full developer access; foreground commands have a %d-second limit."
 msgstr ""
 
-#: includes/class-abilities.php:477
+#: includes/class-abilities.php:526
 msgid "Command words and flags without the leading wp, for example [\"plugin\", \"list\", \"--format=json\"]. --path, --url, --user, --ssh, --http, --require, --exec, --allow-root and @aliases are set by Site Agent."
 msgstr ""
 
-#: includes/class-abilities.php:620
+#: includes/class-abilities.php:669
 msgid "This tool is disabled or you do not have permission to use it."
 msgstr ""
 
-#: includes/class-abilities.php:625
+#: includes/class-abilities.php:674
 msgid "Tool arguments must be an object."
 msgstr ""
 
 #. translators: %s: exception class, message and location.
-#: includes/class-abilities.php:639
+#: includes/class-abilities.php:688
 #, php-format
 msgid "The tool raised %s. Check the site before retrying a write."
 msgstr ""
@@ -853,92 +877,98 @@ msgstr ""
 msgid "Activation sends the license key, site URL, plugin version, WordPress version and PHP version to gauravtiwari.org. Credentials are encrypted and bound to this site. Activated licenses are checked when WordPress checks updates."
 msgstr ""
 
-#: includes/class-content.php:65
+#: includes/class-content.php:72
 msgid "This post type is unavailable or inaccessible."
 msgstr ""
 
-#: includes/class-content.php:130
+#: includes/class-content.php:137
 msgid "Supply post_id, url or slug."
 msgstr ""
 
-#: includes/class-content.php:133
-#: includes/class-content.php:214
+#: includes/class-content.php:140
+#: includes/class-content.php:223
 #: includes/class-media.php:66
 msgid "The post is unavailable or inaccessible."
 msgstr ""
 
-#: includes/class-content.php:218
+#: includes/class-content.php:227
 msgid "This post type cannot be edited with the content tool."
 msgstr ""
 
-#: includes/class-content.php:221
+#: includes/class-content.php:230
 msgid "You cannot create this post type."
 msgstr ""
 
-#: includes/class-content.php:224
+#: includes/class-content.php:233
 msgid "Read the post again and supply its current content hash before updating."
 msgstr ""
 
-#: includes/class-content.php:232
+#: includes/class-content.php:241
 msgid "You cannot publish this post type."
 msgstr ""
 
-#: includes/class-content.php:244
+#: includes/class-content.php:253
 msgid "Use an ISO 8601 date such as 2026-10-05T09:00:00Z for date_gmt."
 msgstr ""
 
-#: includes/class-content.php:254
+#: includes/class-content.php:263
 msgid "Scheduling needs a future date_gmt."
 msgstr ""
 
-#: includes/class-content.php:292
+#: includes/class-content.php:301
 msgid "Only title, content and excerpt changes can be staged. Pass status to update this live post directly."
 msgstr ""
 
-#: includes/class-content.php:297
+#: includes/class-content.php:306
 msgid "Supply a title, content or excerpt to stage, or pass status to change the live post."
 msgstr ""
 
 #. translators: %s: taxonomy name.
-#: includes/class-content.php:322
+#: includes/class-content.php:331
 #, php-format
 msgid "Terms cannot be assigned in the %s taxonomy for this post type."
 msgstr ""
 
 #. translators: 1: term ID, 2: taxonomy name.
-#: includes/class-content.php:330
+#: includes/class-content.php:339
 #, php-format
 msgid "Term %1$d does not exist in %2$s."
 msgstr ""
 
 #. translators: 1: term name, 2: taxonomy name.
-#: includes/class-content.php:344
+#: includes/class-content.php:353
 #, php-format
 msgid "The term \"%1$s\" does not exist in %2$s and cannot be created."
 msgstr ""
 
-#: includes/class-content.php:352
+#: includes/class-content.php:361
 msgid "Use an image attachment ID, or 0 to remove the featured image, on a post type that supports featured images."
 msgstr ""
 
+#. translators: %s: meta key.
+#: includes/class-content.php:370
+#, php-format
+msgid "%s is page builder layout data. Writing it directly skips the builder's validation and cache refresh; follow the builder's skill from get-skill instead."
+msgstr ""
+
 #. translators: 1: meta key, 2: allowed meta keys.
-#: includes/class-content.php:361
+#: includes/class-content.php:374
 #, php-format
 msgid "The meta key %1$s cannot be written. Allowed keys: %2$s."
 msgstr ""
 
 #. translators: 1: meta key, 2: allowed meta keys.
-#: includes/class-content.php:361
+#: includes/class-content.php:374
 msgid "none"
 msgstr ""
 
 #. translators: %s: error message.
-#: includes/class-content.php:412
+#: includes/class-content.php:425
 #, php-format
 msgid "The post was saved, but its terms could not be set: %s"
 msgstr ""
 
-#: includes/class-content.php:418
+#: includes/class-content.php:431
 msgid "This taxonomy is unavailable or inaccessible."
 msgstr ""
 
@@ -1359,6 +1389,12 @@ msgstr ""
 
 #: includes/class-media.php:175
 msgid "The media item is unavailable or inaccessible."
+msgstr ""
+
+#. translators: 1: requested path, 2: skill name.
+#: includes/class-skills.php:147
+#, php-format
+msgid "%1$s is not a file of the %2$s skill. Call list-skills for its files."
 msgstr ""
 
 #: includes/class-updater.php:65

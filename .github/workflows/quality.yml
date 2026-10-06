@@ -34,6 +34,8 @@ jobs:
       - run: composer runtime
       - run: git diff --exit-code -- runtime
       - run: composer lint
+      - name: Builder skills
+        run: python3 bin/sync-skills.py
       - run: vendor/bin/phpcs
       - name: Credential converter
         run: |

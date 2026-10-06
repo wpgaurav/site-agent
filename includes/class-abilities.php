@@ -87,6 +87,7 @@ final class Abilities {
 				),
 				'meta'           => array( 'type' => 'object' ),
 				'autosave'       => array( 'type' => array( 'object', 'null' ) ),
+				'builder'        => $string,
 				'content_sha256' => $string,
 			),
 			array( 'id', 'status', 'content', 'content_sha256' )
@@ -146,7 +147,7 @@ final class Abilities {
 		return array(
 			'site-context'     => array(
 				'label'       => __( 'Site context', 'site-agent' ),
-				'description' => __( 'Inspect WordPress, PHP, active plugins, theme, post types, taxonomies and the tools this connection can use. Start here.', 'site-agent' ),
+				'description' => __( 'Inspect WordPress, PHP, active plugins, theme, page builders, post types, taxonomies and the tools this connection can use. Start here.', 'site-agent' ),
 				'group'       => '',
 				'callback'    => array( Content::class, 'context' ),
 				'input'       => array(),
@@ -161,6 +162,7 @@ final class Abilities {
 						'post_types'    => self::list_of( array( 'type' => 'string' ) ),
 						'taxonomies'    => self::list_of( array( 'type' => 'string' ) ),
 						'enabled_tools' => self::list_of( array( 'type' => 'string' ) ),
+						'builders'      => self::list_of( array( 'type' => 'object' ) ),
 					),
 					array( 'site_url', 'wordpress', 'enabled_tools' )
 				),
@@ -293,6 +295,53 @@ final class Abilities {
 						'total' => array( 'type' => 'integer' ),
 					),
 					array( 'media', 'total' )
+				),
+				'readonly'    => true,
+			),
+			'list-skills'      => array(
+				'label'       => __( 'List builder skills', 'site-agent' ),
+				'description' => __( 'List the bundled page builder skills (Gutenberg, GenerateBlocks, Elementor, Bricks, Divi), whether each builder is active here, and each skill\'s files. Read the matching skill before creating or editing builder layouts.', 'site-agent' ),
+				'group'       => '',
+				'callback'    => array( Skills::class, 'listing' ),
+				'input'       => array(),
+				'required'    => array(),
+				'output'      => self::object(
+					array(
+						'skills' => self::list_of(
+							self::object(
+								array(
+									'name'        => array( 'type' => 'string' ),
+									'description' => array( 'type' => 'string' ),
+									'detected'    => array( 'type' => 'boolean' ),
+									'version'     => array( 'type' => 'string' ),
+									'files'       => self::list_of( array( 'type' => 'string' ) ),
+								),
+								array( 'name', 'detected', 'files' )
+							)
+						),
+					),
+					array( 'skills' )
+				),
+				'readonly'    => true,
+			),
+			'get-skill'        => array(
+				'label'       => __( 'Read builder skill', 'site-agent' ),
+				'description' => __( 'Read a bundled page builder skill. Start with its SKILL.md, which explains the workflow and which reference files to read next.', 'site-agent' ),
+				'group'       => '',
+				'callback'    => array( Skills::class, 'read' ),
+				'input'       => array(
+					'skill' => self::field( 'string', __( 'Skill name from list-skills.', 'site-agent' ), array( 'enum' => Skills::CATALOG ) ),
+					'path'  => self::string( __( 'File within the skill, for example references/elements.md. Default SKILL.md.', 'site-agent' ), 200, array( 'pattern' => Skills::PATH ) ),
+				),
+				'required'    => array( 'skill' ),
+				'output'      => self::object(
+					array(
+						'skill'   => array( 'type' => 'string' ),
+						'path'    => array( 'type' => 'string' ),
+						'content' => array( 'type' => 'string' ),
+						'files'   => self::list_of( array( 'type' => 'string' ) ),
+					),
+					array( 'skill', 'path', 'content' )
 				),
 				'readonly'    => true,
 			),

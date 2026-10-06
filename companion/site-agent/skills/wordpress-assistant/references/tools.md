@@ -1,14 +1,16 @@
 # Source-derived tool reference
 
-Reference source: wpgaurav/site-agent 0.2.0, includes/class-abilities.php, includes/class-content.php, includes/class-media.php and includes/class-files.php. Live discovery determines the names and schemas used by the host; every argument carries a description there.
+Reference source: wpgaurav/site-agent 0.2.0 with the builder skills from main, includes/class-abilities.php, includes/class-skills.php, includes/class-content.php, includes/class-media.php and includes/class-files.php. Live discovery determines the names and schemas used by the host; every argument carries a description there.
 
 | Source tool name | Input fields | Purpose |
 | --- | --- | --- |
-| site-agent-site-context | none | Site URL, environment, versions, plugins, theme, post types, taxonomies, tools available to this connection |
+| site-agent-site-context | none | Site URL, environment, versions, plugins, theme, active page builders, post types, taxonomies, tools available to this connection |
 | site-agent-list-content | post_type, status, orderby, order, search, limit, page | Search accessible content; default post, 20 results, most recently modified first |
-| site-agent-get-content | post_id, url or slug (+ post_type) | Raw content, title, slug, status, dates, link, terms, featured_media, meta, your newer autosave, content_sha256 |
+| site-agent-get-content | post_id, url or slug (+ post_type) | Raw content, title, slug, status, dates, link, terms, featured_media, meta, your newer autosave, builder, content_sha256 |
 | site-agent-list-terms | taxonomy, search, limit, page | Term IDs, names, slugs, parents and counts; default category |
 | site-agent-list-media | mime_type, search, limit, page | Existing media IDs, URLs, MIME types, dimensions and alt text |
+| site-agent-list-skills | none | Bundled builder skills (gutenberg, generateblocks, elementor, bricks, divi), whether each builder is active, and their files |
+| site-agent-get-skill | skill required; path (default SKILL.md) | Read a builder skill or one of its reference, pattern or example files |
 | site-agent-save-content | post_id, post_type, title, content, excerpt, status, slug, date_gmt, terms, featured_media, meta, expected_content_sha256 | Creates default to draft; updates require current hash; edits to live posts are staged unless status is passed |
 | site-agent-upload-media | url or data_base64 + filename; title, alt, caption, description, post_id | Import into the media library with alt text |
 | site-agent-update-media | id required; title, alt, caption, description | Change media metadata |
@@ -23,7 +25,7 @@ Reference source: wpgaurav/site-agent 0.2.0, includes/class-abilities.php, inclu
 
 Content/media/term limit is 1-100. File listing limit is 1-200. Save statuses are draft, pending, publish, private and future; future needs a future date_gmt. Omitted update fields remain unchanged. Updating a published, private or scheduled post without status saves an autosave for human review and returns staged true; pass status (for example publish) only when the user asked to change the live post.
 
-Terms replace the post's terms per taxonomy and accept IDs or names (missing names are created). Meta accepts only the keys the site allows, typically Rank Math or Yoast SEO title, description and focus keyword; an empty string deletes a value. Prefer existing media over uploads, and always provide meaningful alt text.
+Terms replace the post's terms per taxonomy and accept IDs or names (missing names are created). Meta accepts only the keys the site allows, typically Rank Math or Yoast SEO title, description and focus keyword; an empty string deletes a value. Page builder layout meta (Elementor, Bricks, Divi) is refused with builder_meta; use the matching builder skill instead. Prefer existing media over uploads, and always provide meaningful alt text.
 
 Tool groups are disabled by default. Base reads require Site Agent enabled. Content writes, source inspection, source editing, PHP and WP-CLI each require their relevant opt-in, and an Application Password can be limited to fewer groups, so a connection may see fewer tools than the site enables. Tools return errors with the underlying message; do not infer success from transport completion.
 
