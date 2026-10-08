@@ -38,6 +38,9 @@ final class OAuth {
 		add_action( 'parse_request', array( self::class, 'well_known' ), 0 );
 		add_action( 'admin_menu', array( self::class, 'hidden_page' ) );
 		add_action( 'admin_init', array( self::class, 'authorize_page' ), 0 );
+		// A client that appends its parameters with "?" sends page=site-agent-authorize?response_type=...,
+		// which wp-admin refuses before admin_init.
+		add_action( 'admin_page_access_denied', array( self::class, 'repair_authorize_url' ) );
 		add_action( 'admin_post_site_agent_oauth_revoke', array( self::class, 'revoke_action' ) );
 	}
 
@@ -59,8 +62,54 @@ final class OAuth {
 		return untrailingslashit( home_url( '/' . rest_get_url_prefix() . '/site-agent/v1/oauth' ) );
 	}
 
+	/**
+	 * Advertised without a query string, because some clients append their parameters with "?"
+	 * whatever the endpoint already holds. It redirects to the consent screen. Without pretty
+	 * permalinks REST URLs carry a query anyway, so the consent screen is advertised directly.
+	 */
 	public static function authorization_endpoint(): string {
-		return admin_url( 'admin.php?page=' . self::PAGE );
+		$url = rest_url( 'site-agent/v1/oauth/authorize' );
+		return false === strpos( $url, '?' ) ? $url : admin_url( 'admin.php?page=' . self::PAGE );
+	}
+
+	/**
+	 * The consent screen URL carrying the client's parameters.
+	 *
+	 * @param array<string, mixed> $params Authorization request parameters.
+	 */
+	public static function consent_url( array $params ): string {
+		unset( $params['page'], $params['rest_route'] );
+		$params = array_filter( $params, 'is_scalar' );
+		return admin_url( 'admin.php?' . http_build_query( array( 'page' => self::PAGE ) + $params, '', '&', PHP_QUERY_RFC3986 ) );
+	}
+
+	/**
+	 * Parameters of a consent URL whose client appended them with "?", or null for any other page.
+	 *
+	 * @param array<string, mixed> $get Query parameters.
+	 * @return array<string, mixed>|null
+	 */
+	public static function repaired_params( array $get ): ?array {
+		$page   = isset( $get['page'] ) && is_string( $get['page'] ) ? $get['page'] : '';
+		$prefix = self::PAGE . '?';
+		if ( 0 !== strpos( $page, $prefix ) ) {
+			return null;
+		}
+		parse_str( substr( $page, strlen( $prefix ) ), $first );
+		unset( $get['page'] );
+		return array_merge( $first, $get );
+	}
+
+	/** Send a malformed consent URL to the real one. Runs where wp-admin would refuse it. */
+	public static function repair_authorize_url(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only rebuilds the URL; the consent screen validates the request.
+		$params = self::repaired_params( wp_unslash( $_GET ) );
+		if ( null === $params ) {
+			return;
+		}
+		nocache_headers();
+		wp_safe_redirect( self::consent_url( $params ), 302, 'Site Agent' );
+		exit;
 	}
 
 	/** Where clients find the protected resource metadata. Served through REST, so no server rewrite is needed. */
@@ -144,6 +193,14 @@ final class OAuth {
 		);
 		register_rest_route(
 			'site-agent/v1',
+			'/oauth/authorize',
+			array(
+				'methods'  => 'GET',
+				'callback' => array( self::class, 'rest_authorize' ),
+			) + $public
+		);
+		register_rest_route(
+			'site-agent/v1',
 			'/oauth/register',
 			array(
 				'methods'  => 'POST',
@@ -192,6 +249,18 @@ final class OAuth {
 
 	public static function rest_server(): \WP_REST_Response {
 		return self::enabled() ? self::json( self::server_metadata() ) : self::error( 'not_found', 'OAuth is not enabled on this site.', 404 );
+	}
+
+	/**
+	 * The advertised authorization endpoint: redirects the browser to the consent screen with the
+	 * request's parameters, which says so itself when OAuth is off.
+	 */
+	public static function rest_authorize( \WP_REST_Request $request ): \WP_REST_Response {
+		$response = new \WP_REST_Response( null, 302 );
+		$response->header( 'Location', self::consent_url( $request->get_query_params() ) );
+		$response->header( 'Cache-Control', 'no-store' );
+		$response->header( 'Referrer-Policy', 'no-referrer' );
+		return $response;
 	}
 
 	/**
