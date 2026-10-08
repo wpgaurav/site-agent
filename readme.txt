@@ -3,7 +3,7 @@ Contributors: wpgaurav
 Tags: mcp, developer-tools, ai, automation
 Requires at least: 6.9
 Requires PHP: 8.0
-Stable tag: 0.3.0
+Stable tag: 0.4.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -42,8 +42,11 @@ An optional history keeps the last 100 tool calls with the time, user ID, tool n
 = Is Site Agent a Functionalities module? =
 No. It is an independent plugin.
 
-= Does this version provide OAuth or background commands? =
-No. Authentication uses WordPress Application Passwords. WP-CLI commands run in the foreground with a 20-second limit by default (SITE_AGENT_WP_CLI_TIMEOUT, up to 300 seconds). PHP execution is not sandboxed.
+= Does Site Agent support OAuth? =
+Yes, from 0.4.0, as an opt-in. Turn on OAuth connections in Tools → Site Agent, then add the endpoint to an OAuth-capable MCP client without credentials. The client opens a WordPress sign-in and consent page, where an administrator approves it and picks its tool groups. Application Passwords in a header or URL keep working.
+
+= Does this version run background commands? =
+No. WP-CLI commands run in the foreground with a 20-second limit by default (SITE_AGENT_WP_CLI_TIMEOUT, up to 300 seconds). PHP execution is not sandboxed.
 
 = WP-CLI is installed but reported as unavailable. =
 Define SITE_AGENT_WP_CLI in wp-config.php with the full path to the wp executable. Process execution (proc_open) must also be enabled.
@@ -58,6 +61,13 @@ Disable Site Agent or revoke its Application Password. An emergency SITE_AGENT_D
 Get the free checkout license from https://gauravtiwari.org/product/site-agent/ and activate it under Tools > Site Agent. FluentCart supplies automatic updates through protected HTTPS packages. The Update URI protects against unrelated WordPress.org slug matches. Manual release ZIP updates remain available. Licensing never disables the developer tools.
 
 == Changelog ==
+
+= 0.4.0 =
+* Add opt-in OAuth 2.1 connections for MCP clients that support the MCP authorization specification: protected resource and authorization server metadata (also at /.well-known), dynamic client registration for public clients, PKCE (S256) authorization codes, and a WordPress consent screen where an administrator approves each client and picks its tool groups.
+* OAuth clients get one-hour bearer tokens and rotating refresh tokens that end after 30 days without use. Only token hashes are stored, tokens work on the MCP endpoint only, reusing a rotated refresh token ends the connection, and a demoted administrator's connections stop working. Revoke connections in Tools → Site Agent or through the revocation endpoint.
+* Unauthenticated MCP requests now answer with a WWW-Authenticate header that points OAuth clients to discovery when OAuth is on.
+* Audit history records OAuth calls with the client name.
+* Let other plugins add read-only skills to list-skills and get-skill through the site_agent_skills filter. Bundled builder skills cannot be replaced, and only Markdown, JSON and HTML files are served.
 
 = 0.3.0 =
 * Bundle read-only builder skills for Gutenberg, GenerateBlocks, Elementor, Bricks and Divi, with list-skills and get-skill tools, active builders in site-context and the storing builder in get-content.
@@ -93,7 +103,7 @@ Get the free checkout license from https://gauravtiwari.org/product/site-agent/ 
 = 0.1.3 =
 * Release an optional companion package with WordPress workflow skills and a credential-free MCP connection.
 * Correct the companion compatibility manifest to use its included MCP configuration.
-* Preserve the existing WordPress runtime and authentication model; OAuth is not added.
+* Preserve the existing WordPress runtime and authentication model.
 
 = 0.1.2 =
 * Add a browser-only username and Application Password converter to the connection instructions.

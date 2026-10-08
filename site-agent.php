@@ -3,7 +3,7 @@
  * Plugin Name: Site Agent
  * Plugin URI: https://gauravtiwari.org/product/site-agent/
  * Description: Connect an MCP client directly to WordPress with independently enabled developer tools.
- * Version: 0.3.0
+ * Version: 0.4.0
  * Requires at least: 6.9
  * Requires PHP: 8.0
  * Author: Gaurav Tiwari
@@ -21,7 +21,7 @@ namespace SiteAgent;
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'SITE_AGENT_VERSION', '0.3.0' );
+define( 'SITE_AGENT_VERSION', '0.4.0' );
 define( 'SITE_AGENT_DIR', __DIR__ . '/' );
 define( 'SITE_AGENT_FILE', __FILE__ );
 
@@ -46,6 +46,7 @@ add_action(
 	static function () {
 		Admin::init();
 		Updater::init();
+		OAuth::init();
 		// Early, so later rest_pre_dispatch callbacks and loggers never see the URL credential.
 		add_filter( 'rest_pre_dispatch', array( Url_Auth::class, 'capture' ), 1, 3 );
 		add_filter( 'rest_post_dispatch', array( Url_Auth::class, 'response' ), 10, 3 );

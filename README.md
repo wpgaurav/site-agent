@@ -10,9 +10,9 @@ Site Agent is free and open source. The complete release ZIP and a free automati
 
 ## Companion Package
 
-Release 0.3.0 also includes `site-agent-companion-0.3.0.zip`, built from `companion/site-agent/`. It supplies the approved icon, a credential-free MCP connection and a WordPress workflow skill for compatible ChatGPT/Codex hosts. The skill covers site inspection, raw-content audits, draft preparation, hash-checked edits and enabled developer tools.
+Release 0.4.0 also includes `site-agent-companion-0.4.0.zip`, built from `companion/site-agent/`. It supplies the approved icon, a credential-free MCP connection and a WordPress workflow skill for compatible ChatGPT/Codex hosts. The skill covers site inspection, raw-content audits, draft preparation, hash-checked edits and enabled developer tools.
 
-This companion archive is separate from the WordPress installable ZIP. Authentication must be configured privately through a compatible host. It does not implement OAuth or establish authenticated ChatGPT web connectivity. The server requires a WordPress Application Password through a Basic Authorization header or explicitly enabled URL authentication. OAuth remains unimplemented, and ChatGPT web compatibility with credential-bearing URLs has not been verified.
+This companion archive is separate from the WordPress installable ZIP and contains no credentials. With OAuth connections on (0.4.0+), an OAuth-capable host signs in through WordPress and needs nothing else. Otherwise, authentication is configured privately through the host with a WordPress Application Password in a Basic Authorization header or an explicitly enabled authenticated URL. ChatGPT web compatibility with credential-bearing URLs has not been verified.
 
 Build and validate the companion with `python3 bin/build-companion.py`. Never include credentials in its manifests or archive.
 
@@ -124,7 +124,32 @@ License activation explicitly sends the key, site URL, plugin version, WordPress
 
 Update metadata is cached for three hours and partitioned by site, credentials and plugin version. A fresh protected URL is fetched before both single and bulk downloads. Packages require HTTPS on the store or its FluentCart R2 host, and their extracted name/version must match the offered Site Agent release. Invalid licenses never receive a package, and older versions are not offered as updates. Manual release ZIP updates remain available. See [Security and Access](#security-and-access) for the trust model.
 
-OAuth, background WP-CLI jobs, an AI chat UI and a recoverable PHP sandbox are outside this version.
+Background WP-CLI jobs, an AI chat UI and a recoverable PHP sandbox are outside this version.
+
+## OAuth connections
+
+Version 0.4.0 adds opt-in OAuth 2.1 following the MCP authorization specification. Turn on **OAuth connections** in Tools → Site Agent, then add the endpoint to an OAuth-capable client with no credentials:
+
+- An unauthenticated MCP request answers 401 with `WWW-Authenticate: Bearer resource_metadata="…/wp-json/site-agent/v1/oauth/protected-resource"`.
+- Protected resource metadata (RFC 9728) and authorization server metadata (RFC 8414) are served through REST and at `/.well-known/oauth-protected-resource` and `/.well-known/oauth-authorization-server` when the web server passes those paths to WordPress. The issuer is the site's home URL.
+- Clients register through RFC 7591 dynamic client registration as public clients. Redirect URIs must use HTTPS, an HTTP loopback address, or a private-use scheme.
+- The authorization endpoint is a consent screen in wp-admin. An administrator signs in, sees the client and its return address, picks which enabled tool groups it may use, and allows or denies it. PKCE with S256 is required, codes are single-use and last ten minutes, and the response carries `iss` (RFC 9207).
+- Access tokens last one hour and refresh tokens rotate, ending after 30 days without use. Only HMAC hashes are stored, in the approving user's meta. Tokens authenticate only the MCP route. Reusing a rotated refresh token ends the connection. Tokens stop working when OAuth is turned off, Site Agent is disabled, or the approving account loses administrator rights.
+- Approved groups narrow access like per-password limits; Site Agent's switches and wp-config.php constants still apply. Audit history shows `via: oauth` and the client name.
+- Revoke a connection in Tools → Site Agent or through the RFC 7009 revocation endpoint. Uninstalling always removes OAuth clients and connections.
+
+## Skills from other plugins
+
+Plugins can add read-only skills to `list-skills` and `get-skill` with the `site_agent_skills` filter:
+
+```php
+add_filter( 'site_agent_skills', function ( $skills ) {
+	$skills['my-plugin-workflow'] = array( 'directory' => __DIR__ . '/skills/workflow', 'plugin' => 'My Plugin', 'version' => '1.2.0' );
+	return $skills;
+} );
+```
+
+Names use lowercase letters, numbers and hyphens, and cannot replace the bundled builder skills. The directory must contain `SKILL.md`. Only Markdown, JSON and HTML files up to 64 KiB are served, through the same path checks as bundled skills. At most 20 registered skills are listed.
 
 ## Security and Access
 
@@ -142,7 +167,7 @@ python3 bin/sync-skills.py
 bash bin/build.sh
 ```
 
-Tests refuse to load an installation without a `.site-agent-test-install` marker. Never place that marker on a real site. Integration tests modify disposable options, users, posts, and fixture files. The build uses a runtime allowlist and excludes tests, development dependencies, Composer metadata, docs, and screenshots. Ship `dist/site-agent-0.3.0.zip`, not a GitHub source archive.
+Tests refuse to load an installation without a `.site-agent-test-install` marker. Never place that marker on a real site. Integration tests modify disposable options, users, posts, and fixture files. The build uses a runtime allowlist and excludes tests, development dependencies, Composer metadata, docs, and screenshots. Ship `dist/site-agent-0.4.0.zip`, not a GitHub source archive.
 
 ## License and Contributions
 

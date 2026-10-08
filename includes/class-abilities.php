@@ -300,8 +300,8 @@ final class Abilities {
 				'readonly'    => true,
 			),
 			'list-skills'        => array(
-				'label'       => __( 'List builder skills', 'site-agent' ),
-				'description' => __( 'List the bundled page builder skills (Gutenberg, GenerateBlocks, Elementor, Bricks, Divi), whether each builder is active here, and each skill\'s files. Read the matching skill before creating or editing builder layouts.', 'site-agent' ),
+				'label'       => __( 'List skills', 'site-agent' ),
+				'description' => __( 'List the bundled page builder skills (Gutenberg, GenerateBlocks, Elementor, Bricks, Divi) and skills that active plugins add, such as store or invoicing workflows, with whether each applies here and its files. Read the matching skill before creating or editing builder layouts or before running a plugin\'s workflow.', 'site-agent' ),
 				'group'       => '',
 				'callback'    => array( Skills::class, 'listing' ),
 				'input'       => array(),
@@ -315,6 +315,7 @@ final class Abilities {
 									'description' => array( 'type' => 'string' ),
 									'detected'    => array( 'type' => 'boolean' ),
 									'version'     => array( 'type' => 'string' ),
+									'source'      => array( 'type' => 'string' ),
 									'files'       => self::list_of( array( 'type' => 'string' ) ),
 								),
 								array( 'name', 'detected', 'files' )
@@ -326,12 +327,12 @@ final class Abilities {
 				'readonly'    => true,
 			),
 			'get-skill'          => array(
-				'label'       => __( 'Read builder skill', 'site-agent' ),
-				'description' => __( 'Read a bundled page builder skill. Start with its SKILL.md, which explains the workflow and which reference files to read next.', 'site-agent' ),
+				'label'       => __( 'Read skill', 'site-agent' ),
+				'description' => __( 'Read a skill from list-skills: a bundled page builder skill or one an active plugin adds. Start with its SKILL.md, which explains the workflow and which reference files to read next.', 'site-agent' ),
 				'group'       => '',
 				'callback'    => array( Skills::class, 'read' ),
 				'input'       => array(
-					'skill' => self::field( 'string', __( 'Skill name from list-skills.', 'site-agent' ), array( 'enum' => Skills::CATALOG ) ),
+					'skill' => self::field( 'string', __( 'Skill name from list-skills.', 'site-agent' ), array( 'enum' => Skills::names() ) ),
 					'path'  => self::string( __( 'File within the skill, for example references/elements.md. Default SKILL.md.', 'site-agent' ), 200, array( 'pattern' => Skills::PATH ) ),
 				),
 				'required'    => array( 'skill' ),

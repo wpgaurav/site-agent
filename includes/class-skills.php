@@ -11,16 +11,62 @@ defined( 'ABSPATH' ) || exit;
 
 // phpcs:disable WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading bundled plugin files from local disk.
 
-/** Page builder skills bundled with the plugin and served as read-only guidance. */
+/** Page builder skills bundled with the plugin, plus skills other plugins register, served as read-only guidance. */
 final class Skills {
-	/** Skill names in listing order. bin/sync-skills.py checks the directories against this list. */
+	/** Bundled skill names in listing order. bin/sync-skills.py checks the directories against this list. */
 	const CATALOG    = array( 'gutenberg', 'generateblocks', 'elementor', 'bricks', 'divi' );
 	const MAX_BYTES  = 65536;
 	const EXTENSIONS = array( 'md', 'json', 'html' );
 	const PATH       = '^[A-Za-z0-9_][A-Za-z0-9._-]*(/[A-Za-z0-9_][A-Za-z0-9._-]*)*$';
+	/** Names other plugins may register. */
+	const NAME = '^[a-z0-9][a-z0-9-]{1,39}$';
+	/** At most this many registered skills are listed. */
+	const MAX_REGISTERED = 20;
+
+	/**
+	 * Skills registered by other plugins through the site_agent_skills filter, keyed by name.
+	 *
+	 * A registration is `'name' => array( 'directory' => '/absolute/path/', 'plugin' => 'Label', 'version' => '1.0' )`.
+	 * The directory must contain SKILL.md. Bundled names cannot be replaced, and only the same
+	 * Markdown, JSON and HTML files as bundled skills are served.
+	 *
+	 * @return array<string, array{directory: string, plugin: string, version: string}>
+	 */
+	public static function registered(): array {
+		$skills = apply_filters( 'site_agent_skills', array() );
+		$clean  = array();
+		foreach ( is_array( $skills ) ? $skills : array() as $name => $skill ) {
+			if ( count( $clean ) >= self::MAX_REGISTERED ) {
+				break;
+			}
+			if ( ! is_string( $name ) || ! preg_match( '/' . self::NAME . '/D', $name ) || in_array( $name, self::CATALOG, true ) || ! is_array( $skill ) || ! is_string( $skill['directory'] ?? null ) ) {
+				continue;
+			}
+			$directory = realpath( $skill['directory'] );
+			if ( false === $directory || ! is_dir( $directory ) || ! is_file( $directory . '/SKILL.md' ) ) {
+				continue;
+			}
+			$clean[ $name ] = array(
+				'directory' => trailingslashit( $directory ),
+				'plugin'    => sanitize_text_field( (string) ( $skill['plugin'] ?? '' ) ),
+				'version'   => sanitize_text_field( (string) ( $skill['version'] ?? '' ) ),
+			);
+		}
+		return $clean;
+	}
+
+	/**
+	 * Every skill name: bundled first, then registered.
+	 *
+	 * @return string[]
+	 */
+	public static function names(): array {
+		return array_merge( self::CATALOG, array_keys( self::registered() ) );
+	}
 
 	public static function directory( string $skill ): string {
-		return SITE_AGENT_DIR . 'skills/' . $skill . '/';
+		$registered = self::registered();
+		return isset( $registered[ $skill ] ) ? $registered[ $skill ]['directory'] : SITE_AGENT_DIR . 'skills/' . $skill . '/';
 	}
 
 	/**
@@ -112,7 +158,7 @@ final class Skills {
 	 */
 	public static function files( string $skill ): array {
 		$base = self::directory( $skill );
-		if ( ! in_array( $skill, self::CATALOG, true ) || ! is_dir( $base ) ) {
+		if ( ! in_array( $skill, self::names(), true ) || ! is_dir( $base ) ) {
 			return array();
 		}
 		$files    = array();
@@ -146,6 +192,18 @@ final class Skills {
 				'description' => self::description( $skill ),
 				'detected'    => isset( $detected[ $skill ] ),
 				'version'     => $detected[ $skill ]['version'] ?? '',
+				'source'      => 'site-agent',
+				'files'       => self::files( $skill ),
+			);
+		}
+		foreach ( self::registered() as $skill => $registration ) {
+			$skills[] = array(
+				'name'        => $skill,
+				'description' => self::description( $skill ),
+				// A registering plugin is active by definition.
+				'detected'    => true,
+				'version'     => $registration['version'],
+				'source'      => '' !== $registration['plugin'] ? $registration['plugin'] : 'plugin',
 				'files'       => self::files( $skill ),
 			);
 		}

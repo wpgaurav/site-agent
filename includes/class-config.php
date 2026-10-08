@@ -21,6 +21,7 @@ final class Config {
 		return array(
 			'enabled'       => false,
 			'url_auth'      => false,
+			'oauth'         => false,
 			'content_write' => false,
 			'file_read'     => false,
 			'file_write'    => false,

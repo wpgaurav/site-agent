@@ -110,6 +110,7 @@ final class Admin {
 		return array(
 			'enabled'       => array( __( 'Enable Site Agent', 'site-agent' ), __( 'Allow authenticated administrators to connect and use the tools selected below.', 'site-agent' ) ),
 			'url_auth'      => array( __( 'URL authentication', 'site-agent' ), __( 'Allow Base64-encoded username and Application Password credentials in the MCP endpoint auth query parameter. URLs may be recorded in client history and server logs. Use a dedicated, revocable Application Password.', 'site-agent' ) ),
+			'oauth'         => array( __( 'OAuth connections', 'site-agent' ), __( 'Let MCP clients that support OAuth, such as Claude and ChatGPT connectors, connect by signing in here. An administrator approves each client on a consent screen and picks its tool groups. Clients get one-hour access tokens and refresh tokens that end after 30 days without use. No password is shared with the client.', 'site-agent' ) ),
 			'content_write' => array( __( 'Content writes', 'site-agent' ), __( 'Create drafts, edit posts or pages, set terms, featured images and SEO fields, and import media. Edits to live posts are staged as autosaves unless a status is passed explicitly.', 'site-agent' ) ),
 			'file_read'     => array( __( 'Source inspection', 'site-agent' ), __( 'Read plugin, theme and must-use plugin source files. Source files can contain sensitive data.', 'site-agent' ) ),
 			'file_write'    => array( __( 'Source editing', 'site-agent' ), __( 'Create, overwrite, move or delete plugin and theme files, including PHP. PHP changes that cause a fatal error are reverted when the site can be checked.', 'site-agent' ) ),
@@ -167,6 +168,7 @@ final class Admin {
 				<?php self::scopes_panel(); ?>
 				<?php submit_button(); ?>
 			</form>
+			<?php self::oauth_panel(); ?>
 			<?php self::diagnostics_panel(); ?>
 			<?php self::license_panel(); ?>
 			<h2><?php esc_html_e( 'Connect a client', 'site-agent' ); ?></h2>
@@ -176,7 +178,7 @@ final class Admin {
 				<li><?php esc_html_e( 'Use the endpoint below in a client that supports Streamable HTTP and a custom Authorization header. The header uses HTTP Basic authentication with your username and Application Password. Keep the client configuration private.', 'site-agent' ); ?></li>
 			</ol>
 			<p><strong><?php esc_html_e( 'Endpoint', 'site-agent' ); ?>:</strong> <code><?php echo esc_html( $endpoint ); ?></code></p>
-			<p><?php esc_html_e( 'Remote connections require HTTPS. Plain HTTP is accepted only when WordPress identifies the installation as local. Clients that require OAuth need a compatible Application Password bridge; Site Agent does not provide OAuth.', 'site-agent' ); ?></p>
+			<p><?php esc_html_e( 'Remote connections require HTTPS. Plain HTTP is accepted only when WordPress identifies the installation as local. Clients that require OAuth can connect with the endpoint alone once OAuth connections are on: they find the sign-in page through the endpoint\'s OAuth metadata.', 'site-agent' ); ?></p>
 			<section id="site-agent-url-auth-guide" aria-labelledby="site-agent-url-auth-heading" style="margin-block:24px;padding:24px;background:#fff;border:1px solid #c3c4c7;">
 				<h3 id="site-agent-url-auth-heading"><?php esc_html_e( 'Connect with an authenticated URL', 'site-agent' ); ?></h3>
 				<p><?php esc_html_e( 'If your MCP client cannot send a custom Authorization header, include your credentials in the endpoint URL instead.', 'site-agent' ); ?></p>
@@ -190,7 +192,7 @@ final class Admin {
 				<pre style="padding:16px;background:#f6f7f7;overflow:auto;"><code><?php echo esc_html( add_query_arg( 'auth', 'BASE64_TOKEN', $endpoint ) ); ?></code></pre>
 				<p><strong><?php esc_html_e( 'Keep the complete URL private.', 'site-agent' ); ?></strong> <?php esc_html_e( 'Base64 is reversible. This URL contains credentials and may appear in browser history, client configuration or server logs. Site Agent removes it from the request before other plugins run their late logging, but earlier server logs can still record it. Use a dedicated Application Password and clear the converter after copying.', 'site-agent' ); ?></p>
 				<p><?php esc_html_e( 'To stop URL-based connections, turn off URL authentication and save. To revoke this credential everywhere, revoke its Application Password in your profile; existing MCP sessions cannot bypass revocation.', 'site-agent' ); ?></p>
-				<p><?php esc_html_e( 'A compatible Streamable HTTP MCP client is required. URL authentication does not provide OAuth support or guarantee compatibility with every client. ChatGPT web compatibility with credential-bearing URLs has not been verified.', 'site-agent' ); ?></p>
+				<p><?php esc_html_e( 'A compatible Streamable HTTP MCP client is required. Prefer OAuth connections for clients that support them: no credential appears in a URL. ChatGPT web compatibility with credential-bearing URLs has not been verified.', 'site-agent' ); ?></p>
 			</section>
 			<?php self::auth_converter(); ?>
 			<pre id="site-agent-connection-config" style="padding:16px;background:#fff;border:1px solid #c3c4c7;overflow:auto;"><?php echo esc_html( wp_json_encode( $connection, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) ); ?></pre>
@@ -198,6 +200,37 @@ final class Admin {
 			<p><?php esc_html_e( 'To revoke remote access, disable Site Agent or revoke its Application Password in your profile. For an emergency stop, set SITE_AGENT_DISABLED to true in wp-config.php; set SITE_AGENT_ALLOW_EXECUTION to false to block only source editing, PHP and WP-CLI. Deactivation also disables access until you enable it again.', 'site-agent' ); ?></p>
 			<?php self::audit_table(); ?>
 		</div>
+		<?php
+	}
+
+	/** OAuth discovery details and the current user's connected clients, with revoke buttons. */
+	private static function oauth_panel(): void {
+		if ( ! Config::get()['oauth'] ) {
+			return;
+		}
+		$grants = OAuth::grants( get_current_user_id() );
+		?>
+		<section id="site-agent-oauth" aria-labelledby="site-agent-oauth-heading" style="margin-block:24px;padding:24px;background:#fff;border:1px solid #c3c4c7;">
+			<h2 id="site-agent-oauth-heading"><?php esc_html_e( 'OAuth connections', 'site-agent' ); ?></h2>
+			<?php if ( isset( $_GET['oauth_revoked'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Display-only notice after a nonce-checked action. ?>
+				<div class="notice notice-success inline"><p><?php esc_html_e( 'Access revoked. The client must sign in again to reconnect.', 'site-agent' ); ?></p></div>
+			<?php endif; ?>
+			<p><?php esc_html_e( 'Add the endpoint to an OAuth-capable MCP client without any credentials. The client opens a sign-in and consent page here. Approving creates a connection for your account with the tool groups you choose; Site Agent\'s switches above still apply.', 'site-agent' ); ?></p>
+			<p><strong><?php esc_html_e( 'Endpoint', 'site-agent' ); ?>:</strong> <code><?php echo esc_html( OAuth::resource() ); ?></code><br><strong><?php esc_html_e( 'Authorization server', 'site-agent' ); ?>:</strong> <code><?php echo esc_html( OAuth::issuer() ); ?></code></p>
+			<?php if ( $grants ) : ?>
+				<table class="widefat striped" style="max-width:900px"><thead><tr><th><?php esc_html_e( 'Client', 'site-agent' ); ?></th><th><?php esc_html_e( 'Tool groups', 'site-agent' ); ?></th><th><?php esc_html_e( 'Connected', 'site-agent' ); ?></th><th><?php esc_html_e( 'Last used', 'site-agent' ); ?></th><th><span class="screen-reader-text"><?php esc_html_e( 'Actions', 'site-agent' ); ?></span></th></tr></thead><tbody>
+				<?php foreach ( array_reverse( $grants, true ) as $grant_id => $grant ) : ?>
+					<?php $client = OAuth::client( (string) $grant['client_id'] ); ?>
+					<tr><td><?php echo esc_html( $client ? $client['client_name'] : __( 'Removed client', 'site-agent' ) ); ?></td><td><?php echo esc_html( $grant['groups'] ? implode( ', ', $grant['groups'] ) : __( 'Read only', 'site-agent' ) ); ?></td><td><?php echo esc_html( wp_date( 'M j, Y', (int) $grant['created'] ) ); ?></td><td><?php echo esc_html( $grant['last_used'] ? wp_date( 'M j, Y H:i', (int) $grant['last_used'] ) : __( 'Not yet', 'site-agent' ) ); ?></td><td>
+						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"><input type="hidden" name="action" value="site_agent_oauth_revoke"><input type="hidden" name="grant" value="<?php echo esc_attr( $grant_id ); ?>"><?php wp_nonce_field( 'site_agent_oauth_revoke' ); ?><button class="button"><?php esc_html_e( 'Revoke', 'site-agent' ); ?></button></form>
+					</td></tr>
+				<?php endforeach; ?>
+				</tbody></table>
+			<?php else : ?>
+				<p><?php esc_html_e( 'No OAuth clients are connected to your account.', 'site-agent' ); ?></p>
+			<?php endif; ?>
+			<p class="description"><?php esc_html_e( 'Turning off OAuth connections stops every OAuth client at once without deleting connections. Revoking removes a connection for good.', 'site-agent' ); ?></p>
+		</section>
 		<?php
 	}
 

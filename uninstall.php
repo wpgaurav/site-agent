@@ -25,6 +25,9 @@ foreach ( $site_agent_sites as $site_agent_site ) {
 	delete_metadata( 'user', 0, 'site_agent_mcp_adapter_sessions_' . (int) $site_agent_site, '', true );
 	delete_transient( 'site_agent_update_metadata' );
 	delete_transient( 'site_agent_php_binary' );
+	// OAuth grants are credentials, so they never outlive the plugin.
+	delete_metadata( 'user', 0, 'site_agent_oauth_grants', '', true );
+	delete_option( 'site_agent_oauth_clients' );
 	$site_agent_config = get_option( 'site_agent_settings', array() );
 	if ( ! empty( $site_agent_config['delete_data'] ) ) {
 		delete_option( 'site_agent_settings' );

@@ -45,6 +45,9 @@ final class Audit {
 
 	/** How the caller authenticated: an Application Password in a header or URL, or a WordPress session. */
 	private static function via(): string {
+		if ( null !== OAuth::current() ) {
+			return 'oauth';
+		}
 		if ( '' !== Scopes::current_uuid() ) {
 			return Url_Auth::used() ? 'url' : 'header';
 		}
