@@ -127,8 +127,52 @@ final class OAuthTest extends TestCase {
 		$server = $this->rest( 'GET', '/site-agent/v1/oauth/authorization-server' )->get_data();
 		$this->assertSame( array( 'S256' ), $server['code_challenge_methods_supported'] );
 		$this->assertSame( array( 'none' ), $server['token_endpoint_auth_methods_supported'] );
-		$this->assertStringContainsString( 'page=site-agent-authorize', $server['authorization_endpoint'] );
+		$this->assertSame( OAuth::authorization_endpoint(), $server['authorization_endpoint'] );
 		$this->assertContains( 'php_execute', $server['scopes_supported'] );
+	}
+
+	public function test_authorization_endpoint_survives_clients_that_append_with_a_question_mark(): void {
+		$structure = get_option( 'permalink_structure' );
+		update_option( 'permalink_structure', '' );
+		$this->assertStringContainsString( 'page=site-agent-authorize', OAuth::authorization_endpoint(), 'Without pretty permalinks the consent screen is advertised directly.' );
+		update_option( 'permalink_structure', '/%postname%/' );
+		$endpoint = OAuth::authorization_endpoint();
+		update_option( 'permalink_structure', $structure );
+		$this->assertSame( rest_url( 'site-agent/v1/oauth/authorize' ), $endpoint );
+		$this->assertStringNotContainsString( '?', $endpoint );
+
+		$client              = $this->register();
+		list( , $challenge ) = $this->verifier();
+		$params              = array(
+			'response_type'         => 'code',
+			'client_id'             => $client,
+			'redirect_uri'          => 'https://client.example/callback',
+			'state'                 => 'a&b=c',
+			'code_challenge'        => $challenge,
+			'code_challenge_method' => 'S256',
+			'resource'              => OAuth::resource(),
+			'scope'                 => 'site-agent content_write',
+		);
+		$response = $this->rest( 'GET', '/site-agent/v1/oauth/authorize', $params );
+		$this->assertSame( 302, $response->get_status() );
+		$this->assertSame( 'no-store', $response->get_headers()['Cache-Control'] );
+		$location = $response->get_headers()['Location'];
+		$this->assertStringStartsWith( admin_url( 'admin.php?page=site-agent-authorize&' ), $location );
+		parse_str( (string) wp_parse_url( $location, PHP_URL_QUERY ), $query );
+		$this->assertSame( array( 'page' => OAuth::PAGE ) + $params, $query );
+
+		// What PHP makes of admin.php?page=site-agent-authorize?response_type=code&client_id=...
+		parse_str( 'page=' . OAuth::PAGE . '?' . http_build_query( $params, '', '&', PHP_QUERY_RFC3986 ), $malformed );
+		$this->assertSame( OAuth::PAGE . '?response_type=code', $malformed['page'] );
+		$repaired = OAuth::repaired_params( $malformed );
+		$this->assertSame( $params, $repaired );
+		wp_set_current_user( 1 );
+		$this->assertIsArray( OAuth::authorization_request( $repaired ) );
+		parse_str( (string) wp_parse_url( OAuth::consent_url( $repaired ), PHP_URL_QUERY ), $fixed );
+		$this->assertSame( array( 'page' => OAuth::PAGE ) + $params, $fixed );
+		$this->assertNull( OAuth::repaired_params( array( 'page' => OAuth::PAGE ) + $params ) );
+		$this->assertNull( OAuth::repaired_params( array( 'page' => 'site-agent' ) ) );
+		$this->assertNull( OAuth::repaired_params( array() ) );
 	}
 
 	public function test_well_known_paths_map_to_metadata(): void {

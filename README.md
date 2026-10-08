@@ -10,7 +10,7 @@ Site Agent is free and open source. The complete release ZIP and a free automati
 
 ## Companion Package
 
-Release 0.4.1 also includes `site-agent-companion-0.4.1.zip`, built from `companion/site-agent/`. It supplies the approved icon, a credential-free MCP connection and a WordPress workflow skill for compatible ChatGPT/Codex hosts. The skill covers site inspection, raw-content audits, draft preparation, hash-checked edits and enabled developer tools.
+Release 0.4.2 also includes `site-agent-companion-0.4.2.zip`, built from `companion/site-agent/`. It supplies the approved icon, a credential-free MCP connection and a WordPress workflow skill for compatible ChatGPT/Codex hosts. The skill covers site inspection, raw-content audits, draft preparation, hash-checked edits and enabled developer tools.
 
 This companion archive is separate from the WordPress installable ZIP and contains no credentials. With OAuth connections on (0.4.0+), an OAuth-capable host signs in through WordPress and needs nothing else. Otherwise, authentication is configured privately through the host with a WordPress Application Password in a Basic Authorization header or an explicitly enabled authenticated URL. ChatGPT web compatibility with credential-bearing URLs has not been verified.
 
@@ -167,7 +167,7 @@ python3 bin/sync-skills.py
 bash bin/build.sh
 ```
 
-Tests refuse to load an installation without a `.site-agent-test-install` marker. Never place that marker on a real site. Integration tests modify disposable options, users, posts, and fixture files. The build uses a runtime allowlist and excludes tests, development dependencies, Composer metadata, docs, and screenshots. Ship `dist/site-agent-0.4.1.zip`, not a GitHub source archive.
+Tests refuse to load an installation without a `.site-agent-test-install` marker. Never place that marker on a real site. Integration tests modify disposable options, users, posts, and fixture files. The build uses a runtime allowlist and excludes tests, development dependencies, Composer metadata, docs, and screenshots. Ship `dist/site-agent-0.4.2.zip`, not a GitHub source archive.
 
 ## License and Contributions
 
