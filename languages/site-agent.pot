@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-08T02:01:26+00:00\n"
+"POT-Creation-Date: 2026-10-08T02:29:12+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: site-agent\n"
@@ -466,7 +466,7 @@ msgid "Credentials and generated token cleared."
 msgstr ""
 
 #: includes/class-admin.php:49
-#: includes/class-admin.php:382
+#: includes/class-admin.php:415
 msgid "Show token"
 msgstr ""
 
@@ -644,386 +644,424 @@ msgstr ""
 msgid "Blocked by a wp-config.php constant on this site."
 msgstr ""
 
-#: includes/class-admin.php:175
+#: includes/class-admin.php:176
 msgid "Connect a client"
 msgstr ""
 
-#: includes/class-admin.php:177
+#: includes/class-admin.php:178
 msgid "Enable Site Agent and the tools you need, and keep OAuth connections on. Save."
 msgstr ""
 
-#: includes/class-admin.php:178
+#: includes/class-admin.php:179
 msgid "Add the endpoint below to your MCP client, such as a Claude or ChatGPT connector, Claude Code or Cursor, with no credentials."
 msgstr ""
 
-#: includes/class-admin.php:179
+#: includes/class-admin.php:180
 msgid "The client opens a WordPress sign-in and consent page. Check the client name, choose the tool groups it may use, and allow it."
 msgstr ""
 
-#: includes/class-admin.php:181
-#: includes/class-admin.php:263
+#: includes/class-admin.php:182
+#: includes/class-admin.php:296
 #: includes/class-diagnostics.php:32
 msgid "Endpoint"
 msgstr ""
 
-#: includes/class-admin.php:182
+#: includes/class-admin.php:183
 msgid "Application Passwords (not recommended)"
 msgstr ""
 
-#: includes/class-admin.php:183
+#: includes/class-admin.php:184
 msgid "Use an Application Password only for a client that cannot sign in with OAuth. It acts as your account until you revoke it, every client configuration that holds it can leak it, and a password in a URL can also end up in history, chats and server logs. OAuth tokens expire, can be limited per client, and never reveal a password."
 msgstr ""
 
-#: includes/class-admin.php:185
+#: includes/class-admin.php:186
 msgid "Create a dedicated WordPress Application Password in your profile, one per client."
 msgstr ""
 
-#: includes/class-admin.php:186
+#: includes/class-admin.php:187
 msgid "Use the endpoint above in a client that supports Streamable HTTP and a custom Authorization header. The header uses HTTP Basic authentication with your username and Application Password. Keep the client configuration private, and limit the password's tools above."
 msgstr ""
 
-#: includes/class-admin.php:188
+#: includes/class-admin.php:189
 msgid "Remote connections require HTTPS. Plain HTTP is accepted only when WordPress identifies the installation as local. Clients that require OAuth can connect with the endpoint alone once OAuth connections are on: they find the sign-in page through the endpoint's OAuth metadata."
 msgstr ""
 
-#: includes/class-admin.php:190
+#: includes/class-admin.php:191
 msgid "Connect with an authenticated URL"
 msgstr ""
 
-#: includes/class-admin.php:191
+#: includes/class-admin.php:192
 msgid "If your MCP client cannot send a custom Authorization header, include your credentials in the endpoint URL instead."
 msgstr ""
 
-#: includes/class-admin.php:193
+#: includes/class-admin.php:194
 msgid "Enable Site Agent and URL authentication above, select the tools you need, then save your settings."
 msgstr ""
 
-#: includes/class-admin.php:194
+#: includes/class-admin.php:195
 msgid "Create a dedicated Application Password in your administrator profile."
 msgstr ""
 
-#: includes/class-admin.php:195
+#: includes/class-admin.php:196
 msgid "Enter your WordPress username and that Application Password in the converter below. Click Generate token, then Copy authenticated endpoint."
 msgstr ""
 
-#: includes/class-admin.php:196
+#: includes/class-admin.php:197
 msgid "Paste the copied URL into your client as a Streamable HTTP MCP endpoint. The client must retain the auth query parameter on every request; a separate Authorization header is not required."
 msgstr ""
 
-#: includes/class-admin.php:198
+#: includes/class-admin.php:199
 msgid "Example format only: BASE64_TOKEN is a placeholder for the encoded username:application-password value. The copy button generates and URL-encodes it for you."
 msgstr ""
 
-#: includes/class-admin.php:200
+#: includes/class-admin.php:201
 msgid "Keep the complete URL private."
 msgstr ""
 
-#: includes/class-admin.php:200
+#: includes/class-admin.php:201
 msgid "Base64 is reversible. This URL contains credentials and may appear in browser history, client configuration or server logs. Site Agent removes it from the request before other plugins run their late logging, but earlier server logs can still record it. Use a dedicated Application Password and clear the converter after copying."
 msgstr ""
 
-#: includes/class-admin.php:201
+#: includes/class-admin.php:202
 msgid "To stop URL-based connections, turn off URL authentication and save. To revoke this credential everywhere, revoke its Application Password in your profile; existing MCP sessions cannot bypass revocation."
 msgstr ""
 
-#: includes/class-admin.php:202
+#: includes/class-admin.php:203
 msgid "A compatible Streamable HTTP MCP client is required. Prefer OAuth connections for clients that support them: no credential appears in a URL. ChatGPT web compatibility with credential-bearing URLs has not been verified."
 msgstr ""
 
-#: includes/class-admin.php:206
+#: includes/class-admin.php:207
 msgid "Each tool switch controls that entry point. PHP execution, executable source editing, and WP-CLI can change other settings or files, so these switches are not isolation boundaries. Use a backed-up development or staging site for developer tools."
 msgstr ""
 
-#: includes/class-admin.php:207
+#: includes/class-admin.php:208
 msgid "To revoke remote access, disable Site Agent or revoke its Application Password in your profile. For an emergency stop, set SITE_AGENT_DISABLED to true in wp-config.php; set SITE_AGENT_ALLOW_EXECUTION to false to block only source editing, PHP and WP-CLI. Deactivation also disables access until you enable it again."
 msgstr ""
 
-#: includes/class-admin.php:225
+#: includes/class-admin.php:226
 msgid "OAuth connections are off, so clients can only connect with an Application Password. Turn OAuth connections on below; it is the recommended way to connect."
 msgstr ""
 
-#: includes/class-admin.php:228
+#: includes/class-admin.php:229
 msgid "URL authentication is on. A password in a URL is only encoded and can be recorded in client history, chats and server logs. Reconnect those clients with OAuth, then turn URL authentication off and revoke their Application Passwords."
 msgstr ""
 
 #. translators: %s: Application Password names.
-#: includes/class-admin.php:241
+#: includes/class-admin.php:242
 #, php-format
 msgid "Tool calls in the last 30 days used Application Passwords (%s). Reconnect those clients with OAuth if they support it, then revoke the passwords in your profile."
 msgstr ""
 
-#: includes/class-admin.php:242
+#: includes/class-admin.php:243
 msgid "unnamed"
 msgstr ""
 
-#: includes/class-admin.php:258
-msgid "OAuth connections"
+#: includes/class-admin.php:255
+msgid "Plugin skills"
 msgstr ""
 
-#: includes/class-admin.php:260
-msgid "Access revoked. The client must sign in again to reconnect."
+#: includes/class-admin.php:256
+msgid "These plugins hand connected agents a skill for their own workflows. Agents find active ones with list-skills and get-skill, with nothing else to install."
 msgstr ""
 
-#: includes/class-admin.php:262
-msgid "Add the endpoint to an OAuth-capable MCP client without any credentials. The client opens a sign-in and consent page here. Approving creates a connection for your account with the tool groups you choose; Site Agent's switches above still apply."
+#: includes/class-admin.php:257
+msgid "Plugin"
 msgstr ""
 
-#: includes/class-admin.php:263
-msgid "Authorization server"
+#: includes/class-admin.php:257
+msgid "What agents can do"
 msgstr ""
 
-#: includes/class-admin.php:265
-msgid "Client"
+#: includes/class-admin.php:257
+msgid "On this site"
 msgstr ""
 
-#: includes/class-admin.php:265
-msgid "Tool groups"
-msgstr ""
-
-#: includes/class-admin.php:265
-msgid "Connected"
-msgstr ""
-
-#: includes/class-admin.php:265
-#: includes/class-admin.php:299
-msgid "Last used"
-msgstr ""
-
-#: includes/class-admin.php:265
-msgid "Actions"
+#. translators: %s: skill names.
+#: includes/class-admin.php:266
+#, php-format
+msgid "Active. Skills: %s"
 msgstr ""
 
 #: includes/class-admin.php:268
+msgid "Active, without a skill yet. Update the plugin, or turn on the module that provides it."
+msgstr ""
+
+#: includes/class-admin.php:270
+msgid "Installed, not active"
+msgstr ""
+
+#: includes/class-admin.php:272
+msgid "Get it"
+msgstr ""
+
+#: includes/class-admin.php:291
+msgid "OAuth connections"
+msgstr ""
+
+#: includes/class-admin.php:293
+msgid "Access revoked. The client must sign in again to reconnect."
+msgstr ""
+
+#: includes/class-admin.php:295
+msgid "Add the endpoint to an OAuth-capable MCP client without any credentials. The client opens a sign-in and consent page here. Approving creates a connection for your account with the tool groups you choose; Site Agent's switches above still apply."
+msgstr ""
+
+#: includes/class-admin.php:296
+msgid "Authorization server"
+msgstr ""
+
+#: includes/class-admin.php:298
+msgid "Client"
+msgstr ""
+
+#: includes/class-admin.php:298
+msgid "Tool groups"
+msgstr ""
+
+#: includes/class-admin.php:298
+msgid "Connected"
+msgstr ""
+
+#: includes/class-admin.php:298
+#: includes/class-admin.php:332
+msgid "Last used"
+msgstr ""
+
+#: includes/class-admin.php:298
+msgid "Actions"
+msgstr ""
+
+#: includes/class-admin.php:301
 #: includes/class-oauth.php:789
 msgid "Removed client"
 msgstr ""
 
-#: includes/class-admin.php:268
+#: includes/class-admin.php:301
 msgid "Read only"
 msgstr ""
 
-#: includes/class-admin.php:268
+#: includes/class-admin.php:301
 msgid "Not yet"
 msgstr ""
 
-#: includes/class-admin.php:269
+#: includes/class-admin.php:302
 msgid "Revoke"
 msgstr ""
 
-#: includes/class-admin.php:274
+#: includes/class-admin.php:307
 msgid "No OAuth clients are connected to your account."
 msgstr ""
 
-#: includes/class-admin.php:276
+#: includes/class-admin.php:309
 msgid "Turning off OAuth connections stops every OAuth client at once without deleting connections. Revoking removes a connection for good."
 msgstr ""
 
-#: includes/class-admin.php:290
+#: includes/class-admin.php:323
 msgid "Application Password access"
 msgstr ""
 
-#: includes/class-admin.php:291
+#: includes/class-admin.php:324
 msgid "Limit what each of your Application Passwords can do, for example content-only for a chat client and developer tools for a local coding agent. A limit can only narrow the switches above. Read-only content tools stay available to every administrator password."
 msgstr ""
 
-#: includes/class-admin.php:293
+#: includes/class-admin.php:326
 msgid "You have no Application Passwords yet."
 msgstr ""
 
-#: includes/class-admin.php:299
-#: includes/class-admin.php:376
+#: includes/class-admin.php:332
+#: includes/class-admin.php:409
 msgid "Application Password"
 msgstr ""
 
-#: includes/class-admin.php:299
+#: includes/class-admin.php:332
 msgid "Access"
 msgstr ""
 
-#: includes/class-admin.php:309
+#: includes/class-admin.php:342
 msgid "Never"
 msgstr ""
 
-#: includes/class-admin.php:311
+#: includes/class-admin.php:344
 msgid "Limit this password to:"
 msgstr ""
 
-#: includes/class-admin.php:327
+#: includes/class-admin.php:360
 msgid "OK"
 msgstr ""
 
-#: includes/class-admin.php:328
+#: includes/class-admin.php:361
 msgid "Warning"
 msgstr ""
 
-#: includes/class-admin.php:329
+#: includes/class-admin.php:362
 msgid "Problem"
 msgstr ""
 
-#: includes/class-admin.php:332
+#: includes/class-admin.php:365
 msgid "Diagnostics"
 msgstr ""
 
-#: includes/class-admin.php:333
+#: includes/class-admin.php:366
 msgid "Server checks for common connection problems. Generate a token below and use Test connection to confirm the whole path, including whether your server passes the Authorization header to WordPress."
 msgstr ""
 
-#: includes/class-admin.php:348
+#: includes/class-admin.php:381
 msgid "Denied"
 msgstr ""
 
-#: includes/class-admin.php:351
+#: includes/class-admin.php:384
 msgid "Recent tool calls"
 msgstr ""
 
-#: includes/class-admin.php:352
+#: includes/class-admin.php:385
 msgid "Time (UTC)"
 msgstr ""
 
-#: includes/class-admin.php:352
+#: includes/class-admin.php:385
 msgid "User ID"
 msgstr ""
 
-#: includes/class-admin.php:352
+#: includes/class-admin.php:385
 msgid "Tool"
 msgstr ""
 
-#: includes/class-admin.php:352
+#: includes/class-admin.php:385
 msgid "Target"
 msgstr ""
 
-#: includes/class-admin.php:352
+#: includes/class-admin.php:385
 msgid "Credential"
 msgstr ""
 
-#: includes/class-admin.php:352
+#: includes/class-admin.php:385
 msgid "Result"
 msgstr ""
 
-#: includes/class-admin.php:360
+#: includes/class-admin.php:393
 msgid "Success"
 msgstr ""
 
-#: includes/class-admin.php:360
+#: includes/class-admin.php:393
 msgid "Failed"
 msgstr ""
 
-#: includes/class-admin.php:371
+#: includes/class-admin.php:404
 msgid "Create your Authorization value"
 msgstr ""
 
-#: includes/class-admin.php:372
+#: includes/class-admin.php:405
 msgid "Enter a dedicated WordPress Application Password, not your account password. Conversion happens in this browser. Site Agent does not submit or store these credentials; Test connection sends them only to this site's MCP endpoint."
 msgstr ""
 
-#: includes/class-admin.php:375
+#: includes/class-admin.php:408
 msgid "WordPress username"
 msgstr ""
 
-#: includes/class-admin.php:376
+#: includes/class-admin.php:409
 msgid "You can paste the password with its spaces. The converter removes them."
 msgstr ""
 
-#: includes/class-admin.php:378
+#: includes/class-admin.php:411
 msgid "Generate token"
 msgstr ""
 
-#: includes/class-admin.php:378
+#: includes/class-admin.php:411
 msgid "Clear credentials"
 msgstr ""
 
-#: includes/class-admin.php:380
+#: includes/class-admin.php:413
 msgid "Base64 token"
 msgstr ""
 
-#: includes/class-admin.php:382
+#: includes/class-admin.php:415
 msgid "Copy Base64 token"
 msgstr ""
 
-#: includes/class-admin.php:382
+#: includes/class-admin.php:415
 msgid "Copy Authorization value"
 msgstr ""
 
-#: includes/class-admin.php:382
+#: includes/class-admin.php:415
 msgid "Copy MCP configuration"
 msgstr ""
 
-#: includes/class-admin.php:382
+#: includes/class-admin.php:415
 msgid "Copy authenticated endpoint"
 msgstr ""
 
-#: includes/class-admin.php:382
+#: includes/class-admin.php:415
 msgid "Test connection"
 msgstr ""
 
-#: includes/class-admin.php:383
+#: includes/class-admin.php:416
 msgid "The Authorization value includes the Basic prefix. The MCP configuration includes your endpoint and generated value. Base64 is reversible, so keep the token and configuration private."
 msgstr ""
 
-#: includes/class-admin.php:384
+#: includes/class-admin.php:417
 msgid "For clients without custom headers, enable URL authentication above and save first. Copy authenticated endpoint adds the auth query parameter. This URL contains your credentials and may appear in history or logs; keep it private. A compatible Streamable HTTP MCP client is still required."
 msgstr ""
 
-#: includes/class-admin.php:387
+#: includes/class-admin.php:420
 msgid "Enable JavaScript to use the credential converter."
 msgstr ""
 
-#: includes/class-admin.php:395
+#: includes/class-admin.php:428
 msgid "You cannot manage the Site Agent update license."
 msgstr ""
 
-#: includes/class-admin.php:419
+#: includes/class-admin.php:452
 msgid "Automatic updates"
 msgstr ""
 
-#: includes/class-admin.php:420
+#: includes/class-admin.php:453
 msgid "Activate the free FluentCart license from your Site Agent checkout to receive automatic updates. Plugin functionality remains available without a license."
 msgstr ""
 
-#: includes/class-admin.php:421
+#: includes/class-admin.php:454
 msgid "Get a free update license"
 msgstr ""
 
-#: includes/class-admin.php:423
+#: includes/class-admin.php:456
 msgid "The license operation completed."
 msgstr ""
 
-#: includes/class-admin.php:423
+#: includes/class-admin.php:456
 msgid "The license operation failed. Verify the license and server connection, then try again. Previous credentials are retained on network errors."
 msgstr ""
 
-#: includes/class-admin.php:426
+#: includes/class-admin.php:459
 msgid "Status"
 msgstr ""
 
-#: includes/class-admin.php:426
+#: includes/class-admin.php:459
 msgid "Active"
 msgstr ""
 
-#: includes/class-admin.php:426
+#: includes/class-admin.php:459
 msgid "Activation required or inactive"
 msgstr ""
 
-#: includes/class-admin.php:426
+#: includes/class-admin.php:459
 msgid "Key ending"
 msgstr ""
 
-#: includes/class-admin.php:432
+#: includes/class-admin.php:465
 msgid "License key"
 msgstr ""
 
-#: includes/class-admin.php:434
+#: includes/class-admin.php:467
 msgid "Activate license"
 msgstr ""
 
-#: includes/class-admin.php:436
+#: includes/class-admin.php:469
 msgid "Check status"
 msgstr ""
 
-#: includes/class-admin.php:437
+#: includes/class-admin.php:470
 msgid "Disconnect this site"
 msgstr ""
 
-#: includes/class-admin.php:440
+#: includes/class-admin.php:473
 msgid "Activation sends the license key, site URL, plugin version, WordPress version and PHP version to gauravtiwari.org. Credentials are encrypted and bound to this site. Activated licenses are checked when WordPress checks updates."
 msgstr ""
 
@@ -1651,7 +1689,7 @@ msgid "Site Agent requires site administration rights."
 msgstr ""
 
 #. translators: 1: requested path, 2: skill name.
-#: includes/class-skills.php:222
+#: includes/class-skills.php:272
 #, php-format
 msgid "%1$s is not a file of the %2$s skill. Call list-skills for its files."
 msgstr ""

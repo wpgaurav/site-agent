@@ -170,6 +170,7 @@ final class Admin {
 				<?php submit_button(); ?>
 			</form>
 			<?php self::oauth_panel(); ?>
+			<?php self::partners_panel(); ?>
 			<?php self::diagnostics_panel(); ?>
 			<?php self::license_panel(); ?>
 			<h2><?php esc_html_e( 'Connect a client', 'site-agent' ); ?></h2>
@@ -245,6 +246,38 @@ final class Admin {
 		foreach ( $messages as $message ) {
 			echo '<div class="notice notice-warning inline"><p>' . esc_html( $message ) . '</p></div>';
 		}
+	}
+
+	/** Plugins that add skills for connected agents, with links and their state on this site. */
+	private static function partners_panel(): void {
+		?>
+		<section id="site-agent-plugin-skills" aria-labelledby="site-agent-plugin-skills-heading" style="margin-block:24px;padding:24px;background:#fff;border:1px solid #c3c4c7;">
+			<h2 id="site-agent-plugin-skills-heading"><?php esc_html_e( 'Plugin skills', 'site-agent' ); ?></h2>
+			<p><?php esc_html_e( 'These plugins hand connected agents a skill for their own workflows. Agents find active ones with list-skills and get-skill, with nothing else to install.', 'site-agent' ); ?></p>
+			<table class="widefat striped" style="max-width:900px"><thead><tr><th><?php esc_html_e( 'Plugin', 'site-agent' ); ?></th><th><?php esc_html_e( 'What agents can do', 'site-agent' ); ?></th><th><?php esc_html_e( 'On this site', 'site-agent' ); ?></th></tr></thead><tbody>
+			<?php foreach ( Skills::partners() as $partner ) : ?>
+				<tr>
+					<td><a href="<?php echo esc_url( $partner['url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $partner['name'] ); ?></a></td>
+					<td><?php echo esc_html( $partner['does'] ); ?></td>
+					<td>
+					<?php
+					if ( 'active' === $partner['state'] && $partner['skills'] ) {
+						/* translators: %s: skill names. */
+						echo esc_html( sprintf( __( 'Active. Skills: %s', 'site-agent' ), implode( ', ', $partner['skills'] ) ) );
+					} elseif ( 'active' === $partner['state'] ) {
+						esc_html_e( 'Active, without a skill yet. Update the plugin, or turn on the module that provides it.', 'site-agent' );
+					} elseif ( 'installed' === $partner['state'] ) {
+						echo '<a href="' . esc_url( admin_url( 'plugins.php' ) ) . '">' . esc_html__( 'Installed, not active', 'site-agent' ) . '</a>';
+					} else {
+						echo '<a href="' . esc_url( $partner['url'] ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Get it', 'site-agent' ) . '</a>';
+					}
+					?>
+					</td>
+				</tr>
+			<?php endforeach; ?>
+			</tbody></table>
+		</section>
+		<?php
 	}
 
 	/** OAuth discovery details and the current user's connected clients, with revoke buttons. */

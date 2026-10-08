@@ -109,6 +109,25 @@ final class SkillsTest extends TestCase {
 		$this->assertSame( Skills::CATALOG, Skills::names() );
 	}
 
+	public function test_partner_plugins_report_their_state_and_skills(): void {
+		$filter = static function ( $skills ) {
+			$skills['gt-link-manager'] = array( 'directory' => SITE_AGENT_DIR . 'skills/gutenberg', 'plugin' => 'GT Link Manager', 'version' => '1.10.0' );
+			return $skills;
+		};
+		add_filter( 'site_agent_skills', $filter );
+		try {
+			$partners = array_column( Skills::partners(), null, 'name' );
+			$this->assertSame( array( 'GT Extensions for FluentCart', 'GT Page Blocks Builder', 'GT Link Manager' ), array_keys( $partners ) );
+			$this->assertSame( array( 'gt-link-manager' ), $partners['GT Link Manager']['skills'] );
+			foreach ( $partners as $partner ) {
+				$this->assertContains( $partner['state'], array( 'active', 'installed', 'missing' ) );
+				$this->assertStringStartsWith( 'https://', $partner['url'] );
+			}
+		} finally {
+			remove_filter( 'site_agent_skills', $filter );
+		}
+	}
+
 	public function test_skills_need_only_base_access(): void {
 		$listing = Abilities::execute( 'list-skills', array() );
 		$this->assertMatchesOutputSchema( 'list-skills', $listing );
