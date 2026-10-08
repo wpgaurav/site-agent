@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-08T02:29:12+00:00\n"
+"POT-Creation-Date: 2026-10-08T02:50:05+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: site-agent\n"
@@ -1689,7 +1689,7 @@ msgid "Site Agent requires site administration rights."
 msgstr ""
 
 #. translators: 1: requested path, 2: skill name.
-#: includes/class-skills.php:272
+#: includes/class-skills.php:282
 #, php-format
 msgid "%1$s is not a file of the %2$s skill. Call list-skills for its files."
 msgstr ""
