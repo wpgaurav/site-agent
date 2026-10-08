@@ -3,7 +3,7 @@ Contributors: wpgaurav
 Tags: mcp, developer-tools, ai, automation
 Requires at least: 6.9
 Requires PHP: 8.0
-Stable tag: 0.4.0
+Stable tag: 0.4.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -43,7 +43,7 @@ An optional history keeps the last 100 tool calls with the time, user ID, tool n
 No. It is an independent plugin.
 
 = Does Site Agent support OAuth? =
-Yes, from 0.4.0, as an opt-in. Turn on OAuth connections in Tools → Site Agent, then add the endpoint to an OAuth-capable MCP client without credentials. The client opens a WordPress sign-in and consent page, where an administrator approves it and picks its tool groups. Application Passwords in a header or URL keep working.
+Yes. From 0.4.1 OAuth connections are on by default whenever Site Agent is enabled. Add the endpoint to an OAuth-capable MCP client without credentials. The client opens a WordPress sign-in and consent page, where an administrator approves it and picks its tool groups. Application Passwords in a header or URL keep working.
 
 = Does this version run background commands? =
 No. WP-CLI commands run in the foreground with a 20-second limit by default (SITE_AGENT_WP_CLI_TIMEOUT, up to 300 seconds). PHP execution is not sandboxed.
@@ -61,6 +61,11 @@ Disable Site Agent or revoke its Application Password. An emergency SITE_AGENT_D
 Get the free checkout license from https://gauravtiwari.org/product/site-agent/ and activate it under Tools > Site Agent. FluentCart supplies automatic updates through protected HTTPS packages. The Update URI protects against unrelated WordPress.org slug matches. Manual release ZIP updates remain available. Licensing never disables the developer tools.
 
 == Changelog ==
+
+= 0.4.1 =
+* OAuth connections are on by default. Sites that never changed the setting get them as soon as Site Agent is enabled; a site that turned them off keeps its choice.
+* Tools → Site Agent leads with connecting through OAuth and moves Application Passwords to a "not recommended" section with a warning. It also warns when OAuth is off, when URL authentication is on, and when Application Passwords made tool calls in the last 30 days.
+* site-context reports how the connection authenticated. For an Application Password or an authenticated URL it carries a warning that agents pass on, asking the user to reconnect with OAuth.
 
 = 0.4.0 =
 * Add opt-in OAuth 2.1 connections for MCP clients that support the MCP authorization specification: protected resource and authorization server metadata under Site Agent's own issuer path, which leaves the site-root discovery documents to other plugins such as Rank Math, dynamic client registration for public clients, PKCE (S256) authorization codes, and a WordPress consent screen where an administrator approves each client and picks its tool groups.

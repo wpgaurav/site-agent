@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Site Agent 0.4.0\n"
+"Project-Id-Version: Site Agent 0.4.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/site-agent\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-08T01:34:27+00:00\n"
+"POT-Creation-Date: 2026-10-08T02:01:26+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: site-agent\n"
@@ -101,338 +101,338 @@ msgid "Site context"
 msgstr ""
 
 #: includes/class-abilities.php:150
-msgid "Inspect WordPress, PHP, active plugins, theme, page builders, post types, taxonomies and the tools this connection can use. Start here."
-msgstr ""
-
-#: includes/class-abilities.php:172
-msgid "List content"
-msgstr ""
-
-#: includes/class-abilities.php:173
-msgid "Search and paginate posts in a REST-enabled post type, most recently modified first."
+msgid "Inspect WordPress, PHP, active plugins, theme, page builders, post types, taxonomies, the tools this connection can use and how it authenticated. Start here. If connection has a warning, pass it on to the user."
 msgstr ""
 
 #: includes/class-abilities.php:180
+msgid "List content"
+msgstr ""
+
+#: includes/class-abilities.php:181
+msgid "Search and paginate posts in a REST-enabled post type, most recently modified first."
+msgstr ""
+
+#: includes/class-abilities.php:188
 msgid "Only this status. Default: every status except trash."
 msgstr ""
 
-#: includes/class-abilities.php:185
+#: includes/class-abilities.php:193
 msgid "Sort field. Default modified."
 msgstr ""
 
-#: includes/class-abilities.php:190
+#: includes/class-abilities.php:198
 msgid "Sort direction. Default desc (asc for title)."
 msgstr ""
 
-#: includes/class-abilities.php:206
+#: includes/class-abilities.php:214
 msgid "Read content"
 msgstr ""
 
-#: includes/class-abilities.php:207
+#: includes/class-abilities.php:215
 msgid "Read a post by ID, URL or slug: raw Gutenberg markup, terms, featured image, SEO meta, the builder that stores its layout, your autosave if any, and the content hash needed for updates. Pass autosave_content to read the text of your staged autosave."
 msgstr ""
 
-#: includes/class-abilities.php:212
+#: includes/class-abilities.php:220
 msgid "Permalink of the post, as an alternative to post_id."
 msgstr ""
 
-#: includes/class-abilities.php:213
+#: includes/class-abilities.php:221
 msgid "Post slug, as an alternative to post_id. Combine with post_type for pages or custom types."
 msgstr ""
 
-#: includes/class-abilities.php:215
+#: includes/class-abilities.php:223
 msgid "Also return the title, content and excerpt of your autosave. Edits to live posts are staged there, so read it back after such a save."
 msgstr ""
 
-#: includes/class-abilities.php:222
+#: includes/class-abilities.php:230
 msgid "Save content"
 msgstr ""
 
-#: includes/class-abilities.php:223
+#: includes/class-abilities.php:231
 msgid "Create a draft or update a post through WordPress. Updates need the current content hash from get-content. Edits to a published, private or scheduled post are saved as your autosave for review unless you pass status (for example publish) to change the live post. Publishing or scheduling always requires status."
 msgstr ""
 
-#: includes/class-abilities.php:227
+#: includes/class-abilities.php:235
 msgid "Post to update. Omit to create a post."
 msgstr ""
 
-#: includes/class-abilities.php:228
+#: includes/class-abilities.php:236
 msgid "Post type for a new post. Default post."
 msgstr ""
 
-#: includes/class-abilities.php:229
+#: includes/class-abilities.php:237
 msgid "Plain-text title."
 msgstr ""
 
-#: includes/class-abilities.php:230
+#: includes/class-abilities.php:238
 msgid "Complete post content, usually serialized Gutenberg block markup. Replaces the existing content."
 msgstr ""
 
-#: includes/class-abilities.php:231
+#: includes/class-abilities.php:239
 msgid "Manual excerpt."
 msgstr ""
 
-#: includes/class-abilities.php:234
+#: includes/class-abilities.php:242
 msgid "New status. Omit to keep drafts as drafts and stage edits to live posts. future needs a future date_gmt."
 msgstr ""
 
-#: includes/class-abilities.php:237
+#: includes/class-abilities.php:245
 msgid "URL slug. WordPress makes it unique."
 msgstr ""
 
-#: includes/class-abilities.php:238
+#: includes/class-abilities.php:246
 msgid "Publish date in UTC, ISO 8601, for example 2026-10-05T09:00:00Z. A future date with status publish or future schedules the post."
 msgstr ""
 
-#: includes/class-abilities.php:241
+#: includes/class-abilities.php:249
 msgid "Replace terms per taxonomy, for example {\"category\": [3], \"post_tag\": [\"seo\", 12]}. Integers are term IDs; strings are names, created when missing. Use list-terms to find IDs."
 msgstr ""
 
-#: includes/class-abilities.php:251
+#: includes/class-abilities.php:259
 msgid "Image attachment ID for the featured image, or 0 to remove it."
 msgstr ""
 
-#: includes/class-abilities.php:254
+#: includes/class-abilities.php:262
 msgid "Post meta to set, for example SEO title and description fields. Only keys listed in get-content meta support are accepted; an empty string deletes the value."
 msgstr ""
 
-#: includes/class-abilities.php:260
+#: includes/class-abilities.php:268
 msgid "content_sha256 from get-content. Required for updates."
 msgstr ""
 
-#: includes/class-abilities.php:267
+#: includes/class-abilities.php:275
 msgid "List terms"
 msgstr ""
 
-#: includes/class-abilities.php:268
+#: includes/class-abilities.php:276
 msgid "Find categories, tags or other taxonomy terms and their IDs."
 msgstr ""
 
-#: includes/class-abilities.php:272
+#: includes/class-abilities.php:280
 msgid "REST-enabled taxonomy such as category or post_tag. Default category."
 msgstr ""
 
-#: includes/class-abilities.php:285
+#: includes/class-abilities.php:293
 msgid "List media"
 msgstr ""
 
-#: includes/class-abilities.php:286
+#: includes/class-abilities.php:294
 msgid "Find existing media library items with their URLs, alt text and dimensions. Prefer existing media over new uploads."
 msgstr ""
 
-#: includes/class-abilities.php:290
+#: includes/class-abilities.php:298
 msgid "Filter by MIME type or family, for example image or image/png."
 msgstr ""
 
-#: includes/class-abilities.php:303
+#: includes/class-abilities.php:311
 msgid "List skills"
 msgstr ""
 
-#: includes/class-abilities.php:304
+#: includes/class-abilities.php:312
 msgid "List the bundled page builder skills (Gutenberg, GenerateBlocks, Elementor, Bricks, Divi) and skills that active plugins add, such as store or invoicing workflows, with whether each applies here and its files. Read the matching skill before creating or editing builder layouts or before running a plugin's workflow."
 msgstr ""
 
-#: includes/class-abilities.php:330
+#: includes/class-abilities.php:338
 msgid "Read skill"
 msgstr ""
 
-#: includes/class-abilities.php:331
+#: includes/class-abilities.php:339
 msgid "Read a skill from list-skills: a bundled page builder skill or one an active plugin adds. Start with its SKILL.md, which explains the workflow and which reference files to read next."
 msgstr ""
 
-#: includes/class-abilities.php:335
+#: includes/class-abilities.php:343
 msgid "Skill name from list-skills."
 msgstr ""
 
-#: includes/class-abilities.php:336
+#: includes/class-abilities.php:344
 msgid "File within the skill, for example references/elements.md. Default SKILL.md."
 msgstr ""
 
-#: includes/class-abilities.php:351
+#: includes/class-abilities.php:359
 msgid "List Bricks abilities"
 msgstr ""
 
-#: includes/class-abilities.php:352
+#: includes/class-abilities.php:360
 msgid "List Bricks Builder's own abilities on this site: name, label, one-line summary, readonly and destructive hints, and the tool name of those also served directly (bricks-*). Pass ability_name for the full description and the input and output schemas. Use this where Bricks guidance names mcp-adapter-discover-abilities or mcp-adapter-get-ability-info."
 msgstr ""
 
-#: includes/class-abilities.php:356
+#: includes/class-abilities.php:364
 msgid "A Bricks ability, for example bricks/get-page-elements, to return in full with its schemas."
 msgstr ""
 
-#: includes/class-abilities.php:357
+#: includes/class-abilities.php:365
 msgid "Only list abilities whose name, label or description contains this text."
 msgstr ""
 
-#: includes/class-abilities.php:384
+#: includes/class-abilities.php:392
 msgid "Run Bricks ability"
 msgstr ""
 
-#: includes/class-abilities.php:385
+#: includes/class-abilities.php:393
 msgid "Run one of Bricks Builder's own abilities with its parameters. Use this where Bricks guidance names mcp-adapter-execute-ability; ability_name and parameters work the same way. Bricks checks its own permissions and validates the parameters against the ability's input schema. Abilities that are not readonly change the site: follow Bricks' readback and revision guidance."
 msgstr ""
 
-#: includes/class-abilities.php:389
+#: includes/class-abilities.php:397
 msgid "Bricks ability name from bricks-abilities, for example bricks/get-page-elements."
 msgstr ""
 
-#: includes/class-abilities.php:390
+#: includes/class-abilities.php:398
 msgid "The ability's input, matching its input schema. Omit for abilities that take no input."
 msgstr ""
 
-#: includes/class-abilities.php:403
+#: includes/class-abilities.php:411
 msgid "Upload media"
 msgstr ""
 
-#: includes/class-abilities.php:404
+#: includes/class-abilities.php:412
 msgid "Import a file into the media library from a public URL or base64 data, with alt text. WordPress checks the file type. Use the returned ID as featured_media or the URL in content."
 msgstr ""
 
-#: includes/class-abilities.php:408
+#: includes/class-abilities.php:416
 msgid "Public http(s) URL to import. Private and loopback addresses are refused."
 msgstr ""
 
-#: includes/class-abilities.php:409
+#: includes/class-abilities.php:417
 msgid "File contents as base64, up to 10 MiB. Requires filename."
 msgstr ""
 
-#: includes/class-abilities.php:410
+#: includes/class-abilities.php:418
 msgid "File name with extension, for example hero.png. Required with data_base64."
 msgstr ""
 
-#: includes/class-abilities.php:411
+#: includes/class-abilities.php:419
 msgid "Optional post to attach the media to."
 msgstr ""
 
-#: includes/class-abilities.php:419
+#: includes/class-abilities.php:427
 msgid "Update media"
 msgstr ""
 
-#: includes/class-abilities.php:420
+#: includes/class-abilities.php:428
 msgid "Set the title, alt text, caption or description of an existing media item."
 msgstr ""
 
-#: includes/class-abilities.php:430
+#: includes/class-abilities.php:438
 msgid "List source files"
 msgstr ""
 
-#: includes/class-abilities.php:431
+#: includes/class-abilities.php:439
 msgid "Browse plugin, theme and must-use plugin directories. Hidden files, credential files and symlinks are hidden."
 msgstr ""
 
-#: includes/class-abilities.php:435
+#: includes/class-abilities.php:443
 msgid "Directory relative to wp-content, for example plugins or themes/my-theme."
 msgstr ""
 
-#: includes/class-abilities.php:436
+#: includes/class-abilities.php:444
 msgid "Entries to skip. Default 0."
 msgstr ""
 
-#: includes/class-abilities.php:439
+#: includes/class-abilities.php:447
 msgid "Entries to return, 1 to 200. Default 100."
 msgstr ""
 
-#: includes/class-abilities.php:457
+#: includes/class-abilities.php:465
 msgid "Read source file"
 msgstr ""
 
-#: includes/class-abilities.php:458
+#: includes/class-abilities.php:466
 msgid "Read a UTF-8 plugin or theme source file up to 256 KiB and obtain the SHA-256 hash needed to change it."
 msgstr ""
 
-#: includes/class-abilities.php:475
+#: includes/class-abilities.php:483
 msgid "Write source file"
 msgstr ""
 
-#: includes/class-abilities.php:476
+#: includes/class-abilities.php:484
 msgid "Create or replace a plugin or theme source file. Supply its current hash, or new for a new file. PHP is syntax- and compile-checked first; after saving, the site is loaded and a change that causes a fatal error is reverted. This changes executable code."
 msgstr ""
 
-#: includes/class-abilities.php:481
+#: includes/class-abilities.php:489
 msgid "Complete new file contents."
 msgstr ""
 
-#: includes/class-abilities.php:482
+#: includes/class-abilities.php:490
 msgid "sha256 from read-file, or new to create a file that must not exist yet."
 msgstr ""
 
-#: includes/class-abilities.php:497
+#: includes/class-abilities.php:505
 msgid "Create directory"
 msgstr ""
 
-#: includes/class-abilities.php:498
+#: includes/class-abilities.php:506
 msgid "Create a directory, and any missing parents, inside plugins/, themes/ or mu-plugins/."
 msgstr ""
 
-#: includes/class-abilities.php:501
+#: includes/class-abilities.php:509
 msgid "Directory relative to wp-content, for example plugins/my-plugin/includes."
 msgstr ""
 
-#: includes/class-abilities.php:515
+#: includes/class-abilities.php:523
 msgid "Delete source file"
 msgstr ""
 
-#: includes/class-abilities.php:516
+#: includes/class-abilities.php:524
 msgid "Delete a plugin or theme file whose hash still matches, or an empty directory. Deleting PHP that breaks the site is undone."
 msgstr ""
 
-#: includes/class-abilities.php:521
+#: includes/class-abilities.php:529
 msgid "sha256 from read-file, or directory to delete an empty directory."
 msgstr ""
 
-#: includes/class-abilities.php:535
+#: includes/class-abilities.php:543
 msgid "Move source file"
 msgstr ""
 
-#: includes/class-abilities.php:536
+#: includes/class-abilities.php:544
 msgid "Rename or move a plugin or theme file whose hash still matches. The destination must not exist. A PHP move that breaks the site is undone."
 msgstr ""
 
-#: includes/class-abilities.php:540
+#: includes/class-abilities.php:548
 msgid "Current path relative to wp-content."
 msgstr ""
 
-#: includes/class-abilities.php:541
+#: includes/class-abilities.php:549
 msgid "New path relative to wp-content. Its directory must exist."
 msgstr ""
 
-#: includes/class-abilities.php:556
+#: includes/class-abilities.php:564
 msgid "Execute PHP"
 msgstr ""
 
-#: includes/class-abilities.php:557
+#: includes/class-abilities.php:565
 msgid "Run PHP statements in the loaded WordPress request with full server privileges; not sandboxed. No PHP tags and no exit or die. Echo output and a JSON-serializable return value are captured; errors include their message and line."
 msgstr ""
 
-#: includes/class-abilities.php:560
+#: includes/class-abilities.php:568
 msgid "PHP statements without <?php, for example: return get_option( \"blogname\" );"
 msgstr ""
 
-#: includes/class-abilities.php:572
+#: includes/class-abilities.php:580
 msgid "Run WP-CLI"
 msgstr ""
 
 #. translators: %d: time limit in seconds.
-#: includes/class-abilities.php:574
+#: includes/class-abilities.php:582
 #, php-format
 msgid "Run WP-CLI on this installation as the authenticated user, with arguments as an array and no shell. Full developer access; foreground commands have a %d-second limit."
 msgstr ""
 
-#: includes/class-abilities.php:580
+#: includes/class-abilities.php:588
 msgid "Command words and flags without the leading wp, for example [\"plugin\", \"list\", \"--format=json\"]. --path, --url, --user, --ssh, --http, --require, --exec, --allow-root and @aliases are set by Site Agent."
 msgstr ""
 
-#: includes/class-abilities.php:733
+#: includes/class-abilities.php:741
 #: includes/class-bricks.php:244
 msgid "This tool is disabled or you do not have permission to use it."
 msgstr ""
 
-#: includes/class-abilities.php:738
+#: includes/class-abilities.php:746
 msgid "Tool arguments must be an object."
 msgstr ""
 
 #. translators: %s: exception class, message and location.
-#: includes/class-abilities.php:752
+#: includes/class-abilities.php:760
 #, php-format
 msgid "The tool raised %s. Check the site before retrying a write."
 msgstr ""
@@ -466,7 +466,7 @@ msgid "Credentials and generated token cleared."
 msgstr ""
 
 #: includes/class-admin.php:49
-#: includes/class-admin.php:338
+#: includes/class-admin.php:382
 msgid "Show token"
 msgstr ""
 
@@ -545,16 +545,15 @@ msgid "URL authentication"
 msgstr ""
 
 #: includes/class-admin.php:112
-msgid "Allow Base64-encoded username and Application Password credentials in the MCP endpoint auth query parameter. URLs may be recorded in client history and server logs. Use a dedicated, revocable Application Password."
+msgid "Not recommended. Allow Base64-encoded username and Application Password credentials in the MCP endpoint auth query parameter. The password is only encoded, and URLs can be recorded in client history, chats and server logs. Use OAuth connections instead whenever the client supports them."
 msgstr ""
 
 #: includes/class-admin.php:113
-#: includes/class-admin.php:214
-msgid "OAuth connections"
+msgid "OAuth connections (recommended)"
 msgstr ""
 
 #: includes/class-admin.php:113
-msgid "Let MCP clients that support OAuth, such as Claude and ChatGPT connectors, connect by signing in here. An administrator approves each client on a consent screen and picks its tool groups. Clients get one-hour access tokens and refresh tokens that end after 30 days without use. No password is shared with the client."
+msgid "On by default. Let MCP clients that support OAuth, such as Claude and ChatGPT connectors, connect by signing in here. An administrator approves each client on a consent screen and picks its tool groups. Clients get one-hour access tokens and refresh tokens that end after 30 days without use. No password is shared with the client."
 msgstr ""
 
 #: includes/class-admin.php:114
@@ -637,356 +636,394 @@ msgstr ""
 msgid "SITE_AGENT_ALLOW_EXECUTION is false in wp-config.php. Source editing, PHP, and WP-CLI tools are blocked on this site."
 msgstr ""
 
-#: includes/class-admin.php:161
+#: includes/class-admin.php:162
 msgid "Unavailable: Bricks abilities are not active. They need the Bricks theme 2.4 or later with AI/MCP enabled in Bricks > Settings > AI."
 msgstr ""
 
-#: includes/class-admin.php:163
+#: includes/class-admin.php:164
 msgid "Blocked by a wp-config.php constant on this site."
 msgstr ""
 
-#: includes/class-admin.php:174
+#: includes/class-admin.php:175
 msgid "Connect a client"
 msgstr ""
 
-#: includes/class-admin.php:176
-msgid "Enable Site Agent and save the selected tools."
-msgstr ""
-
 #: includes/class-admin.php:177
-msgid "Create a dedicated WordPress Application Password in your profile."
+msgid "Enable Site Agent and the tools you need, and keep OAuth connections on. Save."
 msgstr ""
 
 #: includes/class-admin.php:178
-msgid "Use the endpoint below in a client that supports Streamable HTTP and a custom Authorization header. The header uses HTTP Basic authentication with your username and Application Password. Keep the client configuration private."
+msgid "Add the endpoint below to your MCP client, such as a Claude or ChatGPT connector, Claude Code or Cursor, with no credentials."
 msgstr ""
 
-#: includes/class-admin.php:180
-#: includes/class-admin.php:219
+#: includes/class-admin.php:179
+msgid "The client opens a WordPress sign-in and consent page. Check the client name, choose the tool groups it may use, and allow it."
+msgstr ""
+
+#: includes/class-admin.php:181
+#: includes/class-admin.php:263
 #: includes/class-diagnostics.php:32
 msgid "Endpoint"
 msgstr ""
 
-#: includes/class-admin.php:181
-msgid "Remote connections require HTTPS. Plain HTTP is accepted only when WordPress identifies the installation as local. Clients that require OAuth can connect with the endpoint alone once OAuth connections are on: they find the sign-in page through the endpoint's OAuth metadata."
+#: includes/class-admin.php:182
+msgid "Application Passwords (not recommended)"
 msgstr ""
 
 #: includes/class-admin.php:183
-msgid "Connect with an authenticated URL"
+msgid "Use an Application Password only for a client that cannot sign in with OAuth. It acts as your account until you revoke it, every client configuration that holds it can leak it, and a password in a URL can also end up in history, chats and server logs. OAuth tokens expire, can be limited per client, and never reveal a password."
 msgstr ""
 
-#: includes/class-admin.php:184
-msgid "If your MCP client cannot send a custom Authorization header, include your credentials in the endpoint URL instead."
+#: includes/class-admin.php:185
+msgid "Create a dedicated WordPress Application Password in your profile, one per client."
 msgstr ""
 
 #: includes/class-admin.php:186
-msgid "Enable Site Agent and URL authentication above, select the tools you need, then save your settings."
-msgstr ""
-
-#: includes/class-admin.php:187
-msgid "Create a dedicated Application Password in your administrator profile."
+msgid "Use the endpoint above in a client that supports Streamable HTTP and a custom Authorization header. The header uses HTTP Basic authentication with your username and Application Password. Keep the client configuration private, and limit the password's tools above."
 msgstr ""
 
 #: includes/class-admin.php:188
-msgid "Enter your WordPress username and that Application Password in the converter below. Click Generate token, then Copy authenticated endpoint."
+msgid "Remote connections require HTTPS. Plain HTTP is accepted only when WordPress identifies the installation as local. Clients that require OAuth can connect with the endpoint alone once OAuth connections are on: they find the sign-in page through the endpoint's OAuth metadata."
 msgstr ""
 
-#: includes/class-admin.php:189
-msgid "Paste the copied URL into your client as a Streamable HTTP MCP endpoint. The client must retain the auth query parameter on every request; a separate Authorization header is not required."
+#: includes/class-admin.php:190
+msgid "Connect with an authenticated URL"
 msgstr ""
 
 #: includes/class-admin.php:191
-msgid "Example format only: BASE64_TOKEN is a placeholder for the encoded username:application-password value. The copy button generates and URL-encodes it for you."
+msgid "If your MCP client cannot send a custom Authorization header, include your credentials in the endpoint URL instead."
 msgstr ""
 
 #: includes/class-admin.php:193
-msgid "Keep the complete URL private."
-msgstr ""
-
-#: includes/class-admin.php:193
-msgid "Base64 is reversible. This URL contains credentials and may appear in browser history, client configuration or server logs. Site Agent removes it from the request before other plugins run their late logging, but earlier server logs can still record it. Use a dedicated Application Password and clear the converter after copying."
+msgid "Enable Site Agent and URL authentication above, select the tools you need, then save your settings."
 msgstr ""
 
 #: includes/class-admin.php:194
-msgid "To stop URL-based connections, turn off URL authentication and save. To revoke this credential everywhere, revoke its Application Password in your profile; existing MCP sessions cannot bypass revocation."
+msgid "Create a dedicated Application Password in your administrator profile."
 msgstr ""
 
 #: includes/class-admin.php:195
-msgid "A compatible Streamable HTTP MCP client is required. Prefer OAuth connections for clients that support them: no credential appears in a URL. ChatGPT web compatibility with credential-bearing URLs has not been verified."
+msgid "Enter your WordPress username and that Application Password in the converter below. Click Generate token, then Copy authenticated endpoint."
 msgstr ""
 
-#: includes/class-admin.php:199
-msgid "Each tool switch controls that entry point. PHP execution, executable source editing, and WP-CLI can change other settings or files, so these switches are not isolation boundaries. Use a backed-up development or staging site for developer tools."
+#: includes/class-admin.php:196
+msgid "Paste the copied URL into your client as a Streamable HTTP MCP endpoint. The client must retain the auth query parameter on every request; a separate Authorization header is not required."
+msgstr ""
+
+#: includes/class-admin.php:198
+msgid "Example format only: BASE64_TOKEN is a placeholder for the encoded username:application-password value. The copy button generates and URL-encodes it for you."
 msgstr ""
 
 #: includes/class-admin.php:200
+msgid "Keep the complete URL private."
+msgstr ""
+
+#: includes/class-admin.php:200
+msgid "Base64 is reversible. This URL contains credentials and may appear in browser history, client configuration or server logs. Site Agent removes it from the request before other plugins run their late logging, but earlier server logs can still record it. Use a dedicated Application Password and clear the converter after copying."
+msgstr ""
+
+#: includes/class-admin.php:201
+msgid "To stop URL-based connections, turn off URL authentication and save. To revoke this credential everywhere, revoke its Application Password in your profile; existing MCP sessions cannot bypass revocation."
+msgstr ""
+
+#: includes/class-admin.php:202
+msgid "A compatible Streamable HTTP MCP client is required. Prefer OAuth connections for clients that support them: no credential appears in a URL. ChatGPT web compatibility with credential-bearing URLs has not been verified."
+msgstr ""
+
+#: includes/class-admin.php:206
+msgid "Each tool switch controls that entry point. PHP execution, executable source editing, and WP-CLI can change other settings or files, so these switches are not isolation boundaries. Use a backed-up development or staging site for developer tools."
+msgstr ""
+
+#: includes/class-admin.php:207
 msgid "To revoke remote access, disable Site Agent or revoke its Application Password in your profile. For an emergency stop, set SITE_AGENT_DISABLED to true in wp-config.php; set SITE_AGENT_ALLOW_EXECUTION to false to block only source editing, PHP and WP-CLI. Deactivation also disables access until you enable it again."
 msgstr ""
 
-#: includes/class-admin.php:216
+#: includes/class-admin.php:225
+msgid "OAuth connections are off, so clients can only connect with an Application Password. Turn OAuth connections on below; it is the recommended way to connect."
+msgstr ""
+
+#: includes/class-admin.php:228
+msgid "URL authentication is on. A password in a URL is only encoded and can be recorded in client history, chats and server logs. Reconnect those clients with OAuth, then turn URL authentication off and revoke their Application Passwords."
+msgstr ""
+
+#. translators: %s: Application Password names.
+#: includes/class-admin.php:241
+#, php-format
+msgid "Tool calls in the last 30 days used Application Passwords (%s). Reconnect those clients with OAuth if they support it, then revoke the passwords in your profile."
+msgstr ""
+
+#: includes/class-admin.php:242
+msgid "unnamed"
+msgstr ""
+
+#: includes/class-admin.php:258
+msgid "OAuth connections"
+msgstr ""
+
+#: includes/class-admin.php:260
 msgid "Access revoked. The client must sign in again to reconnect."
 msgstr ""
 
-#: includes/class-admin.php:218
+#: includes/class-admin.php:262
 msgid "Add the endpoint to an OAuth-capable MCP client without any credentials. The client opens a sign-in and consent page here. Approving creates a connection for your account with the tool groups you choose; Site Agent's switches above still apply."
 msgstr ""
 
-#: includes/class-admin.php:219
+#: includes/class-admin.php:263
 msgid "Authorization server"
 msgstr ""
 
-#: includes/class-admin.php:221
+#: includes/class-admin.php:265
 msgid "Client"
 msgstr ""
 
-#: includes/class-admin.php:221
+#: includes/class-admin.php:265
 msgid "Tool groups"
 msgstr ""
 
-#: includes/class-admin.php:221
+#: includes/class-admin.php:265
 msgid "Connected"
 msgstr ""
 
-#: includes/class-admin.php:221
-#: includes/class-admin.php:255
+#: includes/class-admin.php:265
+#: includes/class-admin.php:299
 msgid "Last used"
 msgstr ""
 
-#: includes/class-admin.php:221
+#: includes/class-admin.php:265
 msgid "Actions"
 msgstr ""
 
-#: includes/class-admin.php:224
+#: includes/class-admin.php:268
 #: includes/class-oauth.php:789
 msgid "Removed client"
 msgstr ""
 
-#: includes/class-admin.php:224
+#: includes/class-admin.php:268
 msgid "Read only"
 msgstr ""
 
-#: includes/class-admin.php:224
+#: includes/class-admin.php:268
 msgid "Not yet"
 msgstr ""
 
-#: includes/class-admin.php:225
+#: includes/class-admin.php:269
 msgid "Revoke"
 msgstr ""
 
-#: includes/class-admin.php:230
+#: includes/class-admin.php:274
 msgid "No OAuth clients are connected to your account."
 msgstr ""
 
-#: includes/class-admin.php:232
+#: includes/class-admin.php:276
 msgid "Turning off OAuth connections stops every OAuth client at once without deleting connections. Revoking removes a connection for good."
 msgstr ""
 
-#: includes/class-admin.php:246
+#: includes/class-admin.php:290
 msgid "Application Password access"
 msgstr ""
 
-#: includes/class-admin.php:247
+#: includes/class-admin.php:291
 msgid "Limit what each of your Application Passwords can do, for example content-only for a chat client and developer tools for a local coding agent. A limit can only narrow the switches above. Read-only content tools stay available to every administrator password."
 msgstr ""
 
-#: includes/class-admin.php:249
+#: includes/class-admin.php:293
 msgid "You have no Application Passwords yet."
 msgstr ""
 
-#: includes/class-admin.php:255
-#: includes/class-admin.php:332
+#: includes/class-admin.php:299
+#: includes/class-admin.php:376
 msgid "Application Password"
 msgstr ""
 
-#: includes/class-admin.php:255
+#: includes/class-admin.php:299
 msgid "Access"
 msgstr ""
 
-#: includes/class-admin.php:265
+#: includes/class-admin.php:309
 msgid "Never"
 msgstr ""
 
-#: includes/class-admin.php:267
+#: includes/class-admin.php:311
 msgid "Limit this password to:"
 msgstr ""
 
-#: includes/class-admin.php:283
+#: includes/class-admin.php:327
 msgid "OK"
 msgstr ""
 
-#: includes/class-admin.php:284
+#: includes/class-admin.php:328
 msgid "Warning"
 msgstr ""
 
-#: includes/class-admin.php:285
+#: includes/class-admin.php:329
 msgid "Problem"
 msgstr ""
 
-#: includes/class-admin.php:288
+#: includes/class-admin.php:332
 msgid "Diagnostics"
 msgstr ""
 
-#: includes/class-admin.php:289
+#: includes/class-admin.php:333
 msgid "Server checks for common connection problems. Generate a token below and use Test connection to confirm the whole path, including whether your server passes the Authorization header to WordPress."
 msgstr ""
 
-#: includes/class-admin.php:304
+#: includes/class-admin.php:348
 msgid "Denied"
 msgstr ""
 
-#: includes/class-admin.php:307
+#: includes/class-admin.php:351
 msgid "Recent tool calls"
 msgstr ""
 
-#: includes/class-admin.php:308
+#: includes/class-admin.php:352
 msgid "Time (UTC)"
 msgstr ""
 
-#: includes/class-admin.php:308
+#: includes/class-admin.php:352
 msgid "User ID"
 msgstr ""
 
-#: includes/class-admin.php:308
+#: includes/class-admin.php:352
 msgid "Tool"
 msgstr ""
 
-#: includes/class-admin.php:308
+#: includes/class-admin.php:352
 msgid "Target"
 msgstr ""
 
-#: includes/class-admin.php:308
+#: includes/class-admin.php:352
 msgid "Credential"
 msgstr ""
 
-#: includes/class-admin.php:308
+#: includes/class-admin.php:352
 msgid "Result"
 msgstr ""
 
-#: includes/class-admin.php:316
+#: includes/class-admin.php:360
 msgid "Success"
 msgstr ""
 
-#: includes/class-admin.php:316
+#: includes/class-admin.php:360
 msgid "Failed"
 msgstr ""
 
-#: includes/class-admin.php:327
+#: includes/class-admin.php:371
 msgid "Create your Authorization value"
 msgstr ""
 
-#: includes/class-admin.php:328
+#: includes/class-admin.php:372
 msgid "Enter a dedicated WordPress Application Password, not your account password. Conversion happens in this browser. Site Agent does not submit or store these credentials; Test connection sends them only to this site's MCP endpoint."
 msgstr ""
 
-#: includes/class-admin.php:331
+#: includes/class-admin.php:375
 msgid "WordPress username"
 msgstr ""
 
-#: includes/class-admin.php:332
+#: includes/class-admin.php:376
 msgid "You can paste the password with its spaces. The converter removes them."
 msgstr ""
 
-#: includes/class-admin.php:334
+#: includes/class-admin.php:378
 msgid "Generate token"
 msgstr ""
 
-#: includes/class-admin.php:334
+#: includes/class-admin.php:378
 msgid "Clear credentials"
 msgstr ""
 
-#: includes/class-admin.php:336
+#: includes/class-admin.php:380
 msgid "Base64 token"
 msgstr ""
 
-#: includes/class-admin.php:338
+#: includes/class-admin.php:382
 msgid "Copy Base64 token"
 msgstr ""
 
-#: includes/class-admin.php:338
+#: includes/class-admin.php:382
 msgid "Copy Authorization value"
 msgstr ""
 
-#: includes/class-admin.php:338
+#: includes/class-admin.php:382
 msgid "Copy MCP configuration"
 msgstr ""
 
-#: includes/class-admin.php:338
+#: includes/class-admin.php:382
 msgid "Copy authenticated endpoint"
 msgstr ""
 
-#: includes/class-admin.php:338
+#: includes/class-admin.php:382
 msgid "Test connection"
 msgstr ""
 
-#: includes/class-admin.php:339
+#: includes/class-admin.php:383
 msgid "The Authorization value includes the Basic prefix. The MCP configuration includes your endpoint and generated value. Base64 is reversible, so keep the token and configuration private."
 msgstr ""
 
-#: includes/class-admin.php:340
+#: includes/class-admin.php:384
 msgid "For clients without custom headers, enable URL authentication above and save first. Copy authenticated endpoint adds the auth query parameter. This URL contains your credentials and may appear in history or logs; keep it private. A compatible Streamable HTTP MCP client is still required."
 msgstr ""
 
-#: includes/class-admin.php:343
+#: includes/class-admin.php:387
 msgid "Enable JavaScript to use the credential converter."
 msgstr ""
 
-#: includes/class-admin.php:351
+#: includes/class-admin.php:395
 msgid "You cannot manage the Site Agent update license."
 msgstr ""
 
-#: includes/class-admin.php:375
+#: includes/class-admin.php:419
 msgid "Automatic updates"
 msgstr ""
 
-#: includes/class-admin.php:376
+#: includes/class-admin.php:420
 msgid "Activate the free FluentCart license from your Site Agent checkout to receive automatic updates. Plugin functionality remains available without a license."
 msgstr ""
 
-#: includes/class-admin.php:377
+#: includes/class-admin.php:421
 msgid "Get a free update license"
 msgstr ""
 
-#: includes/class-admin.php:379
+#: includes/class-admin.php:423
 msgid "The license operation completed."
 msgstr ""
 
-#: includes/class-admin.php:379
+#: includes/class-admin.php:423
 msgid "The license operation failed. Verify the license and server connection, then try again. Previous credentials are retained on network errors."
 msgstr ""
 
-#: includes/class-admin.php:382
+#: includes/class-admin.php:426
 msgid "Status"
 msgstr ""
 
-#: includes/class-admin.php:382
+#: includes/class-admin.php:426
 msgid "Active"
 msgstr ""
 
-#: includes/class-admin.php:382
+#: includes/class-admin.php:426
 msgid "Activation required or inactive"
 msgstr ""
 
-#: includes/class-admin.php:382
+#: includes/class-admin.php:426
 msgid "Key ending"
 msgstr ""
 
-#: includes/class-admin.php:388
+#: includes/class-admin.php:432
 msgid "License key"
 msgstr ""
 
-#: includes/class-admin.php:390
+#: includes/class-admin.php:434
 msgid "Activate license"
 msgstr ""
 
-#: includes/class-admin.php:392
+#: includes/class-admin.php:436
 msgid "Check status"
 msgstr ""
 
-#: includes/class-admin.php:393
+#: includes/class-admin.php:437
 msgid "Disconnect this site"
 msgstr ""
 
-#: includes/class-admin.php:396
+#: includes/class-admin.php:440
 msgid "Activation sends the license key, site URL, plugin version, WordPress version and PHP version to gauravtiwari.org. Credentials are encrypted and bound to this site. Activated licenses are checked when WordPress checks updates."
 msgstr ""
 
@@ -1006,102 +1043,102 @@ msgstr ""
 msgid "%s runs PHP, so it also needs PHP execution enabled for this connection in Site Agent."
 msgstr ""
 
-#: includes/class-content.php:72
+#: includes/class-content.php:73
 msgid "This post type is unavailable or inaccessible."
 msgstr ""
 
-#: includes/class-content.php:137
+#: includes/class-content.php:138
 msgid "Supply post_id, url or slug."
 msgstr ""
 
-#: includes/class-content.php:140
-#: includes/class-content.php:238
+#: includes/class-content.php:141
+#: includes/class-content.php:239
 #: includes/class-media.php:66
 msgid "The post is unavailable or inaccessible."
 msgstr ""
 
-#: includes/class-content.php:242
+#: includes/class-content.php:243
 msgid "This post type cannot be edited with the content tool."
 msgstr ""
 
-#: includes/class-content.php:245
+#: includes/class-content.php:246
 msgid "You cannot create this post type."
 msgstr ""
 
-#: includes/class-content.php:248
+#: includes/class-content.php:249
 msgid "Read the post again and supply its current content hash before updating."
 msgstr ""
 
-#: includes/class-content.php:256
+#: includes/class-content.php:257
 msgid "You cannot publish this post type."
 msgstr ""
 
-#: includes/class-content.php:268
+#: includes/class-content.php:269
 msgid "Use an ISO 8601 date such as 2026-10-05T09:00:00Z for date_gmt."
 msgstr ""
 
-#: includes/class-content.php:278
+#: includes/class-content.php:279
 msgid "Scheduling needs a future date_gmt."
 msgstr ""
 
-#: includes/class-content.php:316
+#: includes/class-content.php:317
 msgid "Templates and template parts cannot be staged as autosaves. Pass status to change the live template directly, after keeping a copy of its current content."
 msgstr ""
 
-#: includes/class-content.php:320
+#: includes/class-content.php:321
 msgid "Only title, content and excerpt changes can be staged. Pass status to update this live post directly."
 msgstr ""
 
-#: includes/class-content.php:325
+#: includes/class-content.php:326
 msgid "Supply a title, content or excerpt to stage, or pass status to change the live post."
 msgstr ""
 
 #. translators: %s: taxonomy name.
-#: includes/class-content.php:350
+#: includes/class-content.php:351
 #, php-format
 msgid "Terms cannot be assigned in the %s taxonomy for this post type."
 msgstr ""
 
 #. translators: 1: term ID, 2: taxonomy name.
-#: includes/class-content.php:358
+#: includes/class-content.php:359
 #, php-format
 msgid "Term %1$d does not exist in %2$s."
 msgstr ""
 
 #. translators: 1: term name, 2: taxonomy name.
-#: includes/class-content.php:372
+#: includes/class-content.php:373
 #, php-format
 msgid "The term \"%1$s\" does not exist in %2$s and cannot be created."
 msgstr ""
 
-#: includes/class-content.php:380
+#: includes/class-content.php:381
 msgid "Use an image attachment ID, or 0 to remove the featured image, on a post type that supports featured images."
 msgstr ""
 
 #. translators: %s: meta key.
-#: includes/class-content.php:389
+#: includes/class-content.php:390
 #, php-format
 msgid "%s is page builder layout data. Writing it directly skips the builder's validation and cache refresh; follow the builder's skill from get-skill instead."
 msgstr ""
 
 #. translators: 1: meta key, 2: allowed meta keys.
-#: includes/class-content.php:393
+#: includes/class-content.php:394
 #, php-format
 msgid "The meta key %1$s cannot be written. Allowed keys: %2$s."
 msgstr ""
 
 #. translators: 1: meta key, 2: allowed meta keys.
-#: includes/class-content.php:393
+#: includes/class-content.php:394
 msgid "none"
 msgstr ""
 
 #. translators: %s: error message.
-#: includes/class-content.php:444
+#: includes/class-content.php:445
 #, php-format
 msgid "The post was saved, but its terms could not be set: %s"
 msgstr ""
 
-#: includes/class-content.php:450
+#: includes/class-content.php:451
 msgid "This taxonomy is unavailable or inaccessible."
 msgstr ""
 

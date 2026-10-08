@@ -45,6 +45,31 @@ final class Scopes {
 		return '' === $uuid || ! isset( $scopes[ $uuid ] ) || in_array( $group, $scopes[ $uuid ], true );
 	}
 
+	/**
+	 * How this request authenticated, with a warning when it is not OAuth.
+	 *
+	 * @return array{method: string, client?: string, warning?: string}
+	 */
+	public static function connection(): array {
+		$grant = OAuth::current();
+		if ( null !== $grant ) {
+			return array(
+				'method' => 'oauth',
+				'client' => (string) $grant['client_name'],
+			);
+		}
+		if ( '' !== self::current_uuid() ) {
+			$method = Url_Auth::used() ? 'url' : 'application_password';
+			return array(
+				'method'  => $method,
+				'warning' => 'url' === $method
+					? 'This connection carries an Application Password in its URL, which can end up in logs and history. Tell the user to reconnect with OAuth (Tools > Site Agent > OAuth connections) and revoke this password.'
+					: 'This connection uses an Application Password, which gives full account access until it is revoked. Tell the user to reconnect with OAuth (Tools > Site Agent > OAuth connections) and revoke this password.',
+			);
+		}
+		return array( 'method' => is_user_logged_in() ? 'session' : 'none' );
+	}
+
 	/** Display name of the Application Password, or OAuth client, used for this request. */
 	public static function current_label(): string {
 		$grant = OAuth::current();

@@ -45,14 +45,38 @@ final class SiteAgentTest extends TestCase {
 	public function test_contributors_cannot_smuggle_post_permissions(): void {
 		$this->enable( array( 'php_execute', 'file_read', 'content_write' ) );
 		$user = get_user_by( 'login', 'site_agent_contributor' );
-		$id = $user ? $user->ID : wp_insert_user( array( 'user_login' => 'site_agent_contributor', 'user_pass' => 'test-only', 'role' => 'contributor' ) );
+		$id   = $user ? $user->ID : wp_insert_user(
+			array(
+				'user_login' => 'site_agent_contributor',
+				'user_pass'  => 'test-only',
+				'role'       => 'contributor',
+			)
+		);
 		wp_set_current_user( $id );
 		$this->assertFalse( Permissions::allowed() );
-		$this->assertInstanceOf( WP_Error::class, Abilities::execute( 'execute-php', array( 'code' => 'return 1;', 'post_id' => 1 ) ) );
+		$this->assertInstanceOf(
+			WP_Error::class,
+			Abilities::execute(
+				'execute-php',
+				array(
+					'code'    => 'return 1;',
+					'post_id' => 1,
+				)
+			)
+		);
 	}
 	public function test_schemas_reject_unknown_and_oversized_arguments(): void {
 		$this->enable( array( 'php_execute' ) );
-		$this->assertInstanceOf( WP_Error::class, Abilities::execute( 'execute-php', array( 'code' => 'return 1;', 'post_id' => 1 ) ) );
+		$this->assertInstanceOf(
+			WP_Error::class,
+			Abilities::execute(
+				'execute-php',
+				array(
+					'code'    => 'return 1;',
+					'post_id' => 1,
+				)
+			)
+		);
 		$this->assertInstanceOf( WP_Error::class, Abilities::execute( 'execute-php', array( 'code' => str_repeat( ' ', 65537 ) ) ) );
 		$this->assertInstanceOf( WP_Error::class, Abilities::execute( 'site-context', array( 'unknown' => true ) ) );
 	}
@@ -84,35 +108,102 @@ final class SiteAgentTest extends TestCase {
 	}
 	public function test_file_writes_require_current_hash_and_valid_php(): void {
 		$this->enable( array( 'file_read', 'file_write' ) );
-		$path = 'themes/site-agent-test/example.php';
-		$created = Abilities::execute( 'write-file', array( 'path' => $path, 'content' => '<?php return 1;', 'expected_sha256' => 'new' ) );
+		$path    = 'themes/site-agent-test/example.php';
+		$created = Abilities::execute(
+			'write-file',
+			array(
+				'path'            => $path,
+				'content'         => '<?php return 1;',
+				'expected_sha256' => 'new',
+			)
+		);
 		$this->assertIsArray( $created );
 		$read = Abilities::execute( 'read-file', array( 'path' => $path ) );
 		$this->assertSame( '<?php return 1;', $read['content'] );
 		foreach ( array( array( '<?php return 2;', str_repeat( '0', 64 ) ), array( '<?php return (;', $read['sha256'] ) ) as $attempt ) {
-			$this->assertInstanceOf( WP_Error::class, Abilities::execute( 'write-file', array( 'path' => $path, 'content' => $attempt[0], 'expected_sha256' => $attempt[1] ) ) );
+			$this->assertInstanceOf(
+				WP_Error::class,
+				Abilities::execute(
+					'write-file',
+					array(
+						'path'            => $path,
+						'content'         => $attempt[0],
+						'expected_sha256' => $attempt[1],
+					)
+				)
+			);
 		}
 		$this->assertSame( $read['content'], file_get_contents( $this->directory . '/example.php' ) );
-		$updated = Abilities::execute( 'write-file', array( 'path' => $path, 'content' => '<?php return 2;', 'expected_sha256' => $read['sha256'] ) );
+		$updated = Abilities::execute(
+			'write-file',
+			array(
+				'path'            => $path,
+				'content'         => '<?php return 2;',
+				'expected_sha256' => $read['sha256'],
+			)
+		);
 		$this->assertSame( hash( 'sha256', '<?php return 2;' ), $updated['sha256'] );
 	}
 	public function test_invalid_new_php_does_not_leave_a_file(): void {
 		$this->enable( array( 'file_write' ) );
-		$this->assertInstanceOf( WP_Error::class, Abilities::execute( 'write-file', array( 'path' => 'themes/site-agent-test/bad.php', 'content' => '<?php broken (', 'expected_sha256' => 'new' ) ) );
+		$this->assertInstanceOf(
+			WP_Error::class,
+			Abilities::execute(
+				'write-file',
+				array(
+					'path'            => 'themes/site-agent-test/bad.php',
+					'content'         => '<?php broken (',
+					'expected_sha256' => 'new',
+				)
+			)
+		);
 		$this->assertFileDoesNotExist( $this->directory . '/bad.php' );
 	}
 	public function test_source_editing_cannot_rewrite_site_agent(): void {
 		$this->enable( array( 'file_write' ) );
-		$this->assertInstanceOf( WP_Error::class, Abilities::execute( 'write-file', array( 'path' => 'plugins/site-agent/site-agent.php', 'content' => '<?php echo 1;', 'expected_sha256' => 'new' ) ) );
+		$this->assertInstanceOf(
+			WP_Error::class,
+			Abilities::execute(
+				'write-file',
+				array(
+					'path'            => 'plugins/site-agent/site-agent.php',
+					'content'         => '<?php echo 1;',
+					'expected_sha256' => 'new',
+				)
+			)
+		);
 	}
 	public function test_content_defaults_to_draft_and_preserves_blocks(): void {
 		$this->enable( array( 'content_write' ) );
-		$markup = '<!-- wp:paragraph --><p>Preserve \\ content.</p><!-- /wp:paragraph -->';
-		$created = Abilities::execute( 'save-content', array( 'title' => 'Site Agent fixture', 'content' => $markup ) );
+		$markup  = '<!-- wp:paragraph --><p>Preserve \\ content.</p><!-- /wp:paragraph -->';
+		$created = Abilities::execute(
+			'save-content',
+			array(
+				'title'   => 'Site Agent fixture',
+				'content' => $markup,
+			)
+		);
 		$this->assertSame( 'draft', $created['status'] );
 		$this->assertSame( $markup, $created['content'] );
-		$this->assertInstanceOf( WP_Error::class, Abilities::execute( 'save-content', array( 'post_id' => $created['id'], 'content' => 'stale', 'expected_content_sha256' => str_repeat( '0', 64 ) ) ) );
-		$updated = Abilities::execute( 'save-content', array( 'post_id' => $created['id'], 'title' => 'Updated', 'expected_content_sha256' => $created['content_sha256'] ) );
+		$this->assertInstanceOf(
+			WP_Error::class,
+			Abilities::execute(
+				'save-content',
+				array(
+					'post_id'                 => $created['id'],
+					'content'                 => 'stale',
+					'expected_content_sha256' => str_repeat( '0', 64 ),
+				)
+			)
+		);
+		$updated = Abilities::execute(
+			'save-content',
+			array(
+				'post_id'                 => $created['id'],
+				'title'                   => 'Updated',
+				'expected_content_sha256' => $created['content_sha256'],
+			)
+		);
 		$this->assertSame( $markup, $updated['content'] );
 		wp_delete_post( $created['id'], true );
 	}

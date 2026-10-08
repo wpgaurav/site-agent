@@ -10,7 +10,17 @@ $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
 require $root . '/wp-load.php';
 wp_set_current_user( 1 );
 $saved = SiteAgent\Config::get();
-update_option( SiteAgent\Config::OPTION, array_merge( SiteAgent\Config::defaults(), array( 'enabled' => true, 'php_execute' => true ) ), false );
+update_option(
+	SiteAgent\Config::OPTION,
+	array_merge(
+		SiteAgent\Config::defaults(),
+		array(
+			'enabled'     => true,
+			'php_execute' => true,
+		)
+	),
+	false
+);
 delete_option( SiteAgent\Audit::OPTION );
 register_shutdown_function(
 	static function () use ( $saved ) {
