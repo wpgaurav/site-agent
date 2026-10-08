@@ -1,16 +1,16 @@
 {
-  "version": "0.3.0",
+  "version": "0.4.0",
   "github_repository": "https://github.com/wpgaurav/site-agent",
-  "github_release": "https://github.com/wpgaurav/site-agent/releases/tag/v0.3.0",
+  "github_release": "https://github.com/wpgaurav/site-agent/releases/tag/v0.4.0",
   "product_url": "https://gauravtiwari.org/product/site-agent/",
   "product_id": 1180328,
   "variation_id": 131,
   "price": 0,
-  "download_id": 359,
+  "download_id": 363,
   "driver": "r2",
-  "object": "site-agent-0.3.0.zip",
-  "size": 709982,
-  "sha256": "3f6f333e066337c199374500200f0f66e8132b082606995b0d0353c4f39f8729",
+  "object": "site-agent-0.4.0.zip",
+  "size": 723982,
+  "sha256": "68681c1425fda404688e58d96412bfa3effd528c3ba610d905186acb36468ce3",
   "published_content_sha256": "f13b12febc699f4ec92413213983b09f67197ec0c9d677b20970dd4f2f6ef761",
   "primary_accent": "#1b2733",
   "branding_media": {
@@ -31,19 +31,20 @@
     }
   },
   "rollback_revision": 1180365,
-  "files": 377,
+  "files": 378,
   "rollback_release": {
-    "version": "0.2.0",
-    "download_id": 331
-  },
-  "production_version": "0.3.0",
-  "companion": {
-    "file": "site-agent-companion-0.3.0.zip",
     "version": "0.3.0",
-    "size": 21602,
-    "sha256": "f900c7aa8f6cbcf4ac8d187fffd1f34a461f86f47550a7fd57f3e610ceb7425c",
+    "download_id": 359
+  },
+  "production_version": "0.4.0",
+  "companion": {
+    "file": "site-agent-companion-0.4.0.zip",
+    "version": "0.4.0",
+    "size": 21841,
+    "sha256": "204ee3c0fc8356d0c7792f1a1445bdd75252db757c30ae49fddae5f337e7dbd5",
     "files": 10
   },
   "url_auth_enabled": true,
-  "production_enabled": true
+  "production_enabled": true,
+  "oauth_enabled": false
 }
