@@ -195,7 +195,8 @@ final class OAuth {
 	 * Connect discovery paths that some clients try.
 	 */
 	public static function well_known_document( string $path ): string {
-		$path         = '/' . ltrim( $path, '/' );
+		// Canonical redirects may add a trailing slash; both forms name the same document.
+		$path         = '/' . trim( $path, '/' );
 		$issuer_path  = untrailingslashit( (string) wp_parse_url( self::issuer(), PHP_URL_PATH ) );
 		$resource_url = (string) wp_parse_url( self::resource(), PHP_URL_PATH );
 		$resource     = array( '/.well-known/oauth-protected-resource', '/.well-known/oauth-protected-resource' . $resource_url );

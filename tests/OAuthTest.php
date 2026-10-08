@@ -136,6 +136,7 @@ final class OAuthTest extends TestCase {
 		$this->assertSame( 'resource', OAuth::well_known_document( '/.well-known/oauth-protected-resource' ) );
 		$this->assertSame( 'resource', OAuth::well_known_document( '/.well-known/oauth-protected-resource' . $resource_path ) );
 		$this->assertSame( 'server', OAuth::well_known_document( '/.well-known/oauth-authorization-server' ) );
+		$this->assertSame( 'server', OAuth::well_known_document( '/.well-known/oauth-authorization-server/' ) );
 		$this->assertSame( 'server', OAuth::well_known_document( '/.well-known/openid-configuration' ) );
 		$this->assertSame( '', OAuth::well_known_document( '/.well-known/acme-challenge/x' ) );
 	}
