@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 
 /** OAuth 2.1 authorization server and bearer authentication for the MCP route only. */
 final class OAuth {
-	const CLIENTS       = 'site_agent_oauth_clients';
+	const CLIENTS       = 'site_agent_oauth_client_';
 	const GRANTS        = 'site_agent_oauth_grants';
 	const CODE_PREFIX   = 'site_agent_oauth_code_';
 	const PAGE          = 'site-agent-authorize';
@@ -232,18 +232,37 @@ final class OAuth {
 	}
 
 	/**
-	 * Registered clients keyed by client ID.
+	 * Registered clients keyed by client ID. Each client is its own option, so registrations and
+	 * code exchanges never rewrite a shared list and cannot drop a client registered at the same time.
 	 *
 	 * @return array<string, array<string, mixed>>
 	 */
 	public static function clients(): array {
-		$clients = get_option( self::CLIENTS, array() );
-		return is_array( $clients ) ? $clients : array();
+		global $wpdb;
+		$names   = $wpdb->get_col( $wpdb->prepare( "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( self::CLIENTS ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- Option names by prefix; values are read through get_option.
+		$clients = array();
+		foreach ( $names as $name ) {
+			$client = self::client( substr( $name, strlen( self::CLIENTS ) ) );
+			if ( $client ) {
+				$clients[ substr( $name, strlen( self::CLIENTS ) ) ] = $client;
+			}
+		}
+		return $clients;
 	}
 
 	public static function client( string $client_id ): ?array {
-		$clients = self::clients();
-		return isset( $clients[ $client_id ] ) && is_array( $clients[ $client_id ] ) ? $clients[ $client_id ] : null;
+		if ( ! preg_match( '/^sa-[a-f0-9]{32}$/D', $client_id ) ) {
+			return null;
+		}
+		$client = get_option( self::CLIENTS . $client_id, null );
+		return is_array( $client ) ? $client : null;
+	}
+
+	/** Delete every registered client. */
+	public static function delete_clients(): void {
+		foreach ( array_keys( self::clients() ) as $client_id ) {
+			delete_option( self::CLIENTS . $client_id );
+		}
 	}
 
 	/**
@@ -290,20 +309,25 @@ final class OAuth {
 				return self::error( 'invalid_client_metadata', 'Supported grant types are authorization_code and refresh_token.' );
 			}
 		}
-		$clients = self::prune_clients( self::clients() );
+		$clients = self::clients();
+		if ( count( $clients ) >= self::MAX_CLIENTS ) {
+			self::prune_clients( $clients );
+			$clients = self::clients();
+		}
 		if ( count( $clients ) >= self::MAX_CLIENTS ) {
 			return self::error( 'invalid_client_metadata', 'Too many registered clients. Remove unused OAuth clients in Tools > Site Agent.', 429 );
 		}
-		$client_id             = 'sa-' . bin2hex( random_bytes( 16 ) );
-		$name                  = mb_substr( sanitize_text_field( (string) ( $body['client_name'] ?? '' ) ), 0, 100 );
-		$client                = array(
+		$client_id = 'sa-' . bin2hex( random_bytes( 16 ) );
+		$name      = mb_substr( sanitize_text_field( (string) ( $body['client_name'] ?? '' ) ), 0, 100 );
+		$client    = array(
 			'client_name'   => '' !== $name ? $name : __( 'Unnamed MCP client', 'site-agent' ),
 			'redirect_uris' => array_values( array_map( 'strval', $redirects ) ),
 			'created'       => time(),
 			'used'          => 0,
 		);
-		$clients[ $client_id ] = $client;
-		update_option( self::CLIENTS, $clients, false );
+		if ( ! add_option( self::CLIENTS . $client_id, $client, '', false ) ) {
+			return self::error( 'temporarily_unavailable', 'The client could not be registered. Try again.', 503 );
+		}
 		return self::json(
 			array(
 				'client_id'                  => $client_id,
@@ -319,20 +343,18 @@ final class OAuth {
 	}
 
 	/**
-	 * Drop clients that never completed an authorization within a day, and clients unused for 90 days.
+	 * Delete clients that never completed an authorization within a day, and clients unused for 90 days.
 	 *
 	 * @param array<string, array<string, mixed>> $clients Registered clients.
-	 * @return array<string, array<string, mixed>>
 	 */
-	private static function prune_clients( array $clients ): array {
+	private static function prune_clients( array $clients ): void {
 		$now = time();
-		return array_filter(
-			$clients,
-			static function ( $client ) use ( $now ) {
-				$used = (int) ( $client['used'] ?? 0 );
-				return $used ? $used > $now - 90 * DAY_IN_SECONDS : (int) ( $client['created'] ?? 0 ) > $now - DAY_IN_SECONDS;
+		foreach ( $clients as $client_id => $client ) {
+			$used = (int) ( $client['used'] ?? 0 );
+			if ( $used ? $used <= $now - 90 * DAY_IN_SECONDS : (int) ( $client['created'] ?? 0 ) <= $now - DAY_IN_SECONDS ) {
+				delete_option( self::CLIENTS . $client_id );
 			}
-		);
+		}
 	}
 
 	/**
@@ -712,10 +734,10 @@ final class OAuth {
 	}
 
 	private static function mark_client_used( string $client_id ): void {
-		$clients = self::clients();
-		if ( isset( $clients[ $client_id ] ) ) {
-			$clients[ $client_id ]['used'] = time();
-			update_option( self::CLIENTS, $clients, false );
+		$client = self::client( $client_id );
+		if ( $client ) {
+			$client['used'] = time();
+			update_option( self::CLIENTS . $client_id, $client, false );
 		}
 	}
 

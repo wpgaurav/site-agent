@@ -11,7 +11,7 @@ final class OAuthTest extends TestCase {
 
 	protected function setUp(): void {
 		$this->config( true );
-		delete_option( OAuth::CLIENTS );
+		OAuth::delete_clients();
 		delete_user_meta( 1, OAuth::GRANTS );
 		OAuth::reset();
 		wp_set_current_user( 0 );
@@ -19,7 +19,7 @@ final class OAuthTest extends TestCase {
 
 	protected function tearDown(): void {
 		update_option( Config::OPTION, Config::defaults(), false );
-		delete_option( OAuth::CLIENTS );
+		OAuth::delete_clients();
 		delete_user_meta( 1, OAuth::GRANTS );
 		foreach ( $this->users as $user ) {
 			require_once ABSPATH . 'wp-admin/includes/user.php';
@@ -168,6 +168,34 @@ final class OAuthTest extends TestCase {
 			)->get_status()
 		);
 		$this->assertStringStartsWith( 'sa-', $this->register() );
+	}
+
+	public function test_clients_are_stored_separately_and_stale_ones_are_pruned_at_the_limit(): void {
+		$first  = $this->register();
+		$second = $this->register();
+		$this->assertSame( array( $first, $second ), array_values( array_intersect( array( $first, $second ), array_keys( OAuth::clients() ) ) ) );
+		$this->assertIsArray( get_option( OAuth::CLIENTS . $first ) );
+		$this->assertNull( OAuth::client( '../' . $first ) );
+		$stale            = OAuth::client( $first );
+		$stale['created'] = time() - 2 * DAY_IN_SECONDS;
+		update_option( OAuth::CLIENTS . $first, $stale, false );
+		for ( $i = count( OAuth::clients() ); $i < OAuth::MAX_CLIENTS; $i++ ) {
+			add_option(
+				OAuth::CLIENTS . 'sa-' . bin2hex( random_bytes( 16 ) ),
+				array(
+					'client_name'   => 'Filler',
+					'redirect_uris' => array( 'https://a.example/cb' ),
+					'created'       => time(),
+					'used'          => time(),
+				),
+				'',
+				false
+			);
+		}
+		$this->assertStringStartsWith( 'sa-', $this->register(), 'At the limit, a stale unused client is pruned to make room.' );
+		$this->assertNull( OAuth::client( $first ) );
+		$this->assertNotNull( OAuth::client( $second ) );
+		$this->assertSame( 429, $this->rest( 'POST', '/site-agent/v1/oauth/register', array( 'redirect_uris' => array( 'https://client.example/callback' ) ) )->get_status(), 'With no stale clients, registration stops at the limit.' );
 	}
 
 	public function test_authorization_requests_need_a_registered_redirect_pkce_and_this_resource(): void {
