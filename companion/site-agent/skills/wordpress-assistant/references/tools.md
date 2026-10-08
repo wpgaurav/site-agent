@@ -9,8 +9,8 @@ Reference source: wpgaurav/site-agent 0.3.0, includes/class-abilities.php, inclu
 | site-agent-get-content | post_id, url or slug (+ post_type), autosave_content | Raw content, title, slug, status, dates, link, terms, featured_media, meta, your autosave (newer flag; its text with autosave_content), builder, content_sha256 |
 | site-agent-list-terms | taxonomy, search, limit, page | Term IDs, names, slugs, parents and counts; default category, 50 results |
 | site-agent-list-media | mime_type, search, limit, page | Existing media IDs, URLs, MIME types, dimensions and alt text |
-| site-agent-list-skills | none | Bundled builder skills (gutenberg, generateblocks, elementor, bricks, divi), whether each builder is active, and their files |
-| site-agent-get-skill | skill required; path (default SKILL.md) | Read a builder skill or one of its reference, pattern or example files |
+| site-agent-list-skills | none | Bundled builder skills (gutenberg, generateblocks, elementor, bricks, divi) and skills active plugins add (for example gtfc-invoice), whether each applies here, source plugin and files |
+| site-agent-get-skill | skill required; path (default SKILL.md) | Read a builder or plugin skill, or one of its reference, pattern or example files |
 | site-agent-save-content | post_id, post_type, title, content, excerpt, status, slug, date_gmt, terms, featured_media, meta, expected_content_sha256 | Creates default to draft; updates require current hash; edits to live posts are staged unless status is passed |
 | site-agent-upload-media | url or data_base64 + filename; title, alt, caption, description, post_id | Import into the media library with alt text |
 | site-agent-update-media | id required; title, alt, caption, description | Change media metadata |

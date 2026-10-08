@@ -35,13 +35,22 @@ final class Scopes {
 		if ( '' === $group ) {
 			return true;
 		}
+		$grant = OAuth::current();
+		if ( null !== $grant ) {
+			// An OAuth grant carries the groups its administrator approved on the consent screen.
+			return in_array( $group, $grant['groups'], true );
+		}
 		$scopes = self::all();
 		$uuid   = self::current_uuid();
 		return '' === $uuid || ! isset( $scopes[ $uuid ] ) || in_array( $group, $scopes[ $uuid ], true );
 	}
 
-	/** Display name of the Application Password used for this request. */
+	/** Display name of the Application Password, or OAuth client, used for this request. */
 	public static function current_label(): string {
+		$grant = OAuth::current();
+		if ( null !== $grant ) {
+			return 'OAuth: ' . $grant['client_name'];
+		}
 		$uuid = self::current_uuid();
 		if ( '' === $uuid || ! class_exists( 'WP_Application_Passwords' ) ) {
 			return '';

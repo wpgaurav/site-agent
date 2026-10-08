@@ -40,6 +40,41 @@ final class SkillsTest extends TestCase {
 		$this->assertTrue( rest_validate_value_from_schema( $result, Abilities::definitions()[ $tool ]['output'], 'output' ), $tool . ' output must match its declared schema.' );
 	}
 
+	public function test_plugins_can_register_skills_without_replacing_bundled_ones(): void {
+		$dir = sys_get_temp_dir() . '/site-agent-registered-skill-' . wp_rand();
+		mkdir( $dir . '/references', 0700, true );
+		file_put_contents( $dir . '/SKILL.md', "---\nname: invoice\ndescription: Create invoices.\n---\n# Invoice\n" );
+		file_put_contents( $dir . '/references/fields.md', '# Fields' );
+		file_put_contents( $dir . '/scripts.py', 'print(1)' );
+		$filter = static function ( $skills ) use ( $dir ) {
+			$skills['invoice']    = array( 'directory' => $dir, 'plugin' => 'GT Extensions', 'version' => '2.8.3' );
+			$skills['gutenberg']  = array( 'directory' => $dir );
+			$skills['Bad Name']   = array( 'directory' => $dir );
+			$skills['no-skillmd'] = array( 'directory' => $dir . '/references' );
+			return $skills;
+		};
+		add_filter( 'site_agent_skills', $filter );
+		try {
+			$this->assertSame( array_merge( Skills::CATALOG, array( 'invoice' ) ), Skills::names() );
+			$this->assertSame( SITE_AGENT_DIR . 'skills/gutenberg/', Skills::directory( 'gutenberg' ), 'Bundled skills cannot be replaced.' );
+			$listing = Abilities::execute( 'list-skills', array() );
+			$this->assertMatchesOutputSchema( 'list-skills', $listing );
+			$entry = end( $listing['skills'] );
+			$this->assertSame( array( 'invoice', 'Create invoices.', true, '2.8.3', 'GT Extensions' ), array( $entry['name'], $entry['description'], $entry['detected'], $entry['version'], $entry['source'] ) );
+			$this->assertSame( array( 'SKILL.md', 'references/fields.md' ), $entry['files'], 'Only Markdown, JSON and HTML files are served.' );
+			$read = Skills::read( array( 'skill' => 'invoice', 'path' => 'references/fields.md' ) );
+			$this->assertSame( '# Fields', $read['content'] );
+			$this->assertTrue( is_wp_error( Skills::read( array( 'skill' => 'invoice', 'path' => 'scripts.py' ) ) ) );
+			$this->assertTrue( is_wp_error( Skills::read( array( 'skill' => 'invoice', 'path' => '../SKILL.md' ) ) ) );
+		} finally {
+			remove_filter( 'site_agent_skills', $filter );
+			array_map( 'unlink', array( $dir . '/SKILL.md', $dir . '/references/fields.md', $dir . '/scripts.py' ) );
+			rmdir( $dir . '/references' );
+			rmdir( $dir );
+		}
+		$this->assertSame( Skills::CATALOG, Skills::names() );
+	}
+
 	public function test_skills_need_only_base_access(): void {
 		$listing = Abilities::execute( 'list-skills', array() );
 		$this->assertMatchesOutputSchema( 'list-skills', $listing );

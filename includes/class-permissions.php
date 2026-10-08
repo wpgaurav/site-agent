@@ -31,6 +31,11 @@ final class Permissions {
 		if ( ! is_ssl() && 'local' !== wp_get_environment_type() ) {
 			return self::denied( 'https_required' );
 		}
+		if ( $request instanceof \WP_REST_Request && OAuth::supplied( $request ) ) {
+			// A bearer token decides the identity on its own; it never combines with a session or password.
+			return OAuth::authenticate( $request );
+		}
+		OAuth::reset();
 		if ( $request instanceof \WP_REST_Request && Url_Auth::supplied( $request ) && ! Url_Auth::authenticate( $request ) ) {
 			return false;
 		}

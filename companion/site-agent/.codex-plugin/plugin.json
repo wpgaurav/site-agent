@@ -2,7 +2,7 @@
   "interface": {
     "displayName": "Site Agent",
     "shortDescription": "WordPress content and code",
-    "longDescription": "Site Agent helps WordPress site owners, editors, and developers work with their site's content and code from ChatGPT.\n\nInspect WordPress and PHP versions, installed plugins, the active theme, and enabled tools. Find posts, pages, and media; audit raw content; prepare drafts; and apply scoped edits while preserving Gutenberg markup, ACF data, shortcodes, links, and placeholders. Content updates use the latest content hash to detect intervening changes.\n\nFor developer tasks, separately enabled tools can inspect plugin and theme files, make hash-checked source edits, execute PHP, and run foreground WP-CLI commands. Developer tools run with server privileges and are not sandboxed.\n\nRequires the Site Agent WordPress plugin, an enabled MCP endpoint, and a compatible authenticated connection using a dedicated WordPress Application Password. Authentication is configured separately; credentials are not included. Available features depend on the tool groups enabled on your site. Basic Authorization header compatibility with the ChatGPT host has not been verified.\n\nSite Agent is free and open source. Learn more at https://gauravtiwari.org/product/site-agent/.",
+    "longDescription": "Site Agent helps WordPress site owners, editors, and developers work with their site's content and code from ChatGPT.\n\nInspect WordPress and PHP versions, installed plugins, the active theme, and enabled tools. Find posts, pages, and media; audit raw content; prepare drafts; and apply scoped edits while preserving Gutenberg markup, ACF data, shortcodes, links, and placeholders. Content updates use the latest content hash to detect intervening changes.\n\nFor developer tasks, separately enabled tools can inspect plugin and theme files, make hash-checked source edits, execute PHP, and run foreground WP-CLI commands. Developer tools run with server privileges and are not sandboxed.\n\nRequires the Site Agent WordPress plugin and an enabled MCP endpoint. With OAuth connections on (Site Agent 0.4.0+), the host signs in through WordPress and an administrator approves it; otherwise use a dedicated WordPress Application Password configured privately in the host. Credentials are not included. Available features depend on the tool groups enabled on your site. Basic Authorization header compatibility with the ChatGPT host has not been verified.\n\nSite Agent is free and open source. Learn more at https://gauravtiwari.org/product/site-agent/.",
     "developerName": "Gaurav Tiwari",
     "category": "Productivity",
     "logo": "./assets/icon.png",
@@ -19,7 +19,7 @@
     "termsOfServiceURL": "https://gauravtiwari.org/tos/"
   },
   "name": "site-agent",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "A WordPress assistant for site inspection, content audits, draft creation, and hash-checked edits through Site Agent's MCP tools.",
   "author": {
     "name": "Gaurav Tiwari",

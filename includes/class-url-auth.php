@@ -165,6 +165,11 @@ final class Url_Auth {
 				// A coarse reason (for example unauthenticated or https_required) for clients and the connection test.
 				$response->header( 'X-Site-Agent-Auth', Permissions::denial() );
 			}
+			if ( 401 === $response->get_status() && OAuth::enabled() ) {
+				// RFC 9728: tell MCP clients where to start OAuth discovery.
+				$error = 'invalid_token' === Permissions::denial() ? ', error="invalid_token"' : '';
+				$response->header( 'WWW-Authenticate', 'Bearer resource_metadata="' . OAuth::resource_metadata_url() . '"' . $error );
+			}
 		}
 		return $response;
 	}
