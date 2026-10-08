@@ -20,7 +20,19 @@ final class AccessTest extends TestCase {
 		$created        = WP_Application_Passwords::create_new_application_password( 1, array( 'name' => 'Scoped test client' ) );
 		$this->password = $created[0];
 		$this->uuid     = $created[1]['uuid'];
-		update_option( Config::OPTION, array_merge( Config::defaults(), array( 'enabled' => true, 'url_auth' => true, 'content_write' => true, 'php_execute' => true ) ), false );
+		update_option(
+			Config::OPTION,
+			array_merge(
+				Config::defaults(),
+				array(
+					'enabled'       => true,
+					'url_auth'      => true,
+					'content_write' => true,
+					'php_execute'   => true,
+				)
+			),
+			false
+		);
 		delete_option( Scopes::OPTION );
 		delete_option( Audit::OPTION );
 		wp_set_current_user( 0 );
@@ -141,7 +153,15 @@ final class AccessTest extends TestCase {
 		$this->assertSame( 'plugins/a/b.php', Audit::target( array( 'path' => 'plugins/a/b.php' ) ) );
 		$this->assertSame( 'wp user create', Audit::target( array( 'arguments' => array( 'user', 'create', 'name', 'mail@example.test', '--user_pass=secret' ) ) ) );
 		$this->assertSame( 'cdn.example.test', Audit::target( array( 'url' => 'https://cdn.example.test/a.png?signature=secret' ) ) );
-		$this->assertSame( 'post 7', Audit::target( array( 'post_id' => 7, 'content' => 'secret' ) ) );
+		$this->assertSame(
+			'post 7',
+			Audit::target(
+				array(
+					'post_id' => 7,
+					'content' => 'secret',
+				)
+			)
+		);
 		$output = array();
 		exec( escapeshellarg( PHP_BINARY ) . ' ' . escapeshellarg( __DIR__ . '/guards.php' ) . ' SITE_AGENT_ALLOW_EXECUTION', $output, $status );
 		$this->assertSame( 0, $status );

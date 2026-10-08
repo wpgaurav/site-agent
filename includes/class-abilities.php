@@ -147,7 +147,7 @@ final class Abilities {
 		return array(
 			'site-context'       => array(
 				'label'       => __( 'Site context', 'site-agent' ),
-				'description' => __( 'Inspect WordPress, PHP, active plugins, theme, page builders, post types, taxonomies and the tools this connection can use. Start here.', 'site-agent' ),
+				'description' => __( 'Inspect WordPress, PHP, active plugins, theme, page builders, post types, taxonomies, the tools this connection can use and how it authenticated. Start here. If connection has a warning, pass it on to the user.', 'site-agent' ),
 				'group'       => '',
 				'callback'    => array( Content::class, 'context' ),
 				'input'       => array(),
@@ -163,6 +163,14 @@ final class Abilities {
 						'taxonomies'    => self::list_of( array( 'type' => 'string' ) ),
 						'enabled_tools' => self::list_of( array( 'type' => 'string' ) ),
 						'builders'      => self::list_of( array( 'type' => 'object' ) ),
+						'connection'    => self::object(
+							array(
+								'method'  => array( 'type' => 'string' ),
+								'client'  => array( 'type' => 'string' ),
+								'warning' => array( 'type' => 'string' ),
+							),
+							array( 'method' )
+						),
 					),
 					array( 'site_url', 'wordpress', 'enabled_tools' )
 				),

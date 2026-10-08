@@ -79,7 +79,12 @@ namespace {
 							: static function () {
 								return current_user_can( 'manage_options' );
 							},
-						'meta'                => array( 'annotations' => array( 'readonly' => $readonly, 'destructive' => ! $readonly ) ),
+						'meta'                => array(
+							'annotations' => array(
+								'readonly'    => $readonly,
+								'destructive' => ! $readonly,
+							),
+						),
 					)
 				);
 			}

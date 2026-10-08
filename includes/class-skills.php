@@ -22,6 +22,27 @@ final class Skills {
 	const NAME = '^[a-z0-9][a-z0-9-]{1,39}$';
 	/** At most this many registered skills are listed. */
 	const MAX_REGISTERED = 20;
+	/**
+	 * Plugins known to add skills through site_agent_skills, shown in Tools > Site Agent.
+	 * Keyed by plugin file: name, product URL and what an agent can do with them.
+	 */
+	const PARTNERS = array(
+		'gt-extensions-fluentcart/gt-extensions-fluentcart.php' => array(
+			'name' => 'GT Extensions for FluentCart',
+			'url'  => 'https://gauravtiwari.org/product/gt-extensions-for-fluentcart/',
+			'does' => 'Draft, issue and email invoices; price and send quote proposals.',
+		),
+		'page-blocks-builder/page-blocks-builder.php' => array(
+			'name' => 'GT Page Blocks Builder',
+			'url'  => 'https://gauravtiwari.org/product/gt-page-blocks-builder/',
+			'does' => 'Build draft pages from HTML, CSS and JavaScript sections; edit sections and the block library.',
+		),
+		'gt-link-manager/gt-link-manager.php'         => array(
+			'name' => 'GT Link Manager',
+			'url'  => 'https://wordpress.org/plugins/gt-link-manager/',
+			'does' => 'Find, create and update short links and country rules; read link analytics.',
+		),
+	);
 
 	/**
 	 * Skills registered by other plugins through the site_agent_skills filter, keyed by name.
@@ -180,7 +201,46 @@ final class Skills {
 	private static function description( string $skill ): string {
 		$file = self::directory( $skill ) . 'SKILL.md';
 		$text = is_readable( $file ) ? (string) file_get_contents( $file, false, null, 0, 4096 ) : '';
-		return preg_match( '/^description: (.+)$/m', $text, $match ) ? trim( $match[1] ) : '';
+		if ( ! preg_match( '/^description: (.+)$/m', $text, $match ) ) {
+			return '';
+		}
+		$value = trim( $match[1] );
+		if ( strlen( $value ) > 1 && '"' === $value[0] && '"' === substr( $value, -1 ) ) {
+			return stripcslashes( substr( $value, 1, -1 ) );
+		}
+		if ( strlen( $value ) > 1 && "'" === $value[0] && "'" === substr( $value, -1 ) ) {
+			return str_replace( "''", "'", substr( $value, 1, -1 ) );
+		}
+		return $value;
+	}
+
+	/**
+	 * Known partner plugins with their state here: active (with the skills they registered), installed or missing.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	public static function partners(): array {
+		if ( ! function_exists( 'get_plugins' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+		$installed  = get_plugins();
+		$registered = self::registered();
+		$out        = array();
+		foreach ( self::PARTNERS as $file => $partner ) {
+			$skills = array();
+			foreach ( $registered as $skill => $registration ) {
+				if ( $partner['name'] === $registration['plugin'] ) {
+					$skills[] = $skill;
+				}
+			}
+			$state = isset( $installed[ $file ] ) ? ( is_plugin_active( $file ) ? 'active' : 'installed' ) : 'missing';
+			$out[] = $partner + array(
+				'file'   => $file,
+				'state'  => $state,
+				'skills' => $skills,
+			);
+		}
+		return $out;
 	}
 
 	public static function listing(): array {

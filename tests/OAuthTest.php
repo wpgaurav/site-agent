@@ -334,6 +334,45 @@ final class OAuthTest extends TestCase {
 		$this->assertSame( 400, $this->tokens( $client, $code, $verifier )->get_status() );
 	}
 
+	public function test_oauth_is_on_by_default_and_connections_report_their_method(): void {
+		$this->assertTrue( Config::defaults()['oauth'] );
+		update_option( Config::OPTION, array( 'enabled' => true ), false );
+		$this->assertTrue( Config::get()['oauth'], 'A site that never chose gets OAuth on.' );
+		update_option(
+			Config::OPTION,
+			array(
+				'enabled' => true,
+				'oauth'   => false,
+			),
+			false
+		);
+		$this->assertFalse( Config::get()['oauth'], 'An explicit choice to turn it off is kept.' );
+		$this->config( true );
+
+		wp_set_current_user( 1 );
+		$this->assertSame( array( 'method' => 'session' ), Scopes::connection() );
+		$GLOBALS['wp_rest_application_password_uuid'] = wp_generate_uuid4();
+		$password                                     = Scopes::connection();
+		$this->assertSame( 'application_password', $password['method'] );
+		$this->assertStringContainsString( 'OAuth', $password['warning'] );
+		$GLOBALS['wp_rest_application_password_uuid'] = null;
+
+		$client                       = $this->register();
+		list( $verifier, $challenge ) = $this->verifier();
+		$tokens                       = $this->tokens( $client, $this->code( $client, $challenge ), $verifier )->get_data();
+		$this->assertTrue( Permissions::transport( $this->mcp( $tokens['access_token'] ) ) );
+		$this->assertSame(
+			array(
+				'method' => 'oauth',
+				'client' => 'Test client',
+			),
+			Scopes::connection()
+		);
+		$context = SiteAgent\Content::context();
+		$this->assertSame( 'oauth', $context['connection']['method'] );
+		$this->assertTrue( rest_validate_value_from_schema( $context, SiteAgent\Abilities::definitions()['site-context']['output'], 'output' ) );
+	}
+
 	public function test_unauthenticated_mcp_responses_point_to_oauth_discovery(): void {
 		Permissions::denied( 'unauthenticated' );
 		$response = Url_Auth::response( new WP_REST_Response( array(), 401 ), null, new WP_REST_Request( 'POST', '/site-agent/v1/mcp' ) );

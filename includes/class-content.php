@@ -57,6 +57,7 @@ final class Content {
 			'taxonomies'    => array_values( get_taxonomies( array( 'show_in_rest' => true ) ) ),
 			'enabled_tools' => $tools,
 			'builders'      => $builders,
+			'connection'    => Scopes::connection(),
 		);
 	}
 

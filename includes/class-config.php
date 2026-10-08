@@ -21,7 +21,8 @@ final class Config {
 		return array(
 			'enabled'       => false,
 			'url_auth'      => false,
-			'oauth'         => false,
+			// OAuth is the recommended way to connect, so it is on whenever Site Agent itself is enabled.
+			'oauth'         => true,
 			'content_write' => false,
 			'file_read'     => false,
 			'file_write'    => false,

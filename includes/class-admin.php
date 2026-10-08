@@ -109,8 +109,8 @@ final class Admin {
 		);
 		return array(
 			'enabled'       => array( __( 'Enable Site Agent', 'site-agent' ), __( 'Allow authenticated administrators to connect and use the tools selected below.', 'site-agent' ) ),
-			'url_auth'      => array( __( 'URL authentication', 'site-agent' ), __( 'Allow Base64-encoded username and Application Password credentials in the MCP endpoint auth query parameter. URLs may be recorded in client history and server logs. Use a dedicated, revocable Application Password.', 'site-agent' ) ),
-			'oauth'         => array( __( 'OAuth connections', 'site-agent' ), __( 'Let MCP clients that support OAuth, such as Claude and ChatGPT connectors, connect by signing in here. An administrator approves each client on a consent screen and picks its tool groups. Clients get one-hour access tokens and refresh tokens that end after 30 days without use. No password is shared with the client.', 'site-agent' ) ),
+			'url_auth'      => array( __( 'URL authentication', 'site-agent' ), __( 'Not recommended. Allow Base64-encoded username and Application Password credentials in the MCP endpoint auth query parameter. The password is only encoded, and URLs can be recorded in client history, chats and server logs. Use OAuth connections instead whenever the client supports them.', 'site-agent' ) ),
+			'oauth'         => array( __( 'OAuth connections (recommended)', 'site-agent' ), __( 'On by default. Let MCP clients that support OAuth, such as Claude and ChatGPT connectors, connect by signing in here. An administrator approves each client on a consent screen and picks its tool groups. Clients get one-hour access tokens and refresh tokens that end after 30 days without use. No password is shared with the client.', 'site-agent' ) ),
 			'content_write' => array( __( 'Content writes', 'site-agent' ), __( 'Create drafts, edit posts or pages, set terms, featured images and SEO fields, and import media. Edits to live posts are staged as autosaves unless a status is passed explicitly.', 'site-agent' ) ),
 			'file_read'     => array( __( 'Source inspection', 'site-agent' ), __( 'Read plugin, theme and must-use plugin source files. Source files can contain sensitive data.', 'site-agent' ) ),
 			'file_write'    => array( __( 'Source editing', 'site-agent' ), __( 'Create, overwrite, move or delete plugin and theme files, including PHP. PHP changes that cause a fatal error are reverted when the site can be checked.', 'site-agent' ) ),
@@ -150,6 +150,7 @@ final class Admin {
 			<?php if ( Config::execution_blocked() ) : ?>
 				<div class="notice notice-warning inline"><p><?php esc_html_e( 'SITE_AGENT_ALLOW_EXECUTION is false in wp-config.php. Source editing, PHP, and WP-CLI tools are blocked on this site.', 'site-agent' ); ?></p></div>
 			<?php endif; ?>
+			<?php self::connection_warnings( $config ); ?>
 			<form method="post" action="options.php">
 				<?php settings_fields( 'site_agent' ); ?>
 				<table class="form-table" role="presentation">
@@ -169,15 +170,22 @@ final class Admin {
 				<?php submit_button(); ?>
 			</form>
 			<?php self::oauth_panel(); ?>
+			<?php self::partners_panel(); ?>
 			<?php self::diagnostics_panel(); ?>
 			<?php self::license_panel(); ?>
 			<h2><?php esc_html_e( 'Connect a client', 'site-agent' ); ?></h2>
 			<ol>
-				<li><?php esc_html_e( 'Enable Site Agent and save the selected tools.', 'site-agent' ); ?></li>
-				<li><a href="<?php echo esc_url( admin_url( 'profile.php#application-passwords-section' ) ); ?>"><?php esc_html_e( 'Create a dedicated WordPress Application Password in your profile.', 'site-agent' ); ?></a></li>
-				<li><?php esc_html_e( 'Use the endpoint below in a client that supports Streamable HTTP and a custom Authorization header. The header uses HTTP Basic authentication with your username and Application Password. Keep the client configuration private.', 'site-agent' ); ?></li>
+				<li><?php esc_html_e( 'Enable Site Agent and the tools you need, and keep OAuth connections on. Save.', 'site-agent' ); ?></li>
+				<li><?php esc_html_e( 'Add the endpoint below to your MCP client, such as a Claude or ChatGPT connector, Claude Code or Cursor, with no credentials.', 'site-agent' ); ?></li>
+				<li><?php esc_html_e( 'The client opens a WordPress sign-in and consent page. Check the client name, choose the tool groups it may use, and allow it.', 'site-agent' ); ?></li>
 			</ol>
 			<p><strong><?php esc_html_e( 'Endpoint', 'site-agent' ); ?>:</strong> <code><?php echo esc_html( $endpoint ); ?></code></p>
+			<h2><?php esc_html_e( 'Application Passwords (not recommended)', 'site-agent' ); ?></h2>
+			<div class="notice notice-warning inline"><p><?php esc_html_e( 'Use an Application Password only for a client that cannot sign in with OAuth. It acts as your account until you revoke it, every client configuration that holds it can leak it, and a password in a URL can also end up in history, chats and server logs. OAuth tokens expire, can be limited per client, and never reveal a password.', 'site-agent' ); ?></p></div>
+			<ol>
+				<li><a href="<?php echo esc_url( admin_url( 'profile.php#application-passwords-section' ) ); ?>"><?php esc_html_e( 'Create a dedicated WordPress Application Password in your profile, one per client.', 'site-agent' ); ?></a></li>
+				<li><?php esc_html_e( 'Use the endpoint above in a client that supports Streamable HTTP and a custom Authorization header. The header uses HTTP Basic authentication with your username and Application Password. Keep the client configuration private, and limit the password\'s tools above.', 'site-agent' ); ?></li>
+			</ol>
 			<p><?php esc_html_e( 'Remote connections require HTTPS. Plain HTTP is accepted only when WordPress identifies the installation as local. Clients that require OAuth can connect with the endpoint alone once OAuth connections are on: they find the sign-in page through the endpoint\'s OAuth metadata.', 'site-agent' ); ?></p>
 			<section id="site-agent-url-auth-guide" aria-labelledby="site-agent-url-auth-heading" style="margin-block:24px;padding:24px;background:#fff;border:1px solid #c3c4c7;">
 				<h3 id="site-agent-url-auth-heading"><?php esc_html_e( 'Connect with an authenticated URL', 'site-agent' ); ?></h3>
@@ -200,6 +208,75 @@ final class Admin {
 			<p><?php esc_html_e( 'To revoke remote access, disable Site Agent or revoke its Application Password in your profile. For an emergency stop, set SITE_AGENT_DISABLED to true in wp-config.php; set SITE_AGENT_ALLOW_EXECUTION to false to block only source editing, PHP and WP-CLI. Deactivation also disables access until you enable it again.', 'site-agent' ); ?></p>
 			<?php self::audit_table(); ?>
 		</div>
+		<?php
+	}
+
+	/**
+	 * Warnings when connections bypass OAuth: OAuth off, URL authentication on, or recent calls
+	 * made with an Application Password.
+	 *
+	 * @param array<string, mixed> $config Settings.
+	 */
+	private static function connection_warnings( array $config ): void {
+		if ( empty( $config['enabled'] ) ) {
+			return;
+		}
+		$messages = array();
+		if ( empty( $config['oauth'] ) ) {
+			$messages[] = __( 'OAuth connections are off, so clients can only connect with an Application Password. Turn OAuth connections on below; it is the recommended way to connect.', 'site-agent' );
+		}
+		if ( ! empty( $config['url_auth'] ) ) {
+			$messages[] = __( 'URL authentication is on. A password in a URL is only encoded and can be recorded in client history, chats and server logs. Reconnect those clients with OAuth, then turn URL authentication off and revoke their Application Passwords.', 'site-agent' );
+		}
+		$since  = time() - 30 * DAY_IN_SECONDS;
+		$labels = array();
+		foreach ( (array) get_option( Audit::OPTION, array() ) as $row ) {
+			if ( is_array( $row ) && in_array( $row['via'] ?? '', array( 'header', 'url' ), true ) && strtotime( (string) ( $row['time'] ?? '' ) ) >= $since ) {
+				$labels[ (string) ( $row['credential'] ?? '' ) ] = true;
+			}
+		}
+		if ( $labels ) {
+			$names      = array_filter( array_keys( $labels ) );
+			$messages[] = sprintf(
+				/* translators: %s: Application Password names. */
+				__( 'Tool calls in the last 30 days used Application Passwords (%s). Reconnect those clients with OAuth if they support it, then revoke the passwords in your profile.', 'site-agent' ),
+				$names ? implode( ', ', $names ) : __( 'unnamed', 'site-agent' )
+			);
+		}
+		foreach ( $messages as $message ) {
+			echo '<div class="notice notice-warning inline"><p>' . esc_html( $message ) . '</p></div>';
+		}
+	}
+
+	/** Plugins that add skills for connected agents, with links and their state on this site. */
+	private static function partners_panel(): void {
+		?>
+		<section id="site-agent-plugin-skills" aria-labelledby="site-agent-plugin-skills-heading" style="margin-block:24px;padding:24px;background:#fff;border:1px solid #c3c4c7;">
+			<h2 id="site-agent-plugin-skills-heading"><?php esc_html_e( 'Plugin skills', 'site-agent' ); ?></h2>
+			<p><?php esc_html_e( 'These plugins hand connected agents a skill for their own workflows. Agents find active ones with list-skills and get-skill, with nothing else to install.', 'site-agent' ); ?></p>
+			<table class="widefat striped" style="max-width:900px"><thead><tr><th><?php esc_html_e( 'Plugin', 'site-agent' ); ?></th><th><?php esc_html_e( 'What agents can do', 'site-agent' ); ?></th><th><?php esc_html_e( 'On this site', 'site-agent' ); ?></th></tr></thead><tbody>
+			<?php foreach ( Skills::partners() as $partner ) : ?>
+				<tr>
+					<td><a href="<?php echo esc_url( $partner['url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( $partner['name'] ); ?></a></td>
+					<td><?php echo esc_html( $partner['does'] ); ?></td>
+					<td>
+					<?php
+					if ( 'active' === $partner['state'] && $partner['skills'] ) {
+						/* translators: %s: skill names. */
+						echo esc_html( sprintf( __( 'Active. Skills: %s', 'site-agent' ), implode( ', ', $partner['skills'] ) ) );
+					} elseif ( 'active' === $partner['state'] ) {
+						esc_html_e( 'Active, without a skill yet. Update the plugin, or turn on the module that provides it.', 'site-agent' );
+					} elseif ( 'installed' === $partner['state'] ) {
+						echo '<a href="' . esc_url( admin_url( 'plugins.php' ) ) . '">' . esc_html__( 'Installed, not active', 'site-agent' ) . '</a>';
+					} else {
+						echo '<a href="' . esc_url( $partner['url'] ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Get it', 'site-agent' ) . '</a>';
+					}
+					?>
+					</td>
+				</tr>
+			<?php endforeach; ?>
+			</tbody></table>
+		</section>
 		<?php
 	}
 

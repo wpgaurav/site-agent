@@ -27,7 +27,14 @@ final class SkillsTest extends TestCase {
 	}
 
 	private function post( array $data, array $meta = array() ): int {
-		$id = wp_insert_post( wp_slash( $data + array( 'post_status' => 'draft', 'post_title' => 'Skills fixture' ) ) );
+		$id = wp_insert_post(
+			wp_slash(
+				$data + array(
+					'post_status' => 'draft',
+					'post_title'  => 'Skills fixture',
+				)
+			)
+		);
 		foreach ( $meta as $key => $value ) {
 			update_post_meta( $id, $key, $value );
 		}
@@ -43,11 +50,15 @@ final class SkillsTest extends TestCase {
 	public function test_plugins_can_register_skills_without_replacing_bundled_ones(): void {
 		$dir = sys_get_temp_dir() . '/site-agent-registered-skill-' . wp_rand();
 		mkdir( $dir . '/references', 0700, true );
-		file_put_contents( $dir . '/SKILL.md', "---\nname: invoice\ndescription: Create invoices.\n---\n# Invoice\n" );
+		file_put_contents( $dir . '/SKILL.md', "---\nname: invoice\ndescription: \"Create \\\"invoices\\\".\"\n---\n# Invoice\n" );
 		file_put_contents( $dir . '/references/fields.md', '# Fields' );
 		file_put_contents( $dir . '/scripts.py', 'print(1)' );
 		$filter = static function ( $skills ) use ( $dir ) {
-			$skills['invoice']    = array( 'directory' => $dir, 'plugin' => 'GT Extensions', 'version' => '2.8.3' );
+			$skills['invoice']    = array(
+				'directory' => $dir,
+				'plugin'    => 'GT Extensions',
+				'version'   => '2.8.3',
+			);
 			$skills['gutenberg']  = array( 'directory' => $dir );
 			$skills['Bad Name']   = array( 'directory' => $dir );
 			$skills['no-skillmd'] = array( 'directory' => $dir . '/references' );
@@ -60,12 +71,35 @@ final class SkillsTest extends TestCase {
 			$listing = Abilities::execute( 'list-skills', array() );
 			$this->assertMatchesOutputSchema( 'list-skills', $listing );
 			$entry = end( $listing['skills'] );
-			$this->assertSame( array( 'invoice', 'Create invoices.', true, '2.8.3', 'GT Extensions' ), array( $entry['name'], $entry['description'], $entry['detected'], $entry['version'], $entry['source'] ) );
+			$this->assertSame( array( 'invoice', 'Create "invoices".', true, '2.8.3', 'GT Extensions' ), array( $entry['name'], $entry['description'], $entry['detected'], $entry['version'], $entry['source'] ) );
 			$this->assertSame( array( 'SKILL.md', 'references/fields.md' ), $entry['files'], 'Only Markdown, JSON and HTML files are served.' );
-			$read = Skills::read( array( 'skill' => 'invoice', 'path' => 'references/fields.md' ) );
+			$read = Skills::read(
+				array(
+					'skill' => 'invoice',
+					'path'  => 'references/fields.md',
+				)
+			);
 			$this->assertSame( '# Fields', $read['content'] );
-			$this->assertTrue( is_wp_error( Skills::read( array( 'skill' => 'invoice', 'path' => 'scripts.py' ) ) ) );
-			$this->assertTrue( is_wp_error( Skills::read( array( 'skill' => 'invoice', 'path' => '../SKILL.md' ) ) ) );
+			$this->assertTrue(
+				is_wp_error(
+					Skills::read(
+						array(
+							'skill' => 'invoice',
+							'path'  => 'scripts.py',
+						)
+					)
+				)
+			);
+			$this->assertTrue(
+				is_wp_error(
+					Skills::read(
+						array(
+							'skill' => 'invoice',
+							'path'  => '../SKILL.md',
+						)
+					)
+				)
+			);
 		} finally {
 			remove_filter( 'site_agent_skills', $filter );
 			array_map( 'unlink', array( $dir . '/SKILL.md', $dir . '/references/fields.md', $dir . '/scripts.py' ) );
@@ -73,6 +107,25 @@ final class SkillsTest extends TestCase {
 			rmdir( $dir );
 		}
 		$this->assertSame( Skills::CATALOG, Skills::names() );
+	}
+
+	public function test_partner_plugins_report_their_state_and_skills(): void {
+		$filter = static function ( $skills ) {
+			$skills['gt-link-manager'] = array( 'directory' => SITE_AGENT_DIR . 'skills/gutenberg', 'plugin' => 'GT Link Manager', 'version' => '1.10.0' );
+			return $skills;
+		};
+		add_filter( 'site_agent_skills', $filter );
+		try {
+			$partners = array_column( Skills::partners(), null, 'name' );
+			$this->assertSame( array( 'GT Extensions for FluentCart', 'GT Page Blocks Builder', 'GT Link Manager' ), array_keys( $partners ) );
+			$this->assertSame( array( 'gt-link-manager' ), $partners['GT Link Manager']['skills'] );
+			foreach ( $partners as $partner ) {
+				$this->assertContains( $partner['state'], array( 'active', 'installed', 'missing' ) );
+				$this->assertStringStartsWith( 'https://', $partner['url'] );
+			}
+		} finally {
+			remove_filter( 'site_agent_skills', $filter );
+		}
 	}
 
 	public function test_skills_need_only_base_access(): void {
@@ -171,8 +224,35 @@ final class SkillsTest extends TestCase {
 			array( 'elementor', $this->post( array( 'post_content' => '<p>Fallback</p>' ), array( '_elementor_edit_mode' => 'builder' ) ) ),
 			array( 'bricks', $this->post( array( 'post_content' => '' ), array( '_bricks_editor_mode' => 'bricks' ) ) ),
 			// Bricks renders its data unless the mode is "wordpress"; older or imported pages have no mode.
-			array( 'bricks', $this->post( array( 'post_content' => '' ), array( '_bricks_page_content_2' => array( array( 'id' => 'abc123', 'name' => 'section' ) ) ) ) ),
-			array( 'classic', $this->post( array( 'post_content' => '<p>Kept</p>' ), array( '_bricks_editor_mode' => 'wordpress', '_bricks_page_content_2' => array( array( 'id' => 'abc123', 'name' => 'section' ) ) ) ) ),
+			array(
+				'bricks',
+				$this->post(
+					array( 'post_content' => '' ),
+					array(
+						'_bricks_page_content_2' => array(
+							array(
+								'id'   => 'abc123',
+								'name' => 'section',
+							),
+						),
+					)
+				),
+			),
+			array(
+				'classic',
+				$this->post(
+					array( 'post_content' => '<p>Kept</p>' ),
+					array(
+						'_bricks_editor_mode'    => 'wordpress',
+						'_bricks_page_content_2' => array(
+							array(
+								'id'   => 'abc123',
+								'name' => 'section',
+							),
+						),
+					)
+				),
+			),
 			array( 'generateblocks', $this->post( array( 'post_content' => '<!-- wp:generateblocks-pro/accordion {"uniqueId":"a1b2c3d5"} --><div class="gb-accordion"></div><!-- /wp:generateblocks-pro/accordion -->' ) ) ),
 			array( 'divi', $this->post( array( 'post_content' => '[et_pb_section][/et_pb_section]' ), array( '_et_pb_use_builder' => 'on' ) ) ),
 			array( 'divi', $this->post( array( 'post_content' => '<!-- wp:divi/placeholder --><!-- wp:divi/section --><!-- /wp:divi/section --><!-- /wp:divi/placeholder -->' ) ) ),
@@ -199,7 +279,17 @@ final class SkillsTest extends TestCase {
 	}
 
 	public function test_builder_layout_meta_stays_out_of_content_tools(): void {
-		update_option( Config::OPTION, array_merge( Config::defaults(), array( 'enabled' => true, 'content_write' => true ) ), false );
+		update_option(
+			Config::OPTION,
+			array_merge(
+				Config::defaults(),
+				array(
+					'enabled'       => true,
+					'content_write' => true,
+				)
+			),
+			false
+		);
 		// Elementor registers its layout meta for REST, which would otherwise make it writable here.
 		$args = array(
 			'show_in_rest'  => true,
@@ -209,7 +299,13 @@ final class SkillsTest extends TestCase {
 		);
 		register_post_meta( 'post', '_elementor_data', $args );
 		register_post_meta( 'post', 'site_agent_plain_note', $args );
-		$id = $this->post( array( 'post_content' => '<p>Fallback</p>' ), array( '_elementor_data' => '[]', '_elementor_edit_mode' => 'builder' ) );
+		$id = $this->post(
+			array( 'post_content' => '<p>Fallback</p>' ),
+			array(
+				'_elementor_data'      => '[]',
+				'_elementor_edit_mode' => 'builder',
+			)
+		);
 		try {
 			$read = Abilities::execute( 'get-content', array( 'post_id' => $id ) );
 			$this->assertArrayNotHasKey( '_elementor_data', (array) $read['meta'] );
@@ -247,16 +343,26 @@ final class SkillsTest extends TestCase {
 	}
 
 	public function test_generateblocks_escapes_survive_a_save_round_trip(): void {
-		update_option( Config::OPTION, array_merge( Config::defaults(), array( 'enabled' => true, 'content_write' => true ) ), false );
+		update_option(
+			Config::OPTION,
+			array_merge(
+				Config::defaults(),
+				array(
+					'enabled'       => true,
+					'content_write' => true,
+				)
+			),
+			false
+		);
 		// The canary from the generateblocks skill: custom properties, clamp(), inline markup and an ampersand.
-		$markup = '<!-- wp:generateblocks/element {"uniqueId":"c4n4ry01","tagName":"div","styles":{"padding":"clamp(1rem, 2vw + 1rem, 3rem)","color":"var(\u002d\u002dcontrast)","\u0026:hover":{"color":"var(\u002d\u002daccent)"}},"css":".gb-element-c4n4ry01{color:var(\u002d\u002dcontrast)}"} -->' . "\n"
+		$markup        = '<!-- wp:generateblocks/element {"uniqueId":"c4n4ry01","tagName":"div","styles":{"padding":"clamp(1rem, 2vw + 1rem, 3rem)","color":"var(\u002d\u002dcontrast)","\u0026:hover":{"color":"var(\u002d\u002daccent)"}},"css":".gb-element-c4n4ry01{color:var(\u002d\u002dcontrast)}"} -->' . "\n"
 			. '<div class="gb-element-c4n4ry01"><!-- wp:generateblocks/text {"uniqueId":"c4n4ry02","tagName":"p","content":"Read \u003ca href=\u0022/x\u0022\u003emore\u003c/a\u003e \u0026amp; more"} -->' . "\n"
 			. '<p class="gb-text">Read <a href="/x">more</a> &amp; more</p>' . "\n"
 			. '<!-- /wp:generateblocks/text --></div>' . "\n"
 			. '<!-- /wp:generateblocks/element -->';
-		$saved = Abilities::execute( 'save-content', array( 'content' => $markup ) );
+		$saved         = Abilities::execute( 'save-content', array( 'content' => $markup ) );
 		$this->posts[] = $saved['id'];
-		$read  = Abilities::execute( 'get-content', array( 'post_id' => $saved['id'] ) );
+		$read          = Abilities::execute( 'get-content', array( 'post_id' => $saved['id'] ) );
 		$this->assertSame( $markup, $read['content'] );
 		$this->assertSame( 'generateblocks', $read['builder'] );
 		$this->assertSame( $markup, serialize_blocks( parse_blocks( $markup ) ), 'The canary must already be in canonical WordPress serialization.' );
