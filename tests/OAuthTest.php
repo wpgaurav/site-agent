@@ -137,8 +137,9 @@ final class OAuthTest extends TestCase {
 		$this->assertStringContainsString( 'page=site-agent-authorize', OAuth::authorization_endpoint(), 'Without pretty permalinks the consent screen is advertised directly.' );
 		update_option( 'permalink_structure', '/%postname%/' );
 		$endpoint = OAuth::authorization_endpoint();
+		$expected = rest_url( 'site-agent/v1/oauth/authorize' );
 		update_option( 'permalink_structure', $structure );
-		$this->assertSame( rest_url( 'site-agent/v1/oauth/authorize' ), $endpoint );
+		$this->assertSame( $expected, $endpoint );
 		$this->assertStringNotContainsString( '?', $endpoint );
 
 		$client              = $this->register();
