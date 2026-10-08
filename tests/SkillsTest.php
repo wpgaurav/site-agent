@@ -50,7 +50,7 @@ final class SkillsTest extends TestCase {
 	public function test_plugins_can_register_skills_without_replacing_bundled_ones(): void {
 		$dir = sys_get_temp_dir() . '/site-agent-registered-skill-' . wp_rand();
 		mkdir( $dir . '/references', 0700, true );
-		file_put_contents( $dir . '/SKILL.md', "---\nname: invoice\ndescription: Create invoices.\n---\n# Invoice\n" );
+		file_put_contents( $dir . '/SKILL.md', "---\nname: invoice\ndescription: \"Create \\\"invoices\\\".\"\n---\n# Invoice\n" );
 		file_put_contents( $dir . '/references/fields.md', '# Fields' );
 		file_put_contents( $dir . '/scripts.py', 'print(1)' );
 		$filter = static function ( $skills ) use ( $dir ) {
@@ -71,7 +71,7 @@ final class SkillsTest extends TestCase {
 			$listing = Abilities::execute( 'list-skills', array() );
 			$this->assertMatchesOutputSchema( 'list-skills', $listing );
 			$entry = end( $listing['skills'] );
-			$this->assertSame( array( 'invoice', 'Create invoices.', true, '2.8.3', 'GT Extensions' ), array( $entry['name'], $entry['description'], $entry['detected'], $entry['version'], $entry['source'] ) );
+			$this->assertSame( array( 'invoice', 'Create "invoices".', true, '2.8.3', 'GT Extensions' ), array( $entry['name'], $entry['description'], $entry['detected'], $entry['version'], $entry['source'] ) );
 			$this->assertSame( array( 'SKILL.md', 'references/fields.md' ), $entry['files'], 'Only Markdown, JSON and HTML files are served.' );
 			$read = Skills::read(
 				array(

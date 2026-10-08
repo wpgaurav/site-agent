@@ -201,7 +201,17 @@ final class Skills {
 	private static function description( string $skill ): string {
 		$file = self::directory( $skill ) . 'SKILL.md';
 		$text = is_readable( $file ) ? (string) file_get_contents( $file, false, null, 0, 4096 ) : '';
-		return preg_match( '/^description: (.+)$/m', $text, $match ) ? trim( $match[1] ) : '';
+		if ( ! preg_match( '/^description: (.+)$/m', $text, $match ) ) {
+			return '';
+		}
+		$value = trim( $match[1] );
+		if ( strlen( $value ) > 1 && '"' === $value[0] && '"' === substr( $value, -1 ) ) {
+			return stripcslashes( substr( $value, 1, -1 ) );
+		}
+		if ( strlen( $value ) > 1 && "'" === $value[0] && "'" === substr( $value, -1 ) ) {
+			return str_replace( "''", "'", substr( $value, 1, -1 ) );
+		}
+		return $value;
 	}
 
 	/**
