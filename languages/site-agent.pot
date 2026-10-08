@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-08T01:09:51+00:00\n"
+"POT-Creation-Date: 2026-10-08T01:27:56+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: site-agent\n"
@@ -757,7 +757,7 @@ msgid "Actions"
 msgstr ""
 
 #: includes/class-admin.php:224
-#: includes/class-oauth.php:760
+#: includes/class-oauth.php:767
 msgid "Removed client"
 msgstr ""
 
@@ -1524,92 +1524,92 @@ msgstr ""
 msgid "The media item is unavailable or inaccessible."
 msgstr ""
 
-#: includes/class-oauth.php:293
+#: includes/class-oauth.php:300
 msgid "Unnamed MCP client"
 msgstr ""
 
-#: includes/class-oauth.php:342
+#: includes/class-oauth.php:349
 msgid "This application is not registered with Site Agent. Connect it again from the application."
 msgstr ""
 
-#: includes/class-oauth.php:346
+#: includes/class-oauth.php:353
 msgid "The redirect address does not match the one this application registered."
 msgstr ""
 
-#: includes/class-oauth.php:409
-#: includes/class-oauth.php:522
+#: includes/class-oauth.php:416
+#: includes/class-oauth.php:529
 msgid "Connect to Site Agent"
 msgstr ""
 
-#: includes/class-oauth.php:425
+#: includes/class-oauth.php:432
 msgid "OAuth is off"
 msgstr ""
 
-#: includes/class-oauth.php:425
+#: includes/class-oauth.php:432
 msgid "Turn on Site Agent and OAuth connections in Tools > Site Agent, then connect again from your application."
 msgstr ""
 
-#: includes/class-oauth.php:439
+#: includes/class-oauth.php:446
 msgid "Cannot connect"
 msgstr ""
 
-#: includes/class-oauth.php:490
+#: includes/class-oauth.php:497
 msgid "Create drafts and edit posts, pages, terms and media"
 msgstr ""
 
-#: includes/class-oauth.php:491
+#: includes/class-oauth.php:498
 msgid "Read plugin and theme source files"
 msgstr ""
 
-#: includes/class-oauth.php:492
+#: includes/class-oauth.php:499
 msgid "Change plugin and theme source files"
 msgstr ""
 
-#: includes/class-oauth.php:493
+#: includes/class-oauth.php:500
 msgid "Run PHP with full server privileges"
 msgstr ""
 
-#: includes/class-oauth.php:494
+#: includes/class-oauth.php:501
 msgid "Run WP-CLI commands"
 msgstr ""
 
-#: includes/class-oauth.php:495
+#: includes/class-oauth.php:502
 msgid "Use Bricks Builder tools"
 msgstr ""
 
 #. translators: 1: application name, 2: site name.
-#: includes/class-oauth.php:500
+#: includes/class-oauth.php:507
 #, php-format
 msgid "%1$s wants to connect to %2$s through Site Agent as you."
 msgstr ""
 
 #. translators: %s: redirect address host or scheme.
-#: includes/class-oauth.php:507
+#: includes/class-oauth.php:514
 #, php-format
 msgid "After you decide, you return to %s. Only approve applications you started connecting yourself."
 msgstr ""
 
-#: includes/class-oauth.php:512
+#: includes/class-oauth.php:519
 msgid "It can always read site details and content. Allow it to also:"
 msgstr ""
 
-#: includes/class-oauth.php:518
+#: includes/class-oauth.php:525
 msgid "No other tool groups are turned on in Tools > Site Agent."
 msgstr ""
 
-#: includes/class-oauth.php:520
+#: includes/class-oauth.php:527
 msgid "Access lasts until you revoke it in Tools > Site Agent, or for 30 days without use."
 msgstr ""
 
-#: includes/class-oauth.php:521
+#: includes/class-oauth.php:528
 msgid "Allow"
 msgstr ""
 
-#: includes/class-oauth.php:521
+#: includes/class-oauth.php:528
 msgid "Deny"
 msgstr ""
 
-#: includes/class-oauth.php:794
+#: includes/class-oauth.php:801
 msgid "Site Agent requires site administration rights."
 msgstr ""
 

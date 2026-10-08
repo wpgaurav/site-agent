@@ -63,7 +63,7 @@ Get the free checkout license from https://gauravtiwari.org/product/site-agent/ 
 == Changelog ==
 
 = 0.4.0 =
-* Add opt-in OAuth 2.1 connections for MCP clients that support the MCP authorization specification: protected resource and authorization server metadata (also at /.well-known), dynamic client registration for public clients, PKCE (S256) authorization codes, and a WordPress consent screen where an administrator approves each client and picks its tool groups.
+* Add opt-in OAuth 2.1 connections for MCP clients that support the MCP authorization specification: protected resource and authorization server metadata under Site Agent's own issuer path, which leaves the site-root discovery documents to other plugins such as Rank Math, dynamic client registration for public clients, PKCE (S256) authorization codes, and a WordPress consent screen where an administrator approves each client and picks its tool groups.
 * OAuth clients get one-hour bearer tokens and rotating refresh tokens that end after 30 days without use. Only token hashes are stored, tokens work on the MCP endpoint only, reusing a rotated refresh token ends the connection, and a demoted administrator's connections stop working. Revoke connections in Tools → Site Agent or through the revocation endpoint.
 * Unauthenticated MCP requests now answer with a WWW-Authenticate header that points OAuth clients to discovery when OAuth is on.
 * Audit history records OAuth calls with the client name.

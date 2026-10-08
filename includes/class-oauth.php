@@ -50,8 +50,13 @@ final class OAuth {
 		return untrailingslashit( rest_url( 'site-agent/v1/mcp' ) );
 	}
 
+	/**
+	 * A path issuer under Site Agent's REST namespace. The site root's discovery documents can
+	 * belong to another plugin's OAuth server (Rank Math's MCP server, for example), and a site
+	 * has only one root issuer, so Site Agent never claims them.
+	 */
 	public static function issuer(): string {
-		return untrailingslashit( home_url() );
+		return untrailingslashit( home_url( '/' . rest_get_url_prefix() . '/site-agent/v1/oauth' ) );
 	}
 
 	public static function authorization_endpoint(): string {
@@ -190,20 +195,21 @@ final class OAuth {
 	}
 
 	/**
-	 * Which metadata document a request path asks for: RFC 9728 and RFC 8414 put the well-known
-	 * segment at the host root, followed by the resource or issuer path. Also answers OpenID
-	 * Connect discovery paths that some clients try.
+	 * Which metadata document a request path asks for: RFC 9728 and RFC 8414 insert the
+	 * well-known segment at the host root before the resource or issuer path. Also answers the
+	 * OpenID Connect discovery forms MCP clients try next, including the one appended to the
+	 * issuer, which stays under the REST prefix. The bare root documents are left to others.
 	 */
 	public static function well_known_document( string $path ): string {
 		// Canonical redirects may add a trailing slash; both forms name the same document.
-		$path         = '/' . trim( $path, '/' );
-		$issuer_path  = untrailingslashit( (string) wp_parse_url( self::issuer(), PHP_URL_PATH ) );
-		$resource_url = (string) wp_parse_url( self::resource(), PHP_URL_PATH );
-		$resource     = array( '/.well-known/oauth-protected-resource', '/.well-known/oauth-protected-resource' . $resource_url );
-		$server       = array(
+		$path        = '/' . trim( $path, '/' );
+		$issuer_path = untrailingslashit( (string) wp_parse_url( self::issuer(), PHP_URL_PATH ) );
+		$resource    = array( '/.well-known/oauth-protected-resource' . (string) wp_parse_url( self::resource(), PHP_URL_PATH ) );
+		$server      = array(
 			'/.well-known/oauth-authorization-server' . $issuer_path,
 			'/.well-known/openid-configuration' . $issuer_path,
 			$issuer_path . '/.well-known/openid-configuration',
+			$issuer_path . '/.well-known/oauth-authorization-server',
 		);
 		if ( in_array( $path, $resource, true ) ) {
 			return 'resource';

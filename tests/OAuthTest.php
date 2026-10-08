@@ -133,11 +133,18 @@ final class OAuthTest extends TestCase {
 
 	public function test_well_known_paths_map_to_metadata(): void {
 		$resource_path = (string) wp_parse_url( OAuth::resource(), PHP_URL_PATH );
-		$this->assertSame( 'resource', OAuth::well_known_document( '/.well-known/oauth-protected-resource' ) );
+		$issuer_path   = (string) wp_parse_url( OAuth::issuer(), PHP_URL_PATH );
+		$this->assertSame( untrailingslashit( home_url( '/' . rest_get_url_prefix() . '/site-agent/v1/oauth' ) ), OAuth::issuer() );
 		$this->assertSame( 'resource', OAuth::well_known_document( '/.well-known/oauth-protected-resource' . $resource_path ) );
-		$this->assertSame( 'server', OAuth::well_known_document( '/.well-known/oauth-authorization-server' ) );
-		$this->assertSame( 'server', OAuth::well_known_document( '/.well-known/oauth-authorization-server/' ) );
-		$this->assertSame( 'server', OAuth::well_known_document( '/.well-known/openid-configuration' ) );
+		$this->assertSame( 'resource', OAuth::well_known_document( '/.well-known/oauth-protected-resource' . $resource_path . '/' ) );
+		$this->assertSame( 'server', OAuth::well_known_document( '/.well-known/oauth-authorization-server' . $issuer_path ) );
+		$this->assertSame( 'server', OAuth::well_known_document( '/.well-known/openid-configuration' . $issuer_path ) );
+		$this->assertSame( 'server', OAuth::well_known_document( $issuer_path . '/.well-known/openid-configuration' ) );
+		// The site root's documents may belong to another plugin's OAuth server.
+		$this->assertSame( '', OAuth::well_known_document( '/.well-known/oauth-protected-resource' ) );
+		$this->assertSame( '', OAuth::well_known_document( '/.well-known/oauth-authorization-server' ) );
+		$this->assertSame( '', OAuth::well_known_document( '/.well-known/oauth-authorization-server/' ) );
+		$this->assertSame( '', OAuth::well_known_document( '/.well-known/openid-configuration' ) );
 		$this->assertSame( '', OAuth::well_known_document( '/.well-known/acme-challenge/x' ) );
 	}
 
