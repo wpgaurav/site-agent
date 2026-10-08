@@ -66,6 +66,8 @@ Get the free checkout license from https://gauravtiwari.org/product/site-agent/ 
 * OAuth connections are on by default. Sites that never changed the setting get them as soon as Site Agent is enabled; a site that turned them off keeps its choice.
 * Tools → Site Agent leads with connecting through OAuth and moves Application Passwords to a "not recommended" section with a warning. It also warns when OAuth is off, when URL authentication is on, and when Application Passwords made tool calls in the last 30 days.
 * site-context reports how the connection authenticated. For an Application Password or an authenticated URL it carries a warning that agents pass on, asking the user to reconnect with OAuth.
+* Tools → Site Agent lists the plugins that give agents their own skill (GT Extensions for FluentCart, GT Page Blocks Builder and GT Link Manager) and shows which are active here.
+* Fixed: list-skills showed plugin skill descriptions with their YAML quotes.
 
 = 0.4.0 =
 * Add opt-in OAuth 2.1 connections for MCP clients that support the MCP authorization specification: protected resource and authorization server metadata under Site Agent's own issuer path, which leaves the site-root discovery documents to other plugins such as Rank Math, dynamic client registration for public clients, PKCE (S256) authorization codes, and a WordPress consent screen where an administrator approves each client and picks its tool groups.
