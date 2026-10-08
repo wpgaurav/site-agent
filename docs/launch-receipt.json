@@ -1,16 +1,16 @@
 {
-  "version": "0.4.1",
+  "version": "0.4.2",
   "github_repository": "https://github.com/wpgaurav/site-agent",
-  "github_release": "https://github.com/wpgaurav/site-agent/releases/tag/v0.4.1",
+  "github_release": "https://github.com/wpgaurav/site-agent/releases/tag/v0.4.2",
   "product_url": "https://gauravtiwari.org/product/site-agent/",
   "product_id": 1180328,
   "variation_id": 131,
   "price": 0,
-  "download_id": 365,
+  "download_id": 367,
   "driver": "r2",
-  "object": "site-agent-0.4.1.zip",
-  "size": 727306,
-  "sha256": "e0f32cc20acfc8edd80e4918c0521ca4a5eef8e8ea6971e2b17467086b67628d",
+  "object": "site-agent-0.4.2.zip",
+  "size": 728128,
+  "sha256": "84692b73187c8a6219a924ecbdc07b80212f2c206503aa9e6d8ae2b6cd49c470",
   "published_content_sha256": "f13b12febc699f4ec92413213983b09f67197ec0c9d677b20970dd4f2f6ef761",
   "primary_accent": "#1b2733",
   "branding_media": {
@@ -33,15 +33,15 @@
   "rollback_revision": 1180365,
   "files": 378,
   "rollback_release": {
-    "version": "0.4.0",
-    "download_id": 363
-  },
-  "production_version": "0.4.1",
-  "companion": {
-    "file": "site-agent-companion-0.4.1.zip",
     "version": "0.4.1",
-    "size": 21906,
-    "sha256": "c0bb43253f987bb649c8a8f3000d92199330969bcb0e4058bbff0a3c6e7ee2e3",
+    "download_id": 365
+  },
+  "production_version": "0.4.2",
+  "companion": {
+    "file": "site-agent-companion-0.4.2.zip",
+    "version": "0.4.2",
+    "size": 21905,
+    "sha256": "990f092cd444ba897790d0e9763059950311bd6d95f0cee7b68c9f791713d5dd",
     "files": 10
   },
   "url_auth_enabled": true,
