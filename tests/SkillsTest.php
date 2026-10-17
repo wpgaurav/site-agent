@@ -60,6 +60,7 @@ final class SkillsTest extends TestCase {
 				'version'   => '2.8.3',
 			);
 			$skills['gutenberg']  = array( 'directory' => $dir );
+			$skills['page-blocks-builder'] = array( 'directory' => $dir );
 			$skills['Bad Name']   = array( 'directory' => $dir );
 			$skills['no-skillmd'] = array( 'directory' => $dir . '/references' );
 			return $skills;
@@ -117,7 +118,7 @@ final class SkillsTest extends TestCase {
 		add_filter( 'site_agent_skills', $filter );
 		try {
 			$partners = array_column( Skills::partners(), null, 'name' );
-			$this->assertSame( array( 'GT Extensions for FluentCart', 'GT Page Blocks Builder', 'GT Link Manager' ), array_keys( $partners ) );
+			$this->assertSame( array_column( Skills::PARTNERS, 'name' ), array_keys( $partners ) );
 			$this->assertSame( array( 'gt-link-manager' ), $partners['GT Link Manager']['skills'] );
 			foreach ( $partners as $partner ) {
 				$this->assertContains( $partner['state'], array( 'active', 'installed', 'missing' ) );
@@ -125,6 +126,74 @@ final class SkillsTest extends TestCase {
 			}
 		} finally {
 			remove_filter( 'site_agent_skills', $filter );
+		}
+	}
+
+	public static function plugin_states(): array {
+		return array( 'active' => array( 'active' ), 'inactive' => array( 'installed' ), 'missing' => array( 'missing' ) );
+	}
+
+	/** @dataProvider plugin_states */
+	public function test_plugin_workflows_detect_installed_versions_without_loading_or_enabling_plugins( string $state ): void {
+		get_plugins();
+		$cache = wp_cache_get( 'plugins', 'plugins' );
+		$inventory = array();
+		foreach ( Skills::PARTNERS as $file => $partner ) {
+			if ( isset( $partner['skill'] ) && 'missing' !== $state ) {
+				$inventory[ $file ] = array( 'Name' => $partner['name'], 'Version' => '9.8.7' );
+			}
+		}
+		$active = static function () use ( $state, $inventory ) {
+			return 'active' === $state ? array_keys( $inventory ) : array();
+		};
+		$registered = static function ( $skills ) {
+			$skills['gtfc-store'] = array( 'directory' => SITE_AGENT_DIR . 'skills/fluentcart', 'plugin' => 'GT Extensions for FluentCart', 'version' => '9.8.7' );
+			$skills['gt-page-blocks'] = array( 'directory' => SITE_AGENT_DIR . 'skills/page-blocks-builder', 'plugin' => 'GT Page Blocks Builder', 'version' => '9.8.7' );
+			return $skills;
+		};
+		wp_cache_set( 'plugins', array( '' => $inventory ), 'plugins' );
+		add_filter( 'pre_option_active_plugins', $active );
+		if ( 'active' === $state ) {
+			add_filter( 'site_agent_skills', $registered );
+		}
+		try {
+			$context = Abilities::execute( 'site-context', array() );
+			$this->assertMatchesOutputSchema( 'site-context', $context );
+			$this->assertCount( 6, $context['integrations'] );
+			$this->assertSame( array( 'gutenberg' ), array_column( $context['builders'], 'skill' ), 'Plugins do not become page builders.' );
+			$listing = Abilities::execute( 'list-skills', array() );
+			$this->assertMatchesOutputSchema( 'list-skills', $listing );
+			$skills = array_column( $listing['skills'], null, 'name' );
+			foreach ( $context['integrations'] as $integration ) {
+				$name = $integration['skill'];
+				$this->assertSame( $state, $integration['state'], $name );
+				$this->assertSame( 'missing' === $state ? '' : '9.8.7', $integration['version'], $name );
+				$this->assertSame( 'active' === $state, $skills[ $name ]['detected'], $name );
+				$this->assertSame( $integration['version'], $skills[ $name ]['version'], $name );
+				$this->assertSame( 'site-agent', $skills[ $name ]['source'] );
+				$guide = Abilities::execute( 'get-skill', array( 'skill' => $name ) );
+				$this->assertMatchesOutputSchema( 'get-skill', $guide );
+				$this->assertStringContainsString( "name: $name\n", $guide['content'] );
+				if ( 'active' === $state ) {
+					$this->assertContains( $name, $integration['skills'] );
+				} else {
+					$this->assertSame( array(), $integration['skills'] );
+				}
+			}
+			if ( 'active' === $state ) {
+				$integrations = array_column( $context['integrations'], null, 'skill' );
+				$this->assertContains( 'gtfc-store', $integrations['gt-extensions-fluentcart']['skills'] );
+				$this->assertContains( 'gt-page-blocks', $integrations['page-blocks-builder']['skills'] );
+				$this->assertSame( 'GT Page Blocks Builder', $skills['gt-page-blocks']['source'] );
+			}
+			$this->assertSame( Config::defaults(), array_replace( Config::get(), array( 'enabled' => false ) ), 'Discovery does not enable developer groups.' );
+			$this->assertNotContains( 'execute-php', $context['enabled_tools'] );
+			$this->assertNotContains( 'run-wp-cli', $context['enabled_tools'] );
+			$this->assertInstanceOf( WP_Error::class, Abilities::execute( 'execute-php', array( 'code' => 'return 1;' ) ) );
+		} finally {
+			remove_filter( 'pre_option_active_plugins', $active );
+			remove_filter( 'site_agent_skills', $registered );
+			wp_cache_set( 'plugins', $cache, 'plugins' );
 		}
 	}
 

@@ -3,7 +3,7 @@ Contributors: wpgaurav
 Tags: mcp, developer-tools, ai, automation
 Requires at least: 6.9
 Requires PHP: 8.0
-Stable tag: 0.4.2
+Stable tag: 0.5.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,6 +12,8 @@ Connect an MCP client directly to WordPress with independently enabled developer
 == Description ==
 
 Site Agent provides WordPress context, content, term and media discovery, content and media writes, source inspection, source editing, PHP execution, and foreground WP-CLI commands. Bundled builder skills explain to the connected client how to work with Gutenberg, GenerateBlocks, Elementor, Bricks and Divi layouts, and an opt-in Bricks tools group serves Bricks Builder's own abilities (Bricks 2.4+) on the same connection. It is distributed independently through gauravtiwari.org.
+
+Bundled plugin guides cover MailerHive, Core Support, FluentCart, GT Extensions for FluentCart, Stackless for WooCommerce and Page Blocks Builder (PBB). Site context reports their installed versions, active state and matching skills. Active plugins can add their own detailed workflows. Reading guidance never enables developer tools or authorizes publishing, payments or customer messages.
 
 Access starts disabled. Open Tools > Site Agent to choose the tool groups, then connect with a dedicated WordPress Application Password. Each password can be limited to some of the enabled groups. Remote requests require HTTPS. Administrators can connect; multisite requires a super administrator. Source/developer tools also respect WordPress's file modification restrictions. The settings page includes connection diagnostics and a Test connection button.
 
@@ -61,6 +63,11 @@ Disable Site Agent or revoke its Application Password. An emergency SITE_AGENT_D
 Get the free checkout license from https://gauravtiwari.org/product/site-agent/ and activate it under Tools > Site Agent. FluentCart supplies automatic updates through protected HTTPS packages. The Update URI protects against unrelated WordPress.org slug matches. Manual release ZIP updates remain available. Licensing never disables the developer tools.
 
 == Changelog ==
+
+= 0.5.0 =
+* Added: Bundled workflow guides for MailerHive, Core Support, FluentCart, GT Extensions for FluentCart, Stackless for WooCommerce and Page Blocks Builder (PBB).
+* Added: site-context reports plugin workflow integrations, installed versions, active state and associated skills. Existing plugin-provided skills continue to supply their detailed commands.
+* Updated: MCP server instructions, the settings skills panel and companion guidance direct clients to the matching plugin workflows. All developer operations retain their existing opt-ins.
 
 = 0.4.2 =
 * Fixed: OAuth sign-in failed with "Sorry, you are not allowed to access this page" in clients that add their parameters to the authorization address with a second "?", such as Grok. The advertised authorization endpoint is now `/wp-json/site-agent/v1/oauth/authorize`, which has no query string and forwards to the consent screen, and the old consent address repairs such requests.

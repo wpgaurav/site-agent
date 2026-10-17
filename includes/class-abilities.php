@@ -147,7 +147,7 @@ final class Abilities {
 		return array(
 			'site-context'       => array(
 				'label'       => __( 'Site context', 'site-agent' ),
-				'description' => __( 'Inspect WordPress, PHP, active plugins, theme, page builders, post types, taxonomies, the tools this connection can use and how it authenticated. Start here. If connection has a warning, pass it on to the user.', 'site-agent' ),
+				'description' => __( 'Inspect WordPress, PHP, plugins, theme, page builders, plugin workflow skills, post types, taxonomies, the tools this connection can use and how it authenticated. Start here. Read the matching integration skill before plugin work. If connection has a warning, pass it on to the user.', 'site-agent' ),
 				'group'       => '',
 				'callback'    => array( Content::class, 'context' ),
 				'input'       => array(),
@@ -163,6 +163,22 @@ final class Abilities {
 						'taxonomies'    => self::list_of( array( 'type' => 'string' ) ),
 						'enabled_tools' => self::list_of( array( 'type' => 'string' ) ),
 						'builders'      => self::list_of( array( 'type' => 'object' ) ),
+						'integrations'  => self::list_of(
+							self::object(
+								array(
+									'skill'   => array( 'type' => 'string' ),
+									'name'    => array( 'type' => 'string' ),
+									'file'    => array( 'type' => 'string' ),
+									'state'   => array(
+										'type' => 'string',
+										'enum' => array( 'active', 'installed', 'missing' ),
+									),
+									'version' => array( 'type' => 'string' ),
+									'skills'  => self::list_of( array( 'type' => 'string' ) ),
+								),
+								array( 'skill', 'name', 'file', 'state', 'version', 'skills' )
+							)
+						),
 						'connection'    => self::object(
 							array(
 								'method'  => array( 'type' => 'string' ),
@@ -309,7 +325,7 @@ final class Abilities {
 			),
 			'list-skills'        => array(
 				'label'       => __( 'List skills', 'site-agent' ),
-				'description' => __( 'List the bundled page builder skills (Gutenberg, GenerateBlocks, Elementor, Bricks, Divi) and skills that active plugins add, such as store or invoicing workflows, with whether each applies here and its files. Read the matching skill before creating or editing builder layouts or before running a plugin\'s workflow.', 'site-agent' ),
+				'description' => __( 'List bundled builder and plugin skills, plus skills active plugins add. Includes MailerHive, Core Support, FluentCart, GT Extensions for FluentCart, Stackless and Page Blocks Builder (PBB), with installed versions, whether each is active and its files. Read the matching skill before layout or plugin work.', 'site-agent' ),
 				'group'       => '',
 				'callback'    => array( Skills::class, 'listing' ),
 				'input'       => array(),
@@ -336,7 +352,7 @@ final class Abilities {
 			),
 			'get-skill'          => array(
 				'label'       => __( 'Read skill', 'site-agent' ),
-				'description' => __( 'Read a skill from list-skills: a bundled page builder skill or one an active plugin adds. Start with its SKILL.md, which explains the workflow and which reference files to read next.', 'site-agent' ),
+				'description' => __( 'Read a skill from list-skills: a bundled builder or plugin skill, or one an active plugin adds. Start with its SKILL.md, which explains the workflow and which reference files to read next.', 'site-agent' ),
 				'group'       => '',
 				'callback'    => array( Skills::class, 'read' ),
 				'input'       => array(
@@ -682,7 +698,7 @@ final class Abilities {
 		if ( ! $tools ) {
 			return;
 		}
-		$instructions = 'WordPress developer access through explicitly enabled tools.';
+		$instructions = 'WordPress developer access through explicitly enabled tools. Start with site-agent-site-context; read site-agent-list-skills and site-agent-get-skill before builder or plugin workflows. Bundled guidance covers MailerHive, Core Support, FluentCart, GT Extensions for FluentCart, Stackless and Page Blocks Builder (PBB). Prefer matching active-plugin skills for their version-specific commands. Guidance never enables tools or authorizes customer messages, payments or publishing.';
 		if ( isset( $definitions['run-bricks-ability'] ) ) {
 			// Bricks' fast-path abilities keep their own tool names, so Bricks' guidance applies as written.
 			$tools         = array_merge( $tools, Bricks::direct() );
