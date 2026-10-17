@@ -1,6 +1,6 @@
 ---
 name: wordpress-assistant
-description: Inspect and manage a WordPress site connected through Site Agent. Use for site and plugin inventory, content or media discovery, post audits, draft creation, Gutenberg or ACF content edits, and scoped plugin or theme investigations.
+description: Inspect and manage a WordPress site connected through Site Agent. Use for content, media, drafts, builder edits, and plugin workflows for MailerHive, Core Support, FluentCart, GT Extensions for FluentCart, Stackless and Page Blocks Builder (PBB), with live capability discovery and verification.
 ---
 
 # Site Agent
@@ -36,6 +36,14 @@ Before creating or changing a layout, check where it is stored. site-context lis
 ## Bricks
 
 On Bricks 2.4+ sites with Bricks tools enabled, the connection also lists Bricks' own tools (bricks-*), bricks-abilities and run-bricks-ability. Start with bricks-start-here and the bricks skill. Where Bricks guidance names mcp-adapter-execute-ability or mcp-adapter-discover-abilities, use run-bricks-ability or bricks-abilities with the same ability_name and parameters.
+
+## Plugin workflows
+
+Before working on MailerHive, Core Support, FluentCart, GT Extensions for FluentCart, Stackless or Page Blocks Builder (PBB), inspect site-context.integrations and call list-skills, then get-skill for the matching guide. The bundled skill names are mailerhive, core-support, fluentcart, gt-extensions-fluentcart, stackless and page-blocks-builder. They remain readable when the plugin is missing; detected and integration state describe the actual installation, not permission or API availability.
+
+Prefer the installed plugin's additional workflow skill when present: gtfc-store/invoice/quote, stackless-store/invoice/quote or gt-page-blocks. They describe its native agent commands. The bundled guides explain record ownership, source paths, older-version fallbacks and verification. PHP-backed workflows still need execute-php explicitly enabled for this connection, even for reads. Never enable it or use another entry point to bypass a refusal.
+
+Keep operations distinct: a MailerHive issue isn't a sent campaign, a Core Support internal note isn't an unsaved reply draft, FluentCart and WooCommerce have separate commerce records, and a shared PBB library change can affect many pages. Follow current revisions, hashes and idempotency keys. Publishing, issuing, charging and customer messaging need authorization for that actual effect; carry forward authorization already given for the exact action.
 
 ## Audits and writing
 

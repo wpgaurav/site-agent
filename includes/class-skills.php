@@ -1,6 +1,6 @@
 <?php
 /**
- * Page builder skills bundled with the plugin and served as read-only guidance.
+ * Builder and plugin skills bundled with the plugin and served as read-only guidance.
  *
  * @package SiteAgent
  */
@@ -11,10 +11,10 @@ defined( 'ABSPATH' ) || exit;
 
 // phpcs:disable WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading bundled plugin files from local disk.
 
-/** Page builder skills bundled with the plugin, plus skills other plugins register, served as read-only guidance. */
+/** Bundled and plugin-registered skills, served as read-only guidance. */
 final class Skills {
 	/** Bundled skill names in listing order. bin/sync-skills.py checks the directories against this list. */
-	const CATALOG    = array( 'gutenberg', 'generateblocks', 'elementor', 'bricks', 'divi' );
+	const CATALOG    = array( 'gutenberg', 'generateblocks', 'elementor', 'bricks', 'divi', 'mailerhive', 'core-support', 'fluentcart', 'gt-extensions-fluentcart', 'stackless', 'page-blocks-builder' );
 	const MAX_BYTES  = 65536;
 	const EXTENSIONS = array( 'md', 'json', 'html' );
 	const PATH       = '^[A-Za-z0-9_][A-Za-z0-9._-]*(/[A-Za-z0-9_][A-Za-z0-9._-]*)*$';
@@ -23,19 +23,45 @@ final class Skills {
 	/** At most this many registered skills are listed. */
 	const MAX_REGISTERED = 20;
 	/**
-	 * Plugins known to add skills through site_agent_skills, shown in Tools > Site Agent.
+	 * Plugins with bundled guidance or skills through site_agent_skills, shown in Tools > Site Agent.
 	 * Keyed by plugin file: name, product URL and what an agent can do with them.
 	 */
 	const PARTNERS = array(
+		'mailerhive/mailerhive.php'                   => array(
+			'name'  => 'MailerHive',
+			'url'   => 'https://gauravtiwari.org/product/mailerhive/',
+			'does'  => 'Prepare newsletter issues and MailerPress drafts; inspect mirroring and paid access.',
+			'skill' => 'mailerhive',
+		),
+		'core-support/core-support.php'               => array(
+			'name'  => 'Core Support',
+			'url'   => 'https://gauravtiwari.org/product/core-support/',
+			'does'  => 'Read and triage tickets, prepare replies and notes, and maintain help docs and changelogs.',
+			'skill' => 'core-support',
+		),
+		'fluent-cart/fluent-cart.php'                 => array(
+			'name'  => 'FluentCart',
+			'url'   => 'https://fluentcart.com/',
+			'does'  => 'Inspect products, variations, orders and customers through the store APIs.',
+			'skill' => 'fluentcart',
+		),
 		'gt-extensions-fluentcart/gt-extensions-fluentcart.php' => array(
-			'name' => 'GT Extensions for FluentCart',
-			'url'  => 'https://gauravtiwari.org/product/gt-extensions-for-fluentcart/',
-			'does' => 'Draft, issue and email invoices; price and send quote proposals.',
+			'name'  => 'GT Extensions for FluentCart',
+			'url'   => 'https://gauravtiwari.org/product/gt-extensions-for-fluentcart/',
+			'does'  => 'Run store reports, invoices, quotes, stock alerts, product details and page access.',
+			'skill' => 'gt-extensions-fluentcart',
+		),
+		'stackless/stackless.php'                     => array(
+			'name'  => 'Stackless for WooCommerce',
+			'url'   => 'https://gauravtiwari.org/product/stackless-for-woocommerce/',
+			'does'  => 'Manage WooCommerce store workflows, subscriptions, licenses, invoices and quotes.',
+			'skill' => 'stackless',
 		),
 		'page-blocks-builder/page-blocks-builder.php' => array(
-			'name' => 'GT Page Blocks Builder',
-			'url'  => 'https://gauravtiwari.org/product/gt-page-blocks-builder/',
-			'does' => 'Build draft pages from HTML, CSS and JavaScript sections; edit sections and the block library.',
+			'name'  => 'GT Page Blocks Builder',
+			'url'   => 'https://gauravtiwari.org/product/gt-page-blocks-builder/',
+			'does'  => 'Build draft pages from HTML, CSS and JavaScript sections; edit sections and the block library.',
+			'skill' => 'page-blocks-builder',
 		),
 		'gt-link-manager/gt-link-manager.php'         => array(
 			'name' => 'GT Link Manager',
@@ -228,30 +254,47 @@ final class Skills {
 		$out        = array();
 		foreach ( self::PARTNERS as $file => $partner ) {
 			$skills = array();
+			$state  = isset( $installed[ $file ] ) ? ( is_plugin_active( $file ) ? 'active' : 'installed' ) : 'missing';
+			if ( 'active' === $state && isset( $partner['skill'] ) ) {
+				$skills[] = $partner['skill'];
+			}
 			foreach ( $registered as $skill => $registration ) {
 				if ( $partner['name'] === $registration['plugin'] ) {
 					$skills[] = $skill;
 				}
 			}
-			$state = isset( $installed[ $file ] ) ? ( is_plugin_active( $file ) ? 'active' : 'installed' ) : 'missing';
 			$out[] = $partner + array(
-				'file'   => $file,
-				'state'  => $state,
-				'skills' => $skills,
+				'file'    => $file,
+				'state'   => $state,
+				'version' => (string) ( $installed[ $file ]['Version'] ?? '' ),
+				'skills'  => $skills,
 			);
+		}
+		return $out;
+	}
+
+	/** Bundled plugin workflows and their installed state, kept separate from page builders. */
+	public static function integrations(): array {
+		$out = array();
+		foreach ( self::partners() as $partner ) {
+			if ( ! isset( $partner['skill'] ) ) {
+				continue;
+			}
+			$out[] = array_intersect_key( $partner, array_flip( array( 'skill', 'name', 'file', 'state', 'version', 'skills' ) ) );
 		}
 		return $out;
 	}
 
 	public static function listing(): array {
 		$detected = self::detected();
+		$plugins  = array_column( self::integrations(), null, 'skill' );
 		$skills   = array();
 		foreach ( self::CATALOG as $skill ) {
 			$skills[] = array(
 				'name'        => $skill,
 				'description' => self::description( $skill ),
-				'detected'    => isset( $detected[ $skill ] ),
-				'version'     => $detected[ $skill ]['version'] ?? '',
+				'detected'    => isset( $detected[ $skill ] ) || 'active' === ( $plugins[ $skill ]['state'] ?? '' ),
+				'version'     => $detected[ $skill ]['version'] ?? $plugins[ $skill ]['version'] ?? '',
 				'source'      => 'site-agent',
 				'files'       => self::files( $skill ),
 			);

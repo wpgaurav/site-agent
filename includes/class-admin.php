@@ -248,12 +248,12 @@ final class Admin {
 		}
 	}
 
-	/** Plugins that add skills for connected agents, with links and their state on this site. */
+	/** Plugins with bundled or registered skills, with links and their state on this site. */
 	private static function partners_panel(): void {
 		?>
 		<section id="site-agent-plugin-skills" aria-labelledby="site-agent-plugin-skills-heading" style="margin-block:24px;padding:24px;background:#fff;border:1px solid #c3c4c7;">
 			<h2 id="site-agent-plugin-skills-heading"><?php esc_html_e( 'Plugin skills', 'site-agent' ); ?></h2>
-			<p><?php esc_html_e( 'These plugins hand connected agents a skill for their own workflows. Agents find active ones with list-skills and get-skill, with nothing else to install.', 'site-agent' ); ?></p>
+			<p><?php esc_html_e( 'Site Agent includes workflow guides for these plugins. Active plugins can add more specific skills. Agents find them with list-skills and get-skill; developer operations still require their enabled tool groups.', 'site-agent' ); ?></p>
 			<table class="widefat striped" style="max-width:900px"><thead><tr><th><?php esc_html_e( 'Plugin', 'site-agent' ); ?></th><th><?php esc_html_e( 'What agents can do', 'site-agent' ); ?></th><th><?php esc_html_e( 'On this site', 'site-agent' ); ?></th></tr></thead><tbody>
 			<?php foreach ( Skills::partners() as $partner ) : ?>
 				<tr>

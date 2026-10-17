@@ -1,4 +1,4 @@
-"""Import pinned builder skill files and validate the bundled skills.
+"""Import pinned builder skill files and validate bundled builder and plugin skills.
 
     python3 bin/sync-skills.py          # offline validation (CI)
     python3 bin/sync-skills.py --pull   # re-import upstream files at the commits in skills/sources.json
@@ -37,7 +37,7 @@ LOCAL_OVERRIDES = {'generateblocks/references/mcp-publishing.md'}
 # Must match Skills::MAX_BYTES and Skills::EXTENSIONS in includes/class-skills.php.
 MAX_BYTES = 65536
 EXTENSIONS = {'.md', '.json', '.html'}
-CATALOG = ['gutenberg', 'generateblocks', 'elementor', 'bricks', 'divi']
+CATALOG = ['gutenberg', 'generateblocks', 'elementor', 'bricks', 'divi', 'mailerhive', 'core-support', 'fluentcart', 'gt-extensions-fluentcart', 'stackless', 'page-blocks-builder']
 FORBIDDEN = re.compile(r'novamira|wpvibe|respira', re.I)
 SEGMENT = re.compile(r'^[a-z0-9_][a-z0-9._-]*$', re.I)  # Same rule as Skills::PATH.
 
@@ -107,6 +107,8 @@ def check():
         assert sha256(path) == entry['sha256'], f'{target} differs from {entry["source"]}@{manifest["sources"][entry["source"]]["commit"][:12]}'
     directories = sorted(p.name for p in skills.iterdir() if p.is_dir())
     assert directories == sorted(CATALOG), f'skill directories {directories} do not match the catalog'
+    php_catalog = re.search(r'const CATALOG\s*= array\( (.*?) \);', (root / 'includes/class-skills.php').read_text())
+    assert php_catalog and re.findall(r"'([^']+)'", php_catalog[1]) == CATALOG, 'PHP and Python skill catalogs differ'
     count = 0
     for path in sorted(skills.rglob('*')):
         relative = path.relative_to(skills).as_posix()

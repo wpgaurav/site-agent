@@ -10,7 +10,7 @@ Site Agent is free and open source. The complete release ZIP and a free automati
 
 ## Companion Package
 
-Release 0.4.2 also includes `site-agent-companion-0.4.2.zip`, built from `companion/site-agent/`. It supplies the approved icon, a credential-free MCP connection and a WordPress workflow skill for compatible ChatGPT/Codex hosts. The skill covers site inspection, raw-content audits, draft preparation, hash-checked edits and enabled developer tools.
+The current source builds `site-agent-companion-0.5.0.zip` from `companion/site-agent/`. It supplies the approved icon, a credential-free MCP connection and a WordPress workflow skill for compatible ChatGPT/Codex hosts. The skill covers site inspection, raw-content audits, draft preparation, hash-checked edits and enabled developer tools.
 
 This companion archive is separate from the WordPress installable ZIP and contains no credentials. With OAuth connections on (0.4.0+), an OAuth-capable host signs in through WordPress and needs nothing else. Otherwise, authentication is configured privately through the host with a WordPress Application Password in a Basic Authorization header or an explicitly enabled authenticated URL. ChatGPT web compatibility with credential-bearing URLs has not been verified.
 
@@ -44,13 +44,13 @@ define( 'SITE_AGENT_DISABLED', true );
 
 | Tool | Opt-in group | Behavior |
 | --- | --- | --- |
-| `site-agent-site-context` | Enable Site Agent | WordPress/PHP versions, plugins, theme, active page builders, REST post types and taxonomies, tools available to this connection |
+| `site-agent-site-context` | Enable Site Agent | WordPress/PHP versions, plugins, theme, active page builders, plugin workflow integrations and their versions/state, REST post types and taxonomies, tools available to this connection |
 | `site-agent-list-content` | Enable Site Agent | Search and paginate accessible content, most recently modified first |
 | `site-agent-get-content` | Enable Site Agent | Read by ID, URL or slug: raw content, terms, featured image, SEO meta, the user's autosave (and its text on request), the builder that stores the layout, content hash |
 | `site-agent-list-terms` | Enable Site Agent | Find categories, tags and other taxonomy terms |
 | `site-agent-list-media` | Enable Site Agent | Existing media URLs, MIME types, dimensions, and alt text |
-| `site-agent-list-skills` | Enable Site Agent | Bundled page builder skills, whether each builder is active, and each skill's files |
-| `site-agent-get-skill` | Enable Site Agent | Read a builder skill's SKILL.md, references, patterns or examples |
+| `site-agent-list-skills` | Enable Site Agent | Bundled builder and plugin skills, active state, installed versions, plugin-provided skills and files |
+| `site-agent-get-skill` | Enable Site Agent | Read a builder or plugin skill's SKILL.md, references, patterns or examples |
 | `site-agent-save-content` | Content writes | Create drafts or update posts, terms, featured image, slug, schedule and SEO meta through core APIs |
 | `site-agent-upload-media` | Content writes | Import a public URL or base64 file into the media library with alt text |
 | `site-agent-update-media` | Content writes | Set media title, alt text, caption and description |
@@ -84,9 +84,13 @@ WP-CLI runs without a shell, on the current WordPress installation, and as the a
 
 The settings page shows diagnostics for HTTPS detection (including proxies that hide HTTPS), Application Password availability, WP-CLI, PHP compile checks and symlinked folders. Its Test connection button calls the MCP endpoint from the browser with the generated token, without cookies, and names the likely cause of a failure. Refused MCP requests carry an `X-Site-Agent-Auth` header with a coarse reason such as `unauthenticated` or `https_required`.
 
-## Builder Skills
+## Builder and Plugin Skills
 
-Site Agent bundles read-only skills for Gutenberg, GenerateBlocks, Elementor, Bricks and Divi under `skills/`. An MCP client reads them with `site-agent-list-skills` and `site-agent-get-skill`; they need only the base Enable Site Agent switch and contain no site data. Each skill explains where that builder stores layouts, how to read and change them through Site Agent's tools, and how to verify the result.
+Site Agent bundles eleven read-only skills under `skills/`: Gutenberg, GenerateBlocks, Elementor, Bricks, Divi, MailerHive, Core Support, FluentCart, GT Extensions for FluentCart, Stackless for WooCommerce and Page Blocks Builder (PBB). An MCP client reads them with `site-agent-list-skills` and `site-agent-get-skill`; they need only the base Enable Site Agent switch and contain no site data. The builder guides explain layout storage and verification. Plugin guides explain their records, native agent APIs or REST/CLI routes, module dependencies and verification.
+
+`site-context.integrations` reports the six plugin workflows separately from `builders`, including plugin file, version, active/installed/missing state and associated skills. Guides remain available when a plugin is missing or inactive; a listed skill does not grant API access. PHP and WP-CLI workflows still require their respective opt-ins and connection permissions. The guides preserve native validation and distinguish drafts, publication, payment operations and customer messages. No new execution entry point or automatically enabled group is added.
+
+Active plugins can supply more specific skills: GT Extensions provides `gtfc-store`, `gtfc-invoice` and `gtfc-quote`; Stackless provides corresponding `stackless-*` skills when its modules allow them; PBB provides `gt-page-blocks`. Read these for the installed version's detailed commands. The bundled guides use different names so these registrations continue to work. See [the integration source and verification notes](docs/plugin-workflows.md).
 
 `site-agent-site-context` lists the active builders, and `site-agent-get-content` reports a post's `builder`: `gutenberg`, `generateblocks`, `elementor`, `bricks`, `divi` or `classic`. Bricks counts when its editor mode is `bricks`, or when it has layout data and the mode is not `wordpress` (how Bricks itself decides). GenerateBlocks counts for its free and Pro blocks and for its own `gblocks_*` records such as global styles. Elementor, Bricks and Divi 4 keep the visible layout outside the block markup that `save-content` writes. Their skills either produce paste or import files for the builder's own interface or, when the user asks for a direct change, use the opt-in PHP or WP-CLI tools with a snapshot, a hash check and a read-back. Because PHP code and return values are limited to 64 KiB, the skills read outlines and single elements and send element-level patches instead of whole layouts. Skills are guidance for the client, not a safety layer; the tool groups and their limits still decide what a connection can do.
 
@@ -149,7 +153,7 @@ add_filter( 'site_agent_skills', function ( $skills ) {
 } );
 ```
 
-Names use lowercase letters, numbers and hyphens, and cannot replace the bundled builder skills. The directory must contain `SKILL.md`. Only Markdown, JSON and HTML files up to 64 KiB are served, through the same path checks as bundled skills. At most 20 registered skills are listed.
+Names use lowercase letters, numbers and hyphens, and cannot replace the bundled builder or plugin skills. The directory must contain `SKILL.md`. Only Markdown, JSON and HTML files up to 64 KiB are served, through the same path checks as bundled skills. At most 20 registered skills are listed.
 
 ## Security and Access
 
@@ -167,7 +171,7 @@ python3 bin/sync-skills.py
 bash bin/build.sh
 ```
 
-Tests refuse to load an installation without a `.site-agent-test-install` marker. Never place that marker on a real site. Integration tests modify disposable options, users, posts, and fixture files. The build uses a runtime allowlist and excludes tests, development dependencies, Composer metadata, docs, and screenshots. Ship `dist/site-agent-0.4.2.zip`, not a GitHub source archive.
+Tests refuse to load an installation without a `.site-agent-test-install` marker. Never place that marker on a real site. Integration tests modify disposable options, users, posts, and fixture files. The build uses a runtime allowlist and excludes tests, development dependencies, Composer metadata, docs, and screenshots. Ship `dist/site-agent-0.5.0.zip`, not a GitHub source archive.
 
 ## License and Contributions
 
