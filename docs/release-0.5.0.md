@@ -63,6 +63,42 @@ and verified its size, SHA-256 and embedded version. The maintenance flag was cl
 
 The exact server staging ZIP was removed after delivery verification. Earlier release
 rows, R2 objects and local ZIPs remain. No customer entitlement was changed; synthetic
-verification license 134 remained disabled. The live Site Agent installation was left
-at **0.4.2**: this task released downloads and automatic-update delivery without deploying
-the plugin to production or updating other plugins.
+verification license 134 remained disabled. At the initial release handoff the live
+Site Agent installation remained at **0.4.2**; production deployment followed only after
+the user's separate request below.
+
+## Production deployment
+
+The user subsequently authorized deployment to **gauravtiwari.org** and **anantamias.com**.
+Both installations were confirmed as active 0.4.2 on WordPress 7.1.3 / PHP 8.5.10, then
+updated through native `Plugin_Upgrader` using the verified GitHub ZIP above. All 387
+installed files on each site matched the package byte-for-byte.
+
+The deployments preserved active-plugin state and existing Site Agent settings,
+per-password scopes and encrypted update credentials. Private snapshots contain setting
+values and hashes of protected configuration; credentials were not copied into them.
+Exact previous-plugin ZIPs were verified and kept outside the web roots under each
+site account's `~/site-agent-backups/`:
+
+| Site | Rollback ZIP | SHA-256 |
+| --- | --- | --- |
+| gauravtiwari.org | `site-agent-0.4.2-20261017-175912-b0ae07.zip` | `95090d5acafe9ff168df2d1b530930f4e7264aebb606387936c8f42df4aed574` |
+| anantamias.com | `site-agent-0.4.2-20261017-180033-c132fd.zip` | `cadaa79e8ead58956a8673aa4be68edaf447afda35784f5cbc4750e2b6473fbf` |
+
+Independent fresh CLI loads and authenticated HTTP MCP sessions both reported **0.5.0**
+active. MCP verification used the bundled adapter's supported `2025-11-25` revision,
+called site context and skill listing, and read every one of the six new guides.
+Gauravtiwari.org exposed sixteen total skills and eighteen enabled tools; Anantam IAS
+exposed twelve skills and twenty tools. Those counts reflect existing enabled groups and
+plugin registrations; the deployment enabled no additional permissions.
+
+Both home pages, OAuth protected-resource metadata and the public converter script
+returned HTTP 200; the script's bytes matched the release. Web checks confirmed PHP
+workers served the new version, independently of CLI and OPcache's timestamp interval.
+No visual browser tests or mutation fixtures ran against production.
+
+GT Performance's automatic upgrade-purge callback was suppressed only within each
+installer process. Page caches were left intact, respecting Anantam IAS's standing
+no-purge instruction. No other plugins, content, commerce records or site-wide settings
+were updated. Both sites remained out of maintenance mode. Exact staging ZIPs were
+removed after verification, while private rollback copies remain.
