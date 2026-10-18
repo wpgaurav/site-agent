@@ -84,7 +84,7 @@ final class SiteAgentTest extends TestCase {
 		$this->enable( array( 'php_execute' ) );
 		$result = Abilities::execute( 'execute-php', array( 'code' => 'echo "captured"; return array("answer" => 42);' ) );
 		$this->assertSame( 'captured', $result['output'] );
-		$this->assertSame( array( 'answer' => 42 ), $result['return_value'] );
+		$this->assertSame( '{"answer":42}', wp_json_encode( $result['return_value'] ) );
 		foreach ( array( 'return (', 'throw new RuntimeException("private error");', '?>leak' ) as $code ) {
 			$this->assertInstanceOf( WP_Error::class, Abilities::execute( 'execute-php', array( 'code' => $code ) ) );
 		}

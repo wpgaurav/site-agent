@@ -72,9 +72,10 @@ final class Developer {
 			}
 			self::release();
 		}
+		$output = Process::text( $output, $truncated );
 		return array(
 			'output'       => $output,
-			'return_value' => json_decode( $encoded, true ),
+			'return_value' => json_decode( $encoded ),
 			'truncated'    => $truncated,
 		);
 	}

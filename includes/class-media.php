@@ -79,13 +79,15 @@ final class Media {
 			$file,
 			$parent,
 			null,
-			array_filter(
-				array(
-					'post_title'   => isset( $input['title'] ) ? sanitize_text_field( $input['title'] ) : '',
-					'post_excerpt' => $input['caption'] ?? '',
-					'post_content' => $input['description'] ?? '',
-				),
-				'strlen'
+			wp_slash(
+				array_filter(
+					array(
+						'post_title'   => isset( $input['title'] ) ? sanitize_text_field( $input['title'] ) : '',
+						'post_excerpt' => $input['caption'] ?? '',
+						'post_content' => $input['description'] ?? '',
+					),
+					'strlen'
+				)
 			)
 		);
 		if ( file_exists( $file['tmp_name'] ) ) {

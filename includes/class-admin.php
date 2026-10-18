@@ -282,10 +282,8 @@ final class Admin {
 
 	/** OAuth discovery details and the current user's connected clients, with revoke buttons. */
 	private static function oauth_panel(): void {
-		if ( ! Config::get()['oauth'] ) {
-			return;
-		}
-		$grants = OAuth::grants( get_current_user_id() );
+		$grants  = OAuth::grants( get_current_user_id() );
+		$clients = OAuth::clients();
 		?>
 		<section id="site-agent-oauth" aria-labelledby="site-agent-oauth-heading" style="margin-block:24px;padding:24px;background:#fff;border:1px solid #c3c4c7;">
 			<h2 id="site-agent-oauth-heading"><?php esc_html_e( 'OAuth connections', 'site-agent' ); ?></h2>
@@ -306,6 +304,23 @@ final class Admin {
 			<?php else : ?>
 				<p><?php esc_html_e( 'No OAuth clients are connected to your account.', 'site-agent' ); ?></p>
 			<?php endif; ?>
+			<?php if ( isset( $_GET['oauth_clients_removed'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Display-only notice after a nonce-checked action. ?>
+				<div class="notice notice-success inline"><p><?php esc_html_e( 'Client registration cleanup completed. Removed clients must register and sign in again.', 'site-agent' ); ?></p></div>
+			<?php endif; ?>
+			<details style="margin-block:16px">
+				<summary><strong><?php esc_html_e( 'Registered OAuth applications', 'site-agent' ); ?></strong> (<?php echo esc_html( count( $clients ) ); ?> / <?php echo esc_html( OAuth::MAX_CLIENTS ); ?>)</summary>
+				<p><?php esc_html_e( 'Public registrations reserve a slot before anyone signs in. Unapproved registrations expire after one day when the registration limit is reached. Clear them here to free slots immediately. Approved applications are kept until you explicitly remove them; removing an application ends its access for every account on this site.', 'site-agent' ); ?></p>
+				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"><input type="hidden" name="action" value="site_agent_oauth_remove_client"><input type="hidden" name="client" value="unused"><?php wp_nonce_field( 'site_agent_oauth_remove_client' ); ?><button class="button"><?php esc_html_e( 'Remove unapproved registrations', 'site-agent' ); ?></button></form>
+				<?php if ( $clients ) : ?>
+					<table class="widefat striped" style="max-width:900px;margin-top:12px"><thead><tr><th><?php esc_html_e( 'Client', 'site-agent' ); ?></th><th><?php esc_html_e( 'Status', 'site-agent' ); ?></th><th><?php esc_html_e( 'Last used', 'site-agent' ); ?></th><th><span class="screen-reader-text"><?php esc_html_e( 'Actions', 'site-agent' ); ?></span></th></tr></thead><tbody>
+					<?php foreach ( $clients as $client_id => $client ) : ?>
+						<tr><td><?php echo esc_html( $client['client_name'] ); ?><br><code><?php echo esc_html( $client_id ); ?></code></td><td><?php echo esc_html( empty( $client['used'] ) ? __( 'Not yet approved', 'site-agent' ) : __( 'Approved', 'site-agent' ) ); ?></td><td><?php echo esc_html( empty( $client['used'] ) ? __( 'Not yet', 'site-agent' ) : wp_date( 'M j, Y H:i', (int) $client['used'] ) ); ?></td><td>
+							<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"><input type="hidden" name="action" value="site_agent_oauth_remove_client"><input type="hidden" name="client" value="<?php echo esc_attr( $client_id ); ?>"><?php wp_nonce_field( 'site_agent_oauth_remove_client' ); ?><button class="button"><?php esc_html_e( 'Remove application', 'site-agent' ); ?></button></form>
+						</td></tr>
+					<?php endforeach; ?>
+					</tbody></table>
+				<?php endif; ?>
+			</details>
 			<p class="description"><?php esc_html_e( 'Turning off OAuth connections stops every OAuth client at once without deleting connections. Revoking removes a connection for good.', 'site-agent' ); ?></p>
 		</section>
 		<?php

@@ -4,6 +4,8 @@ Independent GPL-2.0-or-later WordPress MCP plugin. No Novamira application code,
 
 Minimum PHP is 8.0 and WordPress is 6.9. Preserve strict per-tool schemas, default-off access, native authentication, administrator/super-administrator checks and explicit developer-tool opt-ins. PHP, executable source editing and WP-CLI are full-privilege entry points, not a sandbox.
 
+OAuth grant credentials and revocation tombstones are site-local, non-autoloaded options under `site_agent_oauth_grant_`, bound to both resource URL and blog ID. Use atomic expected-value changes for grant mutations and fresh storage reads for authorization. Legacy global user-meta grants may migrate only with matching local client registration; preserve other sites' legacy state. Uninstall must remove both current grant options and legacy credentials. File mutations and rollback share a stable pathname lock and must recheck current contents before reverting a later edit.
+
 License activation controls FluentCart automatic updates only. Features must remain usable without a license. Keep update credentials encrypted, site-bound and non-autoloaded. Never commit environment files, license keys, activation hashes, signed package URLs, customer data or local font files.
 
 The product is https://gauravtiwari.org/product/site-agent/ and its FluentCart post ID is 1180328; free variation 131. Confirm live identity before store mutations. Plugin slug and ZIP root are `site-agent`; main file is `site-agent.php`. New release versions must agree across the header, constant, readme and generated package.

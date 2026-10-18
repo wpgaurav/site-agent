@@ -41,6 +41,10 @@ jobs:
         run: |
           node --check assets/admin-auth-converter.js
           node --test tests/admin-auth-converter.test.js
+      - name: Package and HTTP fixture guards
+        run: |
+          python3 tests/build-artifacts.test.py
+          python3 tests/http-smoke.test.py
       - name: Install disposable WordPress
         run: |
           wp core download --path=/tmp/site-agent-ci --version=6.9
