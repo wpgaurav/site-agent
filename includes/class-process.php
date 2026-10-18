@@ -15,7 +15,8 @@ final class Process {
 	const MAX_OUTPUT = 65536;
 
 	public static function available(): bool {
-		return function_exists( 'proc_open' ) && function_exists( 'proc_get_status' );
+		return function_exists( 'proc_open' ) && function_exists( 'proc_get_status' )
+			&& function_exists( 'proc_terminate' ) && function_exists( 'proc_close' );
 	}
 
 	/**
@@ -82,9 +83,23 @@ final class Process {
 			fclose( $pipes[2] );
 			proc_close( $process );
 		}
-		$result['stdout'] = $output[0];
-		$result['stderr'] = $output[1];
+		$result['stdout'] = self::text( $output[0], $result['truncated'] );
+		$result['stderr'] = self::text( $output[1], $result['truncated'] );
 		return $result;
+	}
+
+	/** Keep bounded process/PHP output valid UTF-8 for the MCP JSON serializer. */
+	public static function text( string $output, bool &$truncated ): string {
+		$output = wp_scrub_utf8( $output );
+		if ( strlen( $output ) > self::MAX_OUTPUT ) {
+			$output    = substr( $output, 0, self::MAX_OUTPUT );
+			$truncated = true;
+			// Scrubbing can expand invalid bytes; discard an incomplete final character.
+			while ( '' !== $output && 1 !== preg_match( '//u', $output ) ) {
+				$output = substr( $output, 0, -1 );
+			}
+		}
+		return $output;
 	}
 
 	/**

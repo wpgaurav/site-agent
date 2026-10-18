@@ -137,8 +137,8 @@ final class Files {
 		if ( self::own_file( $path ) ) {
 			return new \WP_Error( 'protected_plugin', __( 'Site Agent cannot edit its own files.', 'site-agent' ) );
 		}
-		$is_new = ! file_exists( $path );
-		if ( $is_new && 'new' !== $input['expected_sha256'] ) {
+		$is_new = 'new' === $input['expected_sha256'];
+		if ( ! file_exists( $path ) && ! $is_new ) {
 			return new \WP_Error( 'file_conflict', __( 'Use expected_sha256="new" when creating a file.', 'site-agent' ) );
 		}
 		$checks = array(
@@ -159,7 +159,15 @@ final class Files {
 		if ( self::is_php( $path ) ) {
 			$health = self::after_change( $input['path'], $path );
 			if ( 'fatal' === $health['status'] ) {
-				$restored = $is_new ? self::remove( $path ) : ! is_wp_error( self::swap( $path, false, hash( 'sha256', $input['content'] ), $old ) );
+				$restored = $is_new
+					? ! is_wp_error(
+						self::mutate(
+							static function () use ( $input ) {
+								return self::delete_file( $input['path'], hash( 'sha256', $input['content'] ) );
+							}
+						)
+					)
+					: ! is_wp_error( self::swap( $path, false, hash( 'sha256', $input['content'] ), $old ) );
 				self::invalidate( $path );
 				return self::reverted( $health['error'] ?? '', $restored );
 			}
@@ -175,6 +183,14 @@ final class Files {
 
 	/** Create a directory and any missing parents beneath an allowed root. */
 	public static function make_directory( array $input ) {
+		return self::mutate(
+			static function () use ( $input ) {
+				return self::create_directories( $input );
+			}
+		);
+	}
+
+	private static function create_directories( array $input ) {
 		$segments = explode( '/', (string) $input['path'] );
 		$depths   = count( $segments );
 		// The mu-plugins root itself may not exist yet; plugins/ and themes/ always do.
@@ -204,39 +220,18 @@ final class Files {
 
 	/** Delete a file whose hash still matches, or an empty directory. PHP deletions that break the site are undone. */
 	public static function delete( array $input ) {
-		$path = self::resolve( $input['path'] );
-		if ( is_wp_error( $path ) ) {
-			return $path;
-		}
-		if ( count( explode( '/', $input['path'] ) ) < 2 || self::own_file( $path ) ) {
-			return new \WP_Error( 'protected_path', __( 'Root directories and Site Agent files cannot be deleted.', 'site-agent' ) );
-		}
-		if ( is_dir( $path ) ) {
-			if ( 'directory' !== $input['expected_sha256'] ) {
-				return new \WP_Error( 'file_conflict', __( 'Use expected_sha256="directory" to delete an empty directory.', 'site-agent' ) );
+		$deleted = self::mutate(
+			static function () use ( $input ) {
+				return self::delete_file( $input['path'], $input['expected_sha256'] );
 			}
-			if ( array_diff( (array) scandir( $path ), array( '.', '..' ) ) || ! rmdir( $path ) ) {
-				return new \WP_Error( 'delete_failed', __( 'Only empty directories can be deleted.', 'site-agent' ) );
-			}
-			return array(
-				'path'    => $input['path'],
-				'deleted' => true,
-				'checks'  => array( 'health' => 'not_applicable' ),
-			);
+		);
+		if ( is_wp_error( $deleted ) ) {
+			return $deleted;
 		}
-		if ( ! is_file( $path ) || ! self::permitted_file( $path ) ) {
-			return new \WP_Error( 'unsupported_file', __( 'Only supported source and text files can be deleted.', 'site-agent' ) );
-		}
-		$old = file_get_contents( $path, false, null, 0, self::MAX_BYTES + 1 );
-		if ( false === $old || strlen( $old ) > self::MAX_BYTES || ! hash_equals( hash( 'sha256', $old ), (string) $input['expected_sha256'] ) ) {
-			return new \WP_Error( 'file_conflict', __( 'The file changed. Read it again before deleting.', 'site-agent' ) );
-		}
-		if ( ! self::remove( $path ) ) {
-			return new \WP_Error( 'delete_failed', __( 'The file could not be deleted.', 'site-agent' ) );
-		}
-		$health = self::is_php( $path ) ? self::after_change( $input['path'], $path ) : array( 'status' => 'not_applicable' );
+		$path   = $deleted['path'];
+		$health = ! $deleted['directory'] && self::is_php( $path ) ? self::after_change( $input['path'], $path ) : array( 'status' => 'not_applicable' );
 		if ( 'fatal' === $health['status'] ) {
-			$restored = ! is_wp_error( self::swap( $path, true, 'new', $old ) );
+			$restored = ! is_wp_error( self::swap( $path, true, 'new', $deleted['content'] ) );
 			self::invalidate( $path );
 			return self::reverted( $health['error'] ?? '', $restored );
 		}
@@ -247,8 +242,99 @@ final class Files {
 		);
 	}
 
+	/** Called with the pathname mutation lock held; lock the inode before comparing or unlinking. */
+	private static function delete_file( string $relative, string $expected ) {
+		$path = self::resolve( $relative );
+		if ( is_wp_error( $path ) ) {
+			return $path;
+		}
+		if ( count( explode( '/', $relative ) ) < 2 || self::own_file( $path ) ) {
+			return new \WP_Error( 'protected_path', __( 'Root directories and Site Agent files cannot be deleted.', 'site-agent' ) );
+		}
+		if ( is_dir( $path ) ) {
+			if ( 'directory' !== $expected ) {
+				return new \WP_Error( 'file_conflict', __( 'Use expected_sha256="directory" to delete an empty directory.', 'site-agent' ) );
+			}
+			if ( array_diff( (array) scandir( $path ), array( '.', '..' ) ) || ! rmdir( $path ) ) {
+				return new \WP_Error( 'delete_failed', __( 'Only empty directories can be deleted.', 'site-agent' ) );
+			}
+			return array(
+				'path'      => $path,
+				'directory' => true,
+			);
+		}
+		if ( ! is_file( $path ) || ! self::permitted_file( $path ) ) {
+			return new \WP_Error( 'unsupported_file', __( 'Only supported source and text files can be deleted.', 'site-agent' ) );
+		}
+		$handle = fopen( $path, 'rb' );
+		if ( false === $handle ) {
+			return new \WP_Error( 'delete_failed', __( 'The file could not be deleted.', 'site-agent' ) );
+		}
+		try {
+			if ( ! flock( $handle, LOCK_EX ) || ! self::current_file( $handle, $path, true ) ) {
+				return new \WP_Error( 'file_conflict', __( 'The file changed. Read it again before deleting.', 'site-agent' ) );
+			}
+			$old = stream_get_contents( $handle, self::MAX_BYTES + 1 );
+			if ( false === $old || strlen( $old ) > self::MAX_BYTES || ! hash_equals( hash( 'sha256', $old ), $expected ) ) {
+				return new \WP_Error( 'file_conflict', __( 'The file changed. Read it again before deleting.', 'site-agent' ) );
+			}
+			if ( ! self::remove( $path ) ) {
+				return new \WP_Error( 'delete_failed', __( 'The file could not be deleted.', 'site-agent' ) );
+			}
+			return array(
+				'path'      => $path,
+				'directory' => false,
+				'content'   => $old,
+			);
+		} finally {
+			flock( $handle, LOCK_UN );
+			fclose( $handle );
+		}
+	}
+
 	/** Rename a file whose hash still matches. The destination must not exist. */
 	public static function move( array $input ) {
+		$moved = self::mutate(
+			static function () use ( $input ) {
+				return self::move_file( $input );
+			}
+		);
+		if ( is_wp_error( $moved ) ) {
+			return $moved;
+		}
+		$from = $moved['from'];
+		$to   = $moved['to'];
+		self::invalidate( $from );
+		$php    = self::is_php( $from ) || self::is_php( $to );
+		$health = $php ? self::after_change( $input['to'], $to, array( $input['from'] ) ) : array( 'status' => 'not_applicable' );
+		if ( 'fatal' === $health['status'] ) {
+			$restored = ! is_wp_error(
+				self::mutate(
+					static function () use ( $input ) {
+						return self::move_file(
+							array(
+								'from'            => $input['to'],
+								'to'              => $input['from'],
+								'expected_sha256' => $input['expected_sha256'],
+							)
+						);
+					}
+				)
+			);
+			self::invalidate( $to );
+			self::invalidate( $from );
+			return self::reverted( $health['error'] ?? '', $restored );
+		}
+		return array(
+			'from'   => $input['from'],
+			'to'     => $input['to'],
+			'sha256' => $input['expected_sha256'],
+			'checks' => array( 'health' => $health['status'] ),
+		);
+	}
+
+	/** Called with the pathname mutation lock held; never replace an occupied destination. */
+	private static function move_file( array $input ) {
 		$from = self::resolve( $input['from'] );
 		$to   = self::resolve( $input['to'], true );
 		foreach ( array( $from, $to ) as $resolved ) {
@@ -265,27 +351,37 @@ final class Files {
 		if ( file_exists( $to ) ) {
 			return new \WP_Error( 'file_exists', __( 'The destination already exists.', 'site-agent' ) );
 		}
-		$content = file_get_contents( $from, false, null, 0, self::MAX_BYTES + 1 );
-		if ( false === $content || strlen( $content ) > self::MAX_BYTES || ! hash_equals( hash( 'sha256', $content ), (string) $input['expected_sha256'] ) ) {
-			return new \WP_Error( 'file_conflict', __( 'The file changed. Read it again before moving.', 'site-agent' ) );
-		}
-		if ( ! rename( $from, $to ) ) {
+		$handle = fopen( $from, 'rb' );
+		if ( false === $handle ) {
 			return new \WP_Error( 'move_failed', __( 'The file could not be moved.', 'site-agent' ) );
 		}
-		self::invalidate( $from );
-		$php    = self::is_php( $from ) || self::is_php( $to );
-		$health = $php ? self::after_change( $input['to'], $to ) : array( 'status' => 'not_applicable' );
-		if ( 'fatal' === $health['status'] ) {
-			$restored = rename( $to, $from );
-			self::invalidate( $to );
-			return self::reverted( $health['error'] ?? '', $restored );
+		try {
+			if ( ! flock( $handle, LOCK_EX ) || ! self::current_file( $handle, $from, true ) ) {
+				return new \WP_Error( 'file_conflict', __( 'The file changed. Read it again before moving.', 'site-agent' ) );
+			}
+			$content = stream_get_contents( $handle, self::MAX_BYTES + 1 );
+			if ( false === $content || strlen( $content ) > self::MAX_BYTES || ! hash_equals( hash( 'sha256', $content ), (string) $input['expected_sha256'] ) ) {
+				return new \WP_Error( 'file_conflict', __( 'The file changed. Read it again before moving.', 'site-agent' ) );
+			}
+			clearstatcache();
+			$destination = self::resolve( $input['to'], true );
+			if ( is_wp_error( $destination ) ) {
+				return $destination;
+			}
+			if ( file_exists( $destination ) ) {
+				return new \WP_Error( 'file_exists', __( 'The destination already exists.', 'site-agent' ) );
+			}
+			if ( ! rename( $from, $to ) ) {
+				return new \WP_Error( 'move_failed', __( 'The file could not be moved.', 'site-agent' ) );
+			}
+			return array(
+				'from' => $from,
+				'to'   => $to,
+			);
+		} finally {
+			flock( $handle, LOCK_UN );
+			fclose( $handle );
 		}
-		return array(
-			'from'   => $input['from'],
-			'to'     => $input['to'],
-			'sha256' => hash( 'sha256', $content ),
-			'checks' => array( 'health' => $health['status'] ),
-		);
 	}
 
 	/**
@@ -315,9 +411,9 @@ final class Files {
 	 *
 	 * @return array{status: string, error?: string}
 	 */
-	private static function after_change( string $relative, string $path ): array {
+	private static function after_change( string $relative, string $path, array $other_paths = array() ): array {
 		self::invalidate( $path );
-		return Health::check( $relative );
+		return Health::check( $relative, $other_paths );
 	}
 
 	private static function invalidate( string $path ): void {
@@ -337,8 +433,60 @@ final class Files {
 	}
 
 	private static function remove( string $path ): bool {
-		wp_delete_file( $path );
-		return ! file_exists( $path );
+		return unlink( $path );
+	}
+
+	/**
+	 * Serialize pathname changes before opening an inode. Never unlink this stable lock file.
+	 *
+	 * Inode locks alone cannot coordinate a writer that opened a path before it was renamed or
+	 * deleted. The site-scoped lock covers all file tool mutations, including rollback, and is
+	 * released before loopbacks so a separate request can finish. Other editors must cooperate
+	 * with advisory locks; inode identity is also checked after waiting for an existing writer.
+	 */
+	private static function mutate( callable $callback ) {
+		static $active = false;
+		if ( $active ) {
+			return new \WP_Error( 'lock_failed', __( 'The file could not be locked.', 'site-agent' ) );
+		}
+		$root = realpath( WP_CONTENT_DIR );
+		$file = get_temp_dir() . 'site-agent-files-' . hash( 'sha256', (string) $root ) . '.lock';
+		if ( is_link( $file ) ) {
+			return new \WP_Error( 'lock_failed', __( 'The file could not be locked.', 'site-agent' ) );
+		}
+		$lock = fopen( $file, 'c+b' );
+		if ( false === $lock ) {
+			return new \WP_Error( 'lock_failed', __( 'The file could not be locked.', 'site-agent' ) );
+		}
+		$active = true;
+		try {
+			if ( ! flock( $lock, LOCK_EX ) || ! self::current_file( $lock, $file ) ) {
+				return new \WP_Error( 'lock_failed', __( 'The file could not be locked.', 'site-agent' ) );
+			}
+			clearstatcache();
+			return $callback();
+		} finally {
+			flock( $lock, LOCK_UN );
+			fclose( $lock );
+			$active = false;
+		}
+	}
+
+	/** Check the open inode still names a regular, non-symlink file at this pathname. */
+	private static function current_file( $handle, string $path, bool $confined = false ): bool {
+		clearstatcache( true, $path );
+		if ( $confined ) {
+			$root = realpath( WP_CONTENT_DIR );
+			if ( is_wp_error( self::resolve( substr( $path, strlen( (string) $root ) + 1 ) ) ) ) {
+				return false;
+			}
+		}
+		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- The pathname may disappear while waiting for an advisory lock.
+		$named  = @lstat( $path );
+		$opened = fstat( $handle );
+		return is_array( $named ) && is_array( $opened )
+			&& 0100000 === ( $named['mode'] & 0170000 )
+			&& $named['dev'] === $opened['dev'] && $named['ino'] === $opened['ino'];
 	}
 
 	/**
@@ -347,6 +495,23 @@ final class Files {
 	 * @return string|\WP_Error Previous contents ('' for a new file).
 	 */
 	private static function swap( string $path, bool $is_new, string $expected, string $content ) {
+		return self::mutate(
+			static function () use ( $path, $is_new, $expected, $content ) {
+				$root     = realpath( WP_CONTENT_DIR );
+				$resolved = self::resolve( substr( $path, strlen( (string) $root ) + 1 ), $is_new );
+				if ( is_wp_error( $resolved ) ) {
+					return $resolved;
+				}
+				if ( $is_new === file_exists( $resolved ) ) {
+					return new \WP_Error( 'file_conflict', __( 'The file changed. Read it again before saving.', 'site-agent' ) );
+				}
+				return self::swap_locked( $resolved, $is_new, $expected, $content );
+			}
+		);
+	}
+
+	/** Called with the pathname mutation lock held. */
+	private static function swap_locked( string $path, bool $is_new, string $expected, string $content ) {
 		$handle = fopen( $path, $is_new ? 'x+b' : 'r+b' );
 		if ( false === $handle ) {
 			return new \WP_Error( 'write_failed', __( 'The file could not be opened for writing.', 'site-agent' ) );
@@ -355,6 +520,9 @@ final class Files {
 		try {
 			if ( ! flock( $handle, LOCK_EX ) ) {
 				return new \WP_Error( 'lock_failed', __( 'The file could not be locked.', 'site-agent' ) );
+			}
+			if ( ! self::current_file( $handle, $path, true ) ) {
+				return new \WP_Error( 'file_conflict', __( 'The file changed. Read it again before saving.', 'site-agent' ) );
 			}
 			$old = stream_get_contents( $handle, self::MAX_BYTES + 1 );
 			if ( false === $old || strlen( $old ) > self::MAX_BYTES || ( ! $is_new && ! hash_equals( hash( 'sha256', $old ), $expected ) ) ) {
@@ -371,11 +539,11 @@ final class Files {
 			$written = true;
 			return $old;
 		} finally {
+			if ( $is_new && ! $written && self::current_file( $handle, $path, true ) ) {
+				self::remove( $path );
+			}
 			flock( $handle, LOCK_UN );
 			fclose( $handle );
-			if ( $is_new && ! $written ) {
-				wp_delete_file( $path );
-			}
 		}
 	}
 

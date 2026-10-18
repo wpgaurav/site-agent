@@ -106,10 +106,11 @@ final class Health {
 	 * recovery-mode email for these requests. Scraping starts after must-use plugins load, so a
 	 * server error without markers counts as fatal only for mu-plugins changes.
 	 *
-	 * @param string $path Changed path relative to wp-content.
+	 * @param string   $path        Changed path relative to wp-content.
+	 * @param string[] $other_paths Other affected paths, such as a move's original source.
 	 * @return array{status: string, error?: string} Status is ok, fatal, unverified or skipped.
 	 */
-	public static function check( string $path ): array {
+	public static function check( string $path, array $other_paths = array() ): array {
 		/**
 		 * Filters whether to request the site after a PHP change and revert fatal changes.
 		 *
@@ -135,9 +136,13 @@ final class Health {
 		 */
 		$urls   = (array) apply_filters( 'site_agent_health_check_urls', array( home_url( '/' ), admin_url( 'admin-ajax.php' ), rest_url( 'site-agent/v1/mcp' ) ) );
 		$result = array( 'status' => 'ok' );
+		$early  = false;
+		foreach ( array_merge( array( $path ), $other_paths ) as $changed ) {
+			$early = $early || 0 === strpos( $changed, 'mu-plugins/' );
+		}
 		try {
 			foreach ( $urls as $url ) {
-				$outcome = self::probe( (string) $url, $key, $nonce, 0 === strpos( $path, 'mu-plugins/' ) );
+				$outcome = self::probe( (string) $url, $key, $nonce, $early );
 				if ( 'fatal' === $outcome['status'] ) {
 					return $outcome;
 				}

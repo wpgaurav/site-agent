@@ -6,9 +6,13 @@ PHP execution, executable file editing and WP-CLI can alter the database, files 
 
 Every ability checks authenticated administration rights, its current group setting and any limit set for the authenticating Application Password. Multisite requires a super administrator. File/developer tools additionally respect `DISALLOW_FILE_EDIT`, `DISALLOW_FILE_MODS` and `edit_plugins`; setting `SITE_AGENT_ALLOW_EXECUTION` to `false` blocks source editing, PHP and WP-CLI. Strict schemas reject unrecognized arguments. Native WordPress auth, nonce and capability checks protect administrator settings and license actions.
 
+OAuth grants are bound to the issuing resource and blog and stored as non-autoloaded site-local options. Expected-value mutations prevent concurrent activity and refresh requests from restoring revoked credentials. Revocation tombstones prevent old global user-meta grants from being imported again; legacy migration requires the matching local client registration. Newly issued refresh families authenticate their generation so replay of any older issued token ends the family. Older tokens whose hashes were already discarded by a previous release cannot be reconstructed. Administrators can remove pending or approved client registrations in Tools > Site Agent.
+
 Disable MCP access with the settings switch or `define( 'SITE_AGENT_DISABLED', true );` in `wp-config.php`. Revoke the dedicated Application Password in the WordPress profile. Deactivation disables access until it is explicitly re-enabled. The emergency constant applies to MCP access; it does not uninstall the plugin or cancel update licensing.
 
 Source inspection is opt-in and can reveal sensitive data embedded in source. File tools reject hidden paths, symlinks and known credential file names (such as `wp-config*.php`, `auth.json` and key files), but this is not a universal secret detector. File writes require the current hash, lock the target, check PHP syntax and, when a matching PHP binary exists, compile it; after a PHP change the site is loaded and a fatal change is reverted. Source editing cannot rewrite Site Agent itself; raw PHP and WP-CLI can.
+
+Site Agent file mutations share a pathname lock, validate the opened inode after lock waits, and protect later edits during rollback. Advisory locks coordinate Site Agent calls; they do not force SFTP, arbitrary PHP or other filesystem writers to cooperate. A rollback conflict is reported instead of overwriting a newer file.
 
 URL authentication credentials are removed from the request and superglobals before dispatch, so code that logs later in the request does not see them; web server, proxy and early-loading logs can still record the URL.
 

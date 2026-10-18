@@ -28,7 +28,7 @@ foreach ( $site_agent_sites as $site_agent_site ) {
 	// OAuth grants are credentials, so they never outlive the plugin.
 	delete_metadata( 'user', 0, 'site_agent_oauth_grants', '', true );
 	global $wpdb;
-	foreach ( $wpdb->get_col( $wpdb->prepare( "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( 'site_agent_oauth_client_' ) . '%' ) ) as $site_agent_option ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- Uninstall cleanup by prefix.
+	foreach ( $wpdb->get_col( $wpdb->prepare( "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s", $wpdb->esc_like( 'site_agent_oauth_client_' ) . '%', $wpdb->esc_like( 'site_agent_oauth_grant_' ) . '%' ) ) as $site_agent_option ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- Uninstall cleanup by prefix.
 		delete_option( $site_agent_option );
 	}
 	$site_agent_config = get_option( 'site_agent_settings', array() );

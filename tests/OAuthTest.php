@@ -12,7 +12,7 @@ final class OAuthTest extends TestCase {
 	protected function setUp(): void {
 		$this->config( true );
 		OAuth::delete_clients();
-		delete_user_meta( 1, OAuth::GRANTS );
+		$this->clear_grants();
 		OAuth::reset();
 		wp_set_current_user( 0 );
 	}
@@ -20,13 +20,26 @@ final class OAuthTest extends TestCase {
 	protected function tearDown(): void {
 		update_option( Config::OPTION, Config::defaults(), false );
 		OAuth::delete_clients();
-		delete_user_meta( 1, OAuth::GRANTS );
+		$this->clear_grants();
 		foreach ( $this->users as $user ) {
 			require_once ABSPATH . 'wp-admin/includes/user.php';
 			wp_delete_user( $user );
 		}
 		OAuth::reset();
 		wp_set_current_user( 0 );
+	}
+
+	private function clear_grants(): void {
+		global $wpdb;
+		delete_user_meta( 1, OAuth::GRANTS );
+		$names = $wpdb->get_col( $wpdb->prepare( "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( OAuth::GRANT_PREFIX ) . '%' ) );
+		foreach ( $names as $name ) {
+			delete_option( $name );
+		}
+	}
+
+	private function store_grant( string $id, array $grant ): void {
+		update_option( OAuth::GRANT_PREFIX . '1_' . $id, $grant, false );
 	}
 
 	private function config( bool $oauth, array $extra = array() ): void {
@@ -114,6 +127,394 @@ final class OAuthTest extends TestCase {
 		$request = new WP_REST_Request( 'POST', $route );
 		$request->set_header( 'Authorization', 'Bearer ' . $token );
 		return $request;
+	}
+
+	public function test_grants_are_bound_to_the_issuing_resource_and_foreign_revocation_is_ignored(): void {
+		$client                       = $this->register();
+		list( $verifier, $challenge ) = $this->verifier();
+		$tokens                       = $this->tokens( $client, $this->code( $client, $challenge ), $verifier )->get_data();
+		$foreign                      = static function ( $url ) {
+			return str_replace( '/site-agent/v1/mcp', '/another-site/site-agent/v1/mcp', $url );
+		};
+		add_filter( 'rest_url', $foreign );
+		try {
+			$this->assertSame( array(), OAuth::grants( 1 ), 'The admin panel must not list grants from another resource.' );
+			$this->assertFalse( Permissions::transport( $this->mcp( $tokens['access_token'] ) ) );
+			$this->assertSame( 400, $this->rotate( $client, $tokens['refresh_token'] )->get_status() );
+			$this->rest( 'POST', '/site-agent/v1/oauth/revoke', array( 'token' => $tokens['refresh_token'] ) );
+		} finally {
+			remove_filter( 'rest_url', $foreign );
+		}
+		$this->assertTrue( Permissions::transport( $this->mcp( $tokens['access_token'] ) ), 'A foreign resource cannot revoke the issuing resource grant.' );
+	}
+
+	private function rotate( string $client, string $token ): WP_REST_Response {
+		return $this->rest(
+			'POST',
+			'/site-agent/v1/oauth/token',
+			array( 'grant_type' => 'refresh_token', 'client_id' => $client, 'refresh_token' => $token )
+		);
+	}
+
+	public function test_replaying_an_older_refresh_ancestor_ends_the_current_family(): void {
+		$client                       = $this->register();
+		list( $verifier, $challenge ) = $this->verifier();
+		$first                        = $this->tokens( $client, $this->code( $client, $challenge ), $verifier )->get_data();
+		$second                       = $this->rotate( $client, $first['refresh_token'] )->get_data();
+		$third                        = $this->rotate( $client, $second['refresh_token'] )->get_data();
+		$this->assertSame( 400, $this->rotate( $client, $first['refresh_token'] )->get_status() );
+		$this->assertSame( array(), OAuth::grants( 1 ) );
+		$this->assertFalse( Permissions::transport( $this->mcp( $third['access_token'] ) ) );
+	}
+
+	/** Interleave just before the old metadata write or the new grant CAS statement. */
+	private function before_grant_write( callable $callback ): callable {
+		$done = false;
+		$hook = static function ( $value ) use ( &$done, $callback ) {
+			$is_metadata = null === $value;
+			$is_cas = is_string( $value ) && preg_match( '/^UPDATE .*site_agent_oauth_grant_/s', $value );
+			if ( ! $done && ( $is_metadata || $is_cas ) ) {
+				$done = true;
+				$callback();
+			}
+			return $value;
+		};
+		add_filter( 'update_user_metadata', $hook );
+		add_filter( 'query', $hook );
+		return $hook;
+	}
+
+	public function test_a_stale_last_used_write_cannot_restore_a_revoked_grant(): void {
+		$client                       = $this->register();
+		list( $verifier, $challenge ) = $this->verifier();
+		$tokens                       = $this->tokens( $client, $this->code( $client, $challenge ), $verifier )->get_data();
+		$revoked                      = false;
+		$hook                         = $this->before_grant_write(
+			function () use ( $tokens, &$revoked ) {
+				$this->rest( 'POST', '/site-agent/v1/oauth/revoke', array( 'token' => $tokens['refresh_token'] ) );
+				$revoked = array() === OAuth::grants( 1 );
+			}
+		);
+		try {
+			Permissions::transport( $this->mcp( $tokens['access_token'] ) );
+		} finally {
+			remove_filter( 'update_user_metadata', $hook );
+			remove_filter( 'query', $hook );
+		}
+		$this->assertTrue( $revoked, 'The revocation must run between the read and attempted write.' );
+		$this->assertSame( array(), OAuth::grants( 1 ) );
+		$this->assertFalse( Permissions::transport( $this->mcp( $tokens['access_token'] ) ) );
+	}
+
+	public function test_a_stale_last_used_write_cannot_restore_tokens_after_a_refresh(): void {
+		$client                       = $this->register();
+		list( $verifier, $challenge ) = $this->verifier();
+		$tokens                       = $this->tokens( $client, $this->code( $client, $challenge ), $verifier )->get_data();
+		$rotated                      = null;
+		$hook                         = $this->before_grant_write(
+			function () use ( $client, $tokens, &$rotated ) {
+				$rotated = $this->rotate( $client, $tokens['refresh_token'] )->get_data();
+			}
+		);
+		try {
+			$this->assertFalse( Permissions::transport( $this->mcp( $tokens['access_token'] ) ) );
+		} finally {
+			remove_filter( 'update_user_metadata', $hook );
+			remove_filter( 'query', $hook );
+		}
+		$this->assertIsArray( $rotated );
+		$this->assertFalse( Permissions::transport( $this->mcp( $tokens['access_token'] ) ) );
+		$this->assertTrue( Permissions::transport( $this->mcp( $rotated['access_token'] ) ) );
+	}
+
+	public function test_an_inflight_refresh_cannot_restore_a_revoked_grant(): void {
+		$client                       = $this->register();
+		list( $verifier, $challenge ) = $this->verifier();
+		$tokens                       = $this->tokens( $client, $this->code( $client, $challenge ), $verifier )->get_data();
+		$hook                         = $this->before_grant_write(
+			function () use ( $tokens ) {
+				$this->rest( 'POST', '/site-agent/v1/oauth/revoke', array( 'token' => $tokens['refresh_token'] ) );
+			}
+		);
+		try {
+			$this->assertSame( 400, $this->rotate( $client, $tokens['refresh_token'] )->get_status() );
+		} finally {
+			remove_filter( 'update_user_metadata', $hook );
+			remove_filter( 'query', $hook );
+		}
+		$this->assertSame( array(), OAuth::grants( 1 ) );
+		$this->assertFalse( Permissions::transport( $this->mcp( $tokens['access_token'] ) ) );
+	}
+
+	public function test_concurrent_refresh_replay_ends_the_family_instead_of_losing_an_update(): void {
+		$client                       = $this->register();
+		list( $verifier, $challenge ) = $this->verifier();
+		$tokens                       = $this->tokens( $client, $this->code( $client, $challenge ), $verifier )->get_data();
+		$rotated                      = null;
+		$hook                         = $this->before_grant_write(
+			function () use ( $client, $tokens, &$rotated ) {
+				$rotated = $this->rotate( $client, $tokens['refresh_token'] )->get_data();
+			}
+		);
+		try {
+			$this->assertSame( 400, $this->rotate( $client, $tokens['refresh_token'] )->get_status() );
+		} finally {
+			remove_filter( 'update_user_metadata', $hook );
+			remove_filter( 'query', $hook );
+		}
+		$this->assertIsArray( $rotated );
+		$this->assertSame( array(), OAuth::grants( 1 ) );
+		$this->assertFalse( Permissions::transport( $this->mcp( $rotated['access_token'] ) ) );
+	}
+
+	public function test_legacy_grants_need_local_registration_and_revoked_imports_stay_revoked(): void {
+		$client                       = $this->register();
+		list( $verifier, $challenge ) = $this->verifier();
+		$tokens                       = $this->tokens( $client, $this->code( $client, $challenge ), $verifier )->get_data();
+		$grants                       = OAuth::grants( 1 );
+		$id                           = array_key_first( $grants );
+		$legacy                       = $grants[ $id ];
+		unset( $legacy['resource'], $legacy['blog_id'] );
+		delete_option( OAuth::GRANT_PREFIX . '1_' . $id );
+		update_user_meta( 1, OAuth::GRANTS, array( $id => $legacy ) );
+		$registration = OAuth::client( $client );
+		delete_option( OAuth::CLIENTS . $client );
+		$this->assertSame( array(), OAuth::grants( 1 ) );
+		$this->assertFalse( Permissions::transport( $this->mcp( $tokens['access_token'] ) ) );
+		$this->assertSame( 400, $this->rotate( $client, $tokens['refresh_token'] )->get_status() );
+		$this->rest( 'POST', '/site-agent/v1/oauth/revoke', array( 'token' => $tokens['refresh_token'] ) );
+		$this->assertSame( array( $id => $legacy ), get_user_meta( 1, OAuth::GRANTS, true ), 'Another site must not delete the network-global legacy grant.' );
+		add_option( OAuth::CLIENTS . $client, $registration, '', false );
+		$this->assertTrue( Permissions::transport( $this->mcp( $tokens['access_token'] ) ), 'Existing single-site connections survive with their local registration.' );
+		$this->rest( 'POST', '/site-agent/v1/oauth/revoke', array( 'token' => $tokens['refresh_token'] ) );
+		$this->assertSame( array(), OAuth::grants( 1 ) );
+		$this->assertSame( array( $id => $legacy ), get_user_meta( 1, OAuth::GRANTS, true ) );
+		$this->assertFalse( Permissions::transport( $this->mcp( $tokens['access_token'] ) ), 'The retained legacy source cannot resurrect a revoked import.' );
+	}
+
+	public function test_active_clients_refresh_their_activity_and_are_never_automatically_pruned(): void {
+		$client                       = $this->register();
+		list( $verifier, $challenge ) = $this->verifier();
+		$tokens                       = $this->tokens( $client, $this->code( $client, $challenge ), $verifier )->get_data();
+		$registration                 = OAuth::client( $client );
+		$registration['used']          = time() - 100 * DAY_IN_SECONDS;
+		update_option( OAuth::CLIENTS . $client, $registration, false );
+		$this->assertSame( 200, $this->rotate( $client, $tokens['refresh_token'] )->get_status() );
+		$this->assertGreaterThan( time() - 10, OAuth::client( $client )['used'] );
+		$tokens = $this->tokens( $client, $this->code( $client, $challenge ), $verifier )->get_data();
+		$registration['used'] = time() - 100 * DAY_IN_SECONDS;
+		update_option( OAuth::CLIENTS . $client, $registration, false );
+		$this->assertTrue( Permissions::transport( $this->mcp( $tokens['access_token'] ) ) );
+		$this->assertGreaterThan( time() - 10, OAuth::client( $client )['used'] );
+		update_option( OAuth::CLIENTS . $client, $registration, false );
+		$prune = new ReflectionMethod( OAuth::class, 'prune_clients' );
+		$prune->setAccessible( true );
+		$prune->invoke( null, OAuth::clients() );
+		$this->assertNotNull( OAuth::client( $client ), 'Previously approved clients need explicit administrator removal, even without a recent timestamp.' );
+	}
+
+	/** Run an admin action without exiting the test process after its redirect. */
+	private function admin_action( string $method, string $action, array $post ): void {
+		$before_post = $_POST;
+		$before_request = $_REQUEST;
+		$_POST = $post;
+		$_REQUEST = array( '_wpnonce' => wp_create_nonce( $action ) );
+		$stop = static function () {
+			throw new RuntimeException( 'test admin redirect' );
+		};
+		add_filter( 'wp_redirect', $stop );
+		try {
+			OAuth::$method();
+		} catch ( RuntimeException $error ) {
+			$this->assertSame( 'test admin redirect', $error->getMessage() );
+		} finally {
+			remove_filter( 'wp_redirect', $stop );
+			$_POST = $before_post;
+			$_REQUEST = $before_request;
+		}
+	}
+
+	public function test_registration_exhaustion_has_admin_cleanup_that_keeps_approved_clients(): void {
+		$client                       = $this->register();
+		list( , $challenge )          = $this->verifier();
+		$this->code( $client, $challenge );
+		for ( $i = 1; $i < OAuth::MAX_CLIENTS; ++$i ) {
+			$this->register();
+		}
+		$this->assertSame( 429, $this->rest( 'POST', '/site-agent/v1/oauth/register', array( 'redirect_uris' => array( 'https://client.example/callback' ) ) )->get_status() );
+		wp_set_current_user( 1 );
+		$this->admin_action( 'remove_client_action', 'site_agent_oauth_remove_client', array( 'client' => 'unused' ) );
+		$this->assertSame( array( $client ), array_keys( OAuth::clients() ), 'A live authorization code protects its approved registration.' );
+		$this->assertStringStartsWith( 'sa-', $this->register() );
+		$this->admin_action( 'remove_client_action', 'site_agent_oauth_remove_client', array( 'client' => $client ) );
+		$this->assertNull( OAuth::client( $client ), 'A specifically selected approved registration can be removed.' );
+	}
+
+	public function test_admin_revoke_all_preserves_grants_bound_to_another_resource(): void {
+		$client                       = $this->register();
+		list( $verifier, $challenge ) = $this->verifier();
+		$tokens                       = $this->tokens( $client, $this->code( $client, $challenge ), $verifier )->get_data();
+		$id                           = array_key_first( OAuth::grants( 1 ) );
+		$foreign                      = OAuth::grants( 1 )[ $id ];
+		$foreign['resource']           = 'https://other.example/wp-json/site-agent/v1/mcp';
+		$foreign_id                    = bin2hex( random_bytes( 8 ) );
+		$this->store_grant( $foreign_id, $foreign );
+		wp_set_current_user( 1 );
+		$this->admin_action( 'revoke_action', 'site_agent_oauth_revoke', array( 'grant' => 'all' ) );
+		$this->assertSame( array(), OAuth::grants( 1 ) );
+		$this->assertSame( $foreign, get_option( OAuth::GRANT_PREFIX . '1_' . $foreign_id ) );
+		$this->assertFalse( Permissions::transport( $this->mcp( $tokens['access_token'] ) ) );
+	}
+
+	public function test_client_cleanup_requires_an_administrator_and_a_valid_nonce(): void {
+		$client = $this->register();
+		$before_post = $_POST;
+		$before_request = $_REQUEST;
+		$handler = static function () {
+			return static function ( $message, $title, $args ) {
+				throw new RuntimeException( 'blocked admin action', (int) ( $args['response'] ?? 500 ) );
+			};
+		};
+		add_filter( 'wp_die_handler', $handler );
+		try {
+			$_POST = array( 'client' => $client, 'grant' => 'all' );
+			$_REQUEST = array( '_wpnonce' => 'invalid-nonce' );
+			foreach ( array( 'remove_client_action', 'revoke_action' ) as $method ) {
+				foreach ( array( 0, 1 ) as $user ) {
+					wp_set_current_user( $user );
+					try {
+						OAuth::$method();
+						$this->fail( 'The action must reject an unauthorized user or invalid nonce.' );
+					} catch ( RuntimeException $error ) {
+						$this->assertSame( 403, $error->getCode() );
+					}
+					$this->assertNotNull( OAuth::client( $client ) );
+				}
+			}
+		} finally {
+			remove_filter( 'wp_die_handler', $handler );
+			$_POST = $before_post;
+			$_REQUEST = $before_request;
+		}
+	}
+
+	public function test_legacy_refresh_ancestors_remain_detectable_after_migration(): void {
+		$client                       = $this->register();
+		list( $verifier, $challenge ) = $this->verifier();
+		$tokens                       = $this->tokens( $client, $this->code( $client, $challenge ), $verifier )->get_data();
+		$id                           = array_key_first( OAuth::grants( 1 ) );
+		$legacy                       = OAuth::grants( 1 )[ $id ];
+		unset( $legacy['resource'], $legacy['blog_id'], $legacy['refresh_family'], $legacy['refresh_generation'], $legacy['legacy_refresh_hashes'] );
+		delete_option( OAuth::GRANT_PREFIX . '1_' . $id );
+		update_user_meta( 1, OAuth::GRANTS, array( $id => $legacy ) );
+		$second = $this->rotate( $client, $tokens['refresh_token'] )->get_data();
+		$third = $this->rotate( $client, $second['refresh_token'] )->get_data();
+		$this->assertSame( 400, $this->rotate( $client, $tokens['refresh_token'] )->get_status() );
+		$this->assertSame( array(), OAuth::grants( 1 ) );
+		$this->assertFalse( Permissions::transport( $this->mcp( $third['access_token'] ) ) );
+	}
+
+	public function test_refresh_family_storage_is_bounded_and_forged_ancestors_do_not_revoke_it(): void {
+		$client                       = $this->register();
+		list( $verifier, $challenge ) = $this->verifier();
+		$first                        = $this->tokens( $client, $this->code( $client, $challenge ), $verifier )->get_data();
+		$current                      = $first;
+		for ( $i = 0; $i < 20; ++$i ) {
+			$response = $this->rotate( $client, $current['refresh_token'] );
+			$this->assertSame( 200, $response->get_status() );
+			$current = $response->get_data();
+		}
+		$grants = OAuth::grants( 1 );
+		$grant = reset( $grants );
+		$this->assertSame( array(), $grant['legacy_refresh_hashes'] );
+		$this->assertSame( 20, $grant['refresh_generation'] );
+		$forged = substr( $first['refresh_token'], 0, -35 ) . str_repeat( 'x', 35 );
+		$this->assertSame( 400, $this->rotate( $client, $forged )->get_status() );
+		$this->assertTrue( Permissions::transport( $this->mcp( $current['access_token'] ) ), 'An unauthenticated guessed ancestor cannot revoke a valid family.' );
+		$this->assertSame( 400, $this->rotate( $client, $first['refresh_token'] )->get_status() );
+		$this->assertSame( array(), OAuth::grants( 1 ) );
+	}
+
+	public function test_a_concurrent_legacy_import_cannot_replace_a_revocation_tombstone(): void {
+		$client                       = $this->register();
+		list( $verifier, $challenge ) = $this->verifier();
+		$tokens                       = $this->tokens( $client, $this->code( $client, $challenge ), $verifier )->get_data();
+		$id                           = array_key_first( OAuth::grants( 1 ) );
+		$legacy                       = OAuth::grants( 1 )[ $id ];
+		unset( $legacy['resource'], $legacy['blog_id'] );
+		delete_option( OAuth::GRANT_PREFIX . '1_' . $id );
+		update_user_meta( 1, OAuth::GRANTS, array( $id => $legacy ) );
+		$interleaved = false;
+		$hook = function ( $query ) use ( $tokens, &$interleaved ) {
+			if ( ! $interleaved && 0 === strpos( $query, 'INSERT' ) && false !== strpos( $query, 'site_agent_oauth_grant_' ) ) {
+				$interleaved = true;
+				$this->rest( 'POST', '/site-agent/v1/oauth/revoke', array( 'token' => $tokens['refresh_token'] ) );
+			}
+			return $query;
+		};
+		add_filter( 'query', $hook );
+		try {
+			$this->assertFalse( Permissions::transport( $this->mcp( $tokens['access_token'] ) ) );
+		} finally {
+			remove_filter( 'query', $hook );
+		}
+		$this->assertTrue( $interleaved );
+		$this->assertSame( array(), OAuth::grants( 1 ) );
+		$this->assertFalse( Permissions::transport( $this->mcp( $tokens['access_token'] ) ) );
+	}
+
+	public function test_client_cleanup_preserves_concurrent_approval_and_retries_explicit_removal(): void {
+		$client = $this->register();
+		$changes = 0;
+		$hook = static function ( $query ) use ( $client, &$changes ) {
+			if ( $changes < 1 && 0 === strpos( $query, 'DELETE' ) && false !== strpos( $query, 'site_agent_oauth_client_' ) ) {
+				++$changes;
+				$registration = OAuth::client( $client );
+				$registration['used'] = time() + $changes;
+				update_option( OAuth::CLIENTS . $client, $registration, false );
+			}
+			return $query;
+		};
+		wp_set_current_user( 1 );
+		add_filter( 'query', $hook );
+		try {
+			$this->admin_action( 'remove_client_action', 'site_agent_oauth_remove_client', array( 'client' => 'unused' ) );
+		} finally {
+			remove_filter( 'query', $hook );
+		}
+		$this->assertSame( 1, $changes );
+		$this->assertNotNull( OAuth::client( $client ), 'Bulk cleanup must preserve a concurrently approved application.' );
+		$registration = OAuth::client( $client );
+		$registration['used'] = time() - DAY_IN_SECONDS;
+		update_option( OAuth::CLIENTS . $client, $registration, false );
+		$changes = 0;
+		add_filter( 'query', $hook );
+		try {
+			$this->admin_action( 'remove_client_action', 'site_agent_oauth_remove_client', array( 'client' => $client ) );
+		} finally {
+			remove_filter( 'query', $hook );
+		}
+		$this->assertSame( 1, $changes );
+		$this->assertNull( OAuth::client( $client ), 'Explicit removal must retry when activity changes the original snapshot.' );
+	}
+
+	public function test_a_stale_client_cache_cannot_authorize_after_registration_removal(): void {
+		$client                       = $this->register();
+		list( $verifier, $challenge ) = $this->verifier();
+		$tokens                       = $this->tokens( $client, $this->code( $client, $challenge ), $verifier )->get_data();
+		$key                          = OAuth::CLIENTS . $client;
+		$registration                 = OAuth::client( $client );
+		$remove                       = new ReflectionMethod( OAuth::class, 'compare_swap' );
+		$remove->setAccessible( true );
+		$this->assertTrue( $remove->invoke( null, $key, $registration, null ) );
+		// Model a get_option() call that read before removal and refilled its positive cache afterward.
+		wp_cache_set( $key, $registration, 'options' );
+		$this->assertSame( $registration, get_option( $key ), 'The stale positive cache must exist for this regression.' );
+		$this->assertNull( OAuth::client( $client ) );
+		$this->assertFalse( Permissions::transport( $this->mcp( $tokens['access_token'] ) ) );
+		$this->assertSame( 400, $this->rotate( $client, $tokens['refresh_token'] )->get_status() );
+		wp_cache_delete( $key, 'options' );
+		wp_cache_delete( 'notoptions', 'options' );
 	}
 
 	public function test_metadata_is_served_only_when_oauth_is_on(): void {
@@ -346,7 +747,7 @@ final class OAuthTest extends TestCase {
 		$grants                          = OAuth::grants( 1 );
 		$id                              = array_key_first( $grants );
 		$grants[ $id ]['access_expires'] = time() - 1;
-		update_user_meta( 1, OAuth::GRANTS, $grants );
+		$this->store_grant( $id, $grants[ $id ] );
 		$this->assertFalse( Permissions::transport( $this->mcp( $tokens['access_token'] ) ) );
 		$this->assertSame( 'invalid_token', Permissions::denial() );
 		$this->assertFalse( Permissions::transport( $this->mcp( 'sa_1_0123456789abcdef_' . str_repeat( 'x', 43 ) ) ) );

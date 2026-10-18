@@ -172,8 +172,8 @@ final class Content {
 			$staged = array(
 				'id'             => $autosave->ID,
 				'modified_gmt'   => $autosave->post_modified_gmt,
-				// The same test the editor uses before offering to restore an autosave.
-				'newer'          => mysql2date( 'U', $autosave->post_modified_gmt, false ) > mysql2date( 'U', $post->post_modified_gmt, false ),
+				// Report the same working copy staging uses, including edits within one timestamp second.
+				'newer'          => self::has_staged_changes( $post, $autosave ),
 				'title'          => $autosave->post_title,
 				'content_sha256' => hash( 'sha256', $autosave->post_content ),
 			);
@@ -280,7 +280,7 @@ final class Content {
 				return new \WP_Error( 'invalid_date', __( 'Scheduling needs a future date_gmt.', 'site-agent' ) );
 			}
 		}
-		$extras = self::prepare_extras( $type, $input );
+		$extras = self::prepare_extras( $type, $input, $id );
 		if ( is_wp_error( $extras ) ) {
 			return $extras;
 		}
@@ -294,8 +294,13 @@ final class Content {
 				$data[ $key ] = 'title' === $field ? self::title( $input[ $field ] ) : $input[ $field ];
 			}
 		}
-		// Core applies the authenticated author's KSES policy and save hooks.
-		$result = $id ? wp_update_post( wp_slash( $data ), true ) : wp_insert_post( wp_slash( $data ), true );
+		// New registered meta needs a real post ID for native capability checks. Keep it a draft until authorized.
+		$pending_status = ! $id && ! empty( $extras['registered_meta'] ) && in_array( $status, self::LIVE, true ) ? $status : null;
+		if ( $pending_status ) {
+			$data['post_status'] = 'draft';
+		}
+		// Core applies KSES and save hooks. Defer the complete-save hook until terms and meta are final, as REST does.
+		$result = $id ? wp_update_post( wp_slash( $data ), true, false ) : wp_insert_post( wp_slash( $data ), true, false );
 		if ( is_wp_error( $result ) ) {
 			return $result;
 		}
@@ -303,6 +308,20 @@ final class Content {
 		if ( is_wp_error( $applied ) ) {
 			return $applied;
 		}
+		if ( $pending_status ) {
+			$published = wp_update_post(
+				array(
+					'ID'          => $result,
+					'post_status' => $pending_status,
+				),
+				true,
+				false
+			);
+			if ( is_wp_error( $published ) ) {
+				return self::partial( $published, (int) $result );
+			}
+		}
+		wp_after_insert_post( get_post( $result ), (bool) $id, $post );
 		return array( 'staged' => false ) + self::data( get_post( $result ) );
 	}
 
@@ -329,13 +348,45 @@ final class Content {
 		if ( isset( $body['title'] ) ) {
 			$body['title'] = self::title( $body['title'] );
 		}
+		$autosave = wp_get_post_autosave( $post->ID, get_current_user_id() );
+		$working  = $autosave && self::has_staged_changes( $post, $autosave ) ? $autosave : $post;
+		// Core's first autosave fills omitted revision fields with empty strings, so submit a complete working copy.
+		$body   += array(
+			'title'   => $working->post_title,
+			'content' => $working->post_content,
+			'excerpt' => $working->post_excerpt,
+		);
 		$request = new \WP_REST_Request( 'POST', sprintf( '/%s/%s/%d/autosaves', $type->rest_namespace ? $type->rest_namespace : 'wp/v2', $type->rest_base ? $type->rest_base : $type->name, $post->ID ) );
 		$request->set_body_params( $body );
 		$response = rest_do_request( $request );
 		if ( $response->is_error() ) {
 			return $response->as_error();
 		}
+		$autosave = wp_get_post_autosave( $post->ID, get_current_user_id() );
+		if ( $autosave ) {
+			// Track the live base even when sequential edits share core's one-second timestamp resolution.
+			update_metadata( 'post', $autosave->ID, '_site_agent_stage_base_sha256', self::stage_base( $post ) );
+		}
 		return array( 'staged' => true ) + self::data( get_post( $post->ID ) );
+	}
+
+	/** Whether an autosave has unsaved changes based on the current live copy. */
+	private static function has_staged_changes( \WP_Post $post, \WP_Post $autosave ): bool {
+		$live_base = self::stage_base( $post );
+		if ( hash_equals( $live_base, self::stage_base( $autosave ) ) ) {
+			return false;
+		}
+		$base = get_post_meta( $autosave->ID, '_site_agent_stage_base_sha256', true );
+		if ( is_string( $base ) && '' !== $base ) {
+			return hash_equals( $base, $live_base );
+		}
+		// Autosaves made outside Site Agent retain the editor's timestamp comparison.
+		return mysql2date( 'U', $autosave->post_modified_gmt, false ) > mysql2date( 'U', $post->post_modified_gmt, false );
+	}
+
+	/** Identify the live revision fields on which a staged working copy is based. */
+	private static function stage_base( \WP_Post $post ): string {
+		return hash( 'sha256', wp_json_encode( array( $post->post_title, $post->post_content, $post->post_excerpt ) ) );
 	}
 
 	/**
@@ -343,7 +394,7 @@ final class Content {
 	 *
 	 * @return array<string, mixed>|\WP_Error
 	 */
-	private static function prepare_extras( \WP_Post_Type $type, array $input ) {
+	private static function prepare_extras( \WP_Post_Type $type, array $input, int $post_id ) {
 		$extras = array();
 		foreach ( (array) ( $input['terms'] ?? array() ) as $name => $items ) {
 			$taxonomy = get_taxonomy( (string) $name );
@@ -359,22 +410,22 @@ final class Content {
 						/* translators: 1: term ID, 2: taxonomy name. */
 						return new \WP_Error( 'invalid_term', sprintf( __( 'Term %1$d does not exist in %2$s.', 'site-agent' ), $item, $taxonomy->name ) );
 					}
-					$terms[] = $term->term_id;
+					$terms[ 'id:' . $term->term_id ] = $term->term_id;
 					continue;
 				}
 				$label = trim( (string) $item );
 				$term  = '' === $label ? false : get_term_by( 'name', $label, $taxonomy->name );
 				if ( $term instanceof \WP_Term ) {
-					$terms[] = $term->term_id;
+					$terms[ 'id:' . $term->term_id ] = $term->term_id;
 				} elseif ( '' !== $label && current_user_can( $taxonomy->cap->edit_terms ) ) {
 					// Created after the post saves, so a rejected post leaves no stray terms.
-					$terms[] = $label;
+					$terms[ 'name:' . $label ] = $label;
 				} else {
 					/* translators: 1: term name, 2: taxonomy name. */
 					return new \WP_Error( 'invalid_term', sprintf( __( 'The term "%1$s" does not exist in %2$s and cannot be created.', 'site-agent' ), $label, $taxonomy->name ) );
 				}
 			}
-			$extras['terms'][ $taxonomy->name ] = $terms;
+			$extras['terms'][ $taxonomy->name ] = array_values( $terms );
 		}
 		if ( isset( $input['featured_media'] ) ) {
 			$media = (int) $input['featured_media'];
@@ -384,7 +435,10 @@ final class Content {
 			$extras['featured_media'] = $media;
 		}
 		if ( isset( $input['meta'] ) ) {
-			$allowed = self::meta_keys( $type->name );
+			$allowed    = self::meta_keys( $type->name );
+			$registered = array_merge( get_registered_meta_keys( 'post' ), get_registered_meta_keys( 'post', $type->name ) );
+			$controller = new \WP_REST_Post_Meta_Fields( $type->name );
+			$schema     = $controller->get_field_schema();
 			foreach ( (array) $input['meta'] as $key => $value ) {
 				if ( ! in_array( $key, $allowed, true ) && preg_match( self::BUILDER_META, (string) $key ) ) {
 					/* translators: %s: meta key. */
@@ -394,8 +448,28 @@ final class Content {
 					/* translators: 1: meta key, 2: allowed meta keys. */
 					return new \WP_Error( 'invalid_meta', sprintf( __( 'The meta key %1$s cannot be written. Allowed keys: %2$s.', 'site-agent' ), $key, $allowed ? implode( ', ', $allowed ) : __( 'none', 'site-agent' ) ) );
 				}
+				if ( isset( $registered[ $key ] ) ) {
+					$args      = $registered[ $key ];
+					$rest_args = is_array( $args['show_in_rest'] ) ? $args['show_in_rest'] : array();
+					$name      = $rest_args['name'] ?? $key;
+					$rules     = $schema['properties'][ $name ] ?? array_merge( array( 'type' => $args['type'] ), $rest_args['schema'] ?? array() );
+					if ( '' !== $value ) {
+						$valid = rest_validate_value_from_schema( $value, $rules, 'meta.' . $key );
+						if ( is_wp_error( $valid ) ) {
+							return $valid;
+						}
+						$value = rest_sanitize_value_from_schema( $value, $rules );
+					}
+					$extras['registered_meta'][ $key ] = empty( $args['show_in_rest'] ) ? null : $name;
+				}
+				$extras['meta'][ $key ] = $value;
 			}
-			$extras['meta'] = (array) $input['meta'];
+			if ( $post_id ) {
+				$permission = self::meta_permissions( $post_id, $extras );
+				if ( is_wp_error( $permission ) ) {
+					return $permission;
+				}
+			}
 		}
 		return $extras;
 	}
@@ -406,23 +480,9 @@ final class Content {
 	 * @return true|\WP_Error
 	 */
 	private static function apply_extras( int $post_id, array $extras ) {
-		foreach ( $extras['terms'] ?? array() as $taxonomy => $terms ) {
-			$ids = array();
-			foreach ( $terms as $term ) {
-				if ( is_int( $term ) ) {
-					$ids[] = $term;
-					continue;
-				}
-				$created = wp_insert_term( $term, $taxonomy );
-				if ( is_wp_error( $created ) ) {
-					return self::partial( $created );
-				}
-				$ids[] = (int) $created['term_id'];
-			}
-			$set = wp_set_object_terms( $post_id, $ids, $taxonomy );
-			if ( is_wp_error( $set ) ) {
-				return self::partial( $set );
-			}
+		$permission = self::meta_permissions( $post_id, $extras );
+		if ( is_wp_error( $permission ) ) {
+			return self::partial( $permission, $post_id );
 		}
 		if ( isset( $extras['featured_media'] ) ) {
 			if ( $extras['featured_media'] ) {
@@ -431,19 +491,80 @@ final class Content {
 				delete_post_thumbnail( $post_id );
 			}
 		}
+		foreach ( $extras['terms'] ?? array() as $taxonomy => $terms ) {
+			$ids = array();
+			foreach ( $terms as $term ) {
+				if ( is_int( $term ) ) {
+					$ids[] = $term;
+					continue;
+				}
+				$created = wp_insert_term( wp_slash( $term ), $taxonomy );
+				if ( is_wp_error( $created ) ) {
+					$existing = 'term_exists' === $created->get_error_code() ? get_term( (int) $created->get_error_data( 'term_exists' ), $taxonomy ) : null;
+					if ( ! $existing instanceof \WP_Term ) {
+						return self::partial( $created, $post_id );
+					}
+					$ids[] = $existing->term_id;
+				} else {
+					$ids[] = (int) $created['term_id'];
+				}
+			}
+			$set = wp_set_object_terms( $post_id, $ids, $taxonomy );
+			if ( is_wp_error( $set ) ) {
+				return self::partial( $set, $post_id );
+			}
+		}
+		$controller = new \WP_REST_Post_Meta_Fields( get_post_type( $post_id ) );
 		foreach ( $extras['meta'] ?? array() as $key => $value ) {
-			if ( '' === $value || null === $value ) {
-				delete_post_meta( $post_id, $key );
+			if ( '' === $value ) {
+				$exists  = metadata_exists( 'post', $post_id, $key );
+				$deleted = delete_post_meta( $post_id, wp_slash( $key ) );
+				if ( $exists && ! $deleted ) {
+					return self::partial( new \WP_Error( 'rest_meta_database_error', __( 'Could not delete meta value from database.' ) ), $post_id );
+				}
+			} elseif ( isset( $extras['registered_meta'][ $key ] ) ) {
+				$updated = $controller->update_value( array( $extras['registered_meta'][ $key ] => $value ), $post_id );
+				if ( is_wp_error( $updated ) ) {
+					return self::partial( $updated, $post_id );
+				}
 			} else {
-				update_post_meta( $post_id, $key, wp_slash( $value ) );
+				// Explicit filter and SEO allowlists retain support for unregistered keys. Core still sanitizes registered keys.
+				update_post_meta( $post_id, wp_slash( $key ), wp_slash( $value ) );
 			}
 		}
 		return true;
 	}
 
-	private static function partial( \WP_Error $error ): \WP_Error {
-		/* translators: %s: error message. */
-		return new \WP_Error( 'partially_saved', sprintf( __( 'The post was saved, but its terms could not be set: %s', 'site-agent' ), $error->get_error_message() ) );
+	/** Check every registered key before changing the post or any of its extra fields. */
+	private static function meta_permissions( int $post_id, array $extras ) {
+		foreach ( $extras['registered_meta'] ?? array() as $key => $name ) {
+			$deleting = '' === $extras['meta'][ $key ];
+			if ( ! current_user_can( $deleting ? 'delete_post_meta' : 'edit_post_meta', $post_id, $key ) ) {
+				return new \WP_Error(
+					$deleting ? 'rest_cannot_delete' : 'rest_cannot_update',
+					/* translators: %s: custom field key. */
+					sprintf( __( 'Sorry, you are not allowed to edit the %s custom field.' ), $key ),
+					array(
+						'key'    => $key,
+						'status' => rest_authorization_required_code(),
+					)
+				);
+			}
+		}
+		return true;
+	}
+
+	private static function partial( \WP_Error $error, int $post_id ): \WP_Error {
+		return new \WP_Error(
+			'partially_saved',
+			/* translators: 1: saved post ID, 2: error message. */
+			sprintf( __( 'Post %1$d was saved, but the remaining changes could not be applied: %2$s Read it with get-content using post_id %1$d before retrying this post.', 'site-agent' ), $post_id, $error->get_error_message() ),
+			array(
+				'post_id' => $post_id,
+				'post'    => self::data( get_post( $post_id ) ),
+				'cause'   => $error->get_error_code(),
+			)
+		);
 	}
 
 	public static function terms( array $input ) {

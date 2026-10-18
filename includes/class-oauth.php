@@ -14,7 +14,8 @@ defined( 'ABSPATH' ) || exit;
 /** OAuth 2.1 authorization server and bearer authentication for the MCP route only. */
 final class OAuth {
 	const CLIENTS       = 'site_agent_oauth_client_';
-	const GRANTS        = 'site_agent_oauth_grants';
+	const GRANTS        = 'site_agent_oauth_grants'; // Legacy network-wide user meta, read only during migration.
+	const GRANT_PREFIX  = 'site_agent_oauth_grant_';
 	const CODE_PREFIX   = 'site_agent_oauth_code_';
 	const PAGE          = 'site-agent-authorize';
 	const BASE_SCOPE    = 'site-agent';
@@ -42,6 +43,7 @@ final class OAuth {
 		// which wp-admin refuses before admin_init.
 		add_action( 'admin_page_access_denied', array( self::class, 'repair_authorize_url' ) );
 		add_action( 'admin_post_site_agent_oauth_revoke', array( self::class, 'revoke_action' ) );
+		add_action( 'admin_post_site_agent_oauth_remove_client', array( self::class, 'remove_client_action' ) );
 	}
 
 	public static function enabled(): bool {
@@ -308,7 +310,7 @@ final class OAuth {
 	 */
 	public static function clients(): array {
 		global $wpdb;
-		$names   = $wpdb->get_col( $wpdb->prepare( "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( self::CLIENTS ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- Option names by prefix; values are read through get_option.
+		$names   = $wpdb->get_col( $wpdb->prepare( "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( self::CLIENTS ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- Option names by prefix; authorization client values are always read freshly.
 		$clients = array();
 		foreach ( $names as $name ) {
 			$client = self::client( substr( $name, strlen( self::CLIENTS ) ) );
@@ -323,8 +325,8 @@ final class OAuth {
 		if ( ! preg_match( '/^sa-[a-f0-9]{32}$/D', $client_id ) ) {
 			return null;
 		}
-		$client = get_option( self::CLIENTS . $client_id, null );
-		return is_array( $client ) ? $client : null;
+		// A slow option-cache refill can outlive administrator removal; authorization reads the row.
+		return self::record( self::CLIENTS . $client_id );
 	}
 
 	/** Delete every registered client. */
@@ -412,18 +414,46 @@ final class OAuth {
 	}
 
 	/**
-	 * Delete clients that never completed an authorization within a day, and clients unused for 90 days.
+	 * Delete only never-approved registrations older than a day. Approved clients require explicit cleanup.
 	 *
 	 * @param array<string, array<string, mixed>> $clients Registered clients.
 	 */
 	private static function prune_clients( array $clients ): void {
-		$now = time();
 		foreach ( $clients as $client_id => $client ) {
-			$used = (int) ( $client['used'] ?? 0 );
-			if ( $used ? $used <= $now - 90 * DAY_IN_SECONDS : (int) ( $client['created'] ?? 0 ) <= $now - DAY_IN_SECONDS ) {
-				delete_option( self::CLIENTS . $client_id );
+			if ( empty( $client['used'] ) && (int) ( $client['created'] ?? 0 ) <= time() - DAY_IN_SECONDS ) {
+				self::compare_swap( self::CLIENTS . $client_id, $client, null );
 			}
 		}
+	}
+
+	/** Explicit administrator cleanup, including registrations filling the public registration limit. */
+	public static function remove_client_action(): void {
+		if ( ! Permissions::administrator() ) {
+			wp_die( esc_html__( 'Site Agent requires site administration rights.', 'site-agent' ), '', array( 'response' => 403 ) );
+		}
+		check_admin_referer( 'site_agent_oauth_remove_client' );
+		$id      = isset( $_POST['client'] ) ? sanitize_key( wp_unslash( $_POST['client'] ) ) : '';
+		$clients = 'unused' === $id ? self::clients() : array( $id => self::client( $id ) );
+		foreach ( $clients as $client_id => $client ) {
+			if ( ! $client ) {
+				continue;
+			}
+			for ( $attempt = 0; $attempt < 8; ++$attempt ) {
+				$client = self::record( self::CLIENTS . $client_id );
+				if ( ! $client || ( 'unused' === $id && ! empty( $client['used'] ) ) || self::compare_swap( self::CLIENTS . $client_id, $client, null ) ) {
+					break;
+				}
+				// Bulk cleanup preserves any registration that becomes active during cleanup.
+				if ( 'unused' === $id ) {
+					break;
+				}
+				if ( 7 === $attempt ) {
+					wp_die( esc_html__( 'The connection changed. Try again.', 'site-agent' ), '', array( 'response' => 503 ) );
+				}
+			}
+		}
+		wp_safe_redirect( add_query_arg( 'oauth_clients_removed', 1, admin_url( 'tools.php?page=site-agent#site-agent-oauth' ) ) );
+		exit;
 	}
 
 	/**
@@ -567,6 +597,8 @@ final class OAuth {
 	/** Store a single-use authorization code bound to the client, redirect URI, PKCE challenge and user. */
 	public static function issue_code( array $request, array $groups ): string {
 		$code = self::random();
+		// Approval protects a live authorization code from unused-registration cleanup.
+		self::mark_client_used( (string) $request['client_id'] );
 		set_transient(
 			self::CODE_PREFIX . hash( 'sha256', $code ),
 			array(
@@ -638,35 +670,116 @@ final class OAuth {
 		return hash_hmac( 'sha256', $token, wp_salt( 'secure_auth' ) );
 	}
 
+	/** Site-local option name. User meta is network-global and cannot hold unbound grants. */
+	private static function grant_key( int $user_id, string $grant_id ): string {
+		return self::GRANT_PREFIX . $user_id . '_' . $grant_id;
+	}
+
+	/** Read the database value, bypassing potentially stale persistent option caches. */
+	private static function record( string $key ): ?array {
+		global $wpdb;
+		$value = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $key ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- Fresh read is required for the compare-and-swap protocol.
+		$value = null === $value ? null : maybe_unserialize( $value );
+		return is_array( $value ) ? $value : null;
+	}
+
+	/** Insert only: add_option() may update a duplicate row after a concurrent cache miss. */
+	private static function insert_record( string $key, array $value ): bool {
+		global $wpdb;
+		$inserted = 1 === $wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, %s, 'off')", $key, maybe_serialize( $value ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- The unique option_name must reject duplicates without replacing an existing tombstone.
+		if ( $inserted ) {
+			wp_cache_delete( $key, 'options' );
+			wp_cache_delete( 'notoptions', 'options' );
+		}
+		return $inserted;
+	}
+
+	/** The option row is the serialization point; an outdated request cannot overwrite a new row. */
+	private static function compare_swap( string $key, array $before, ?array $after ): bool {
+		global $wpdb;
+		if ( null === $after ) {
+			$query = $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name = %s AND BINARY option_value = BINARY %s", $key, maybe_serialize( $before ) );
+		} else {
+			$query = $wpdb->prepare( "UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND BINARY option_value = BINARY %s", maybe_serialize( $after ), $key, maybe_serialize( $before ) );
+		}
+		$changed = 1 === $wpdb->query( $query ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared -- Both query branches prepare their arguments; the expected-value mutation must be atomic.
+		if ( $changed ) {
+			wp_cache_delete( $key, 'options' );
+			wp_cache_delete( 'notoptions', 'options' );
+		}
+		return $changed;
+	}
+
+	private static function bound( array $grant ): bool {
+		return ( $grant['resource'] ?? '' ) === self::resource() && (int) ( $grant['blog_id'] ?? 0 ) === get_current_blog_id();
+	}
+
+	/** Import a legacy grant only where its randomly registered client exists locally. */
+	private static function grant_record( int $user_id, string $grant_id ): ?array {
+		if ( $user_id < 1 || ! preg_match( '/^[a-f0-9]{16}$/D', $grant_id ) ) {
+			return null;
+		}
+		$key   = self::grant_key( $user_id, $grant_id );
+		$grant = self::record( $key );
+		if ( null !== $grant ) {
+			return self::bound( $grant ) ? $grant : null;
+		}
+		$legacy = get_user_meta( $user_id, self::GRANTS, true );
+		$grant  = is_array( $legacy ) ? ( $legacy[ $grant_id ] ?? null ) : null;
+		if ( ! is_array( $grant ) || ! self::client( (string) ( $grant['client_id'] ?? '' ) ) || (int) ( $grant['refresh_expires'] ?? 0 ) <= time() || ( isset( $grant['resource'] ) && $grant['resource'] !== self::resource() ) ) {
+			return null;
+		}
+		$grant['resource'] = self::resource();
+		$grant['blog_id']  = get_current_blog_id();
+		// Insert-only semantics prevent simultaneous imports from replacing a revocation.
+		self::insert_record( $key, $grant );
+		$grant = self::record( $key );
+		return $grant && self::bound( $grant ) ? $grant : null;
+	}
+
 	/**
-	 * Grants of a user, keyed by grant ID.
+	 * Live grants for this user and resource. Legacy user meta is preserved for other sites.
 	 *
 	 * @return array<string, array<string, mixed>>
 	 */
 	public static function grants( int $user_id ): array {
-		$grants = get_user_meta( $user_id, self::GRANTS, true );
-		return is_array( $grants ) ? $grants : array();
+		global $wpdb;
+		$legacy = get_user_meta( $user_id, self::GRANTS, true );
+		foreach ( is_array( $legacy ) ? array_keys( $legacy ) : array() as $grant_id ) {
+			self::grant_record( $user_id, (string) $grant_id );
+		}
+		$prefix = self::GRANT_PREFIX . $user_id . '_';
+		$names  = $wpdb->get_col( $wpdb->prepare( "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s ORDER BY option_id", $wpdb->esc_like( $prefix ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- Site-local grant names; grant values are read freshly for CAS.
+		$grants = array();
+		foreach ( $names as $name ) {
+			$grant = self::record( $name );
+			if ( ! $grant || ! self::bound( $grant ) ) {
+				continue;
+			}
+			if ( (int) ( $grant['refresh_expires'] ?? 0 ) <= time() ) {
+				// A revoked legacy import stays as a tombstone until its legacy token expires.
+				self::compare_swap( $name, $grant, null );
+			} elseif ( empty( $grant['revoked'] ) ) {
+				$grants[ substr( $name, strlen( $prefix ) ) ] = $grant;
+			}
+		}
+		return $grants;
 	}
 
-	/**
-	 * Keep live grants only, newest last, at most MAX_GRANTS.
-	 *
-	 * @param array<string, array<string, mixed>> $grants Grants.
-	 */
-	private static function save_grants( int $user_id, array $grants ): void {
-		$now    = time();
-		$grants = array_filter(
-			$grants,
-			static function ( $grant ) use ( $now ) {
-				return (int) ( $grant['refresh_expires'] ?? 0 ) > $now;
+	/** End one family without deleting its legacy-import tombstone or touching another site. */
+	private static function revoke_grant( int $user_id, string $grant_id ): bool {
+		for ( $attempt = 0; $attempt < 8; ++$attempt ) {
+			$grant = self::grant_record( $user_id, $grant_id );
+			if ( ! $grant || ! empty( $grant['revoked'] ) ) {
+				return true;
 			}
-		);
-		$grants = array_slice( $grants, -self::MAX_GRANTS, null, true );
-		if ( $grants ) {
-			update_user_meta( $user_id, self::GRANTS, $grants );
-		} else {
-			delete_user_meta( $user_id, self::GRANTS );
+			$revoked            = $grant;
+			$revoked['revoked'] = true;
+			if ( self::compare_swap( self::grant_key( $user_id, $grant_id ), $grant, $revoked ) ) {
+				return true;
+			}
 		}
+		return false;
 	}
 
 	/**
@@ -676,14 +789,21 @@ final class OAuth {
 	 * @return array{0: array<string, mixed>, 1: array<string, mixed>} The stored grant and the token response.
 	 */
 	private static function mint( int $user_id, string $grant_id, array $grant ): array {
-		$access                    = 'sa_' . $user_id . '_' . $grant_id . '_' . self::random();
-		$refresh                   = 'sar_' . $user_id . '_' . $grant_id . '_' . self::random();
-		$grant['previous_refresh'] = $grant['refresh_hash'] ?? '';
-		$grant['access_hash']      = self::hash( $access );
-		$grant['access_expires']   = time() + self::ACCESS_TTL;
-		$grant['refresh_hash']     = self::hash( $refresh );
-		$grant['refresh_expires']  = time() + self::REFRESH_TTL;
-		$scope                     = implode( ' ', array_merge( array( self::BASE_SCOPE ), $grant['groups'] ) );
+		$access = 'sa_' . $user_id . '_' . $grant_id . '_' . self::random();
+		if ( empty( $grant['refresh_family'] ) ) {
+			// Only legacy opaque tokens require retained hashes; all new ancestors authenticate themselves.
+			$grant['legacy_refresh_hashes'] = array_values( array_filter( array( $grant['refresh_hash'] ?? '', $grant['previous_refresh'] ?? '' ) ) );
+			$grant['refresh_family']        = self::random();
+			$grant['refresh_generation']    = -1;
+		}
+		++$grant['refresh_generation'];
+		$refresh                  = 'sar_' . $user_id . '_' . $grant_id . '_' . self::refresh_suffix( $grant, $grant['refresh_generation'] );
+		$grant['access_hash']     = self::hash( $access );
+		$grant['access_expires']  = time() + self::ACCESS_TTL;
+		$grant['refresh_hash']    = self::hash( $refresh );
+		$grant['refresh_expires'] = time() + self::REFRESH_TTL;
+		unset( $grant['previous_refresh'] );
+		$scope = implode( ' ', array_merge( array( self::BASE_SCOPE ), $grant['groups'] ) );
 		return array(
 			$grant,
 			array(
@@ -694,6 +814,28 @@ final class OAuth {
 				'scope'         => $scope,
 			),
 		);
+	}
+
+	/** Fixed-size family authentication recognizes every ancestor without an ever-growing hash list. */
+	private static function refresh_suffix( array $grant, int $generation ): string {
+		$counter   = sprintf( '%08x', $generation );
+		$signature = rtrim( strtr( base64_encode( hash_hmac( 'sha256', 'site-agent-refresh:' . $grant['refresh_family'] . ':' . $counter, wp_salt( 'secure_auth' ), true ) ), '+/', '-_' ), '=' ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Base64url of a 210-bit refresh-family authenticator.
+		return $counter . substr( $signature, 0, 35 );
+	}
+
+	private static function refresh_replayed( array $grant, string $token ): bool {
+		$hash = self::hash( $token );
+		foreach ( array_merge( $grant['legacy_refresh_hashes'] ?? array(), array( $grant['previous_refresh'] ?? '' ) ) as $old ) {
+			if ( '' !== $old && hash_equals( $old, $hash ) ) {
+				return true;
+			}
+		}
+		$suffix = substr( $token, -43 );
+		if ( empty( $grant['refresh_family'] ) || ! preg_match( '/^[a-f0-9]{8}$/D', substr( $suffix, 0, 8 ) ) ) {
+			return false;
+		}
+		$generation = (int) hexdec( substr( $suffix, 0, 8 ) );
+		return $generation < (int) $grant['refresh_generation'] && hash_equals( self::refresh_suffix( $grant, $generation ), $suffix );
 	}
 
 	/**
@@ -743,7 +885,7 @@ final class OAuth {
 		if ( ! preg_match( '/^[A-Za-z0-9._~-]{43,128}$/D', $verifier ) || ! hash_equals( $data['code_challenge'], $computed ) ) {
 			return self::error( 'invalid_grant', 'PKCE verification failed.' );
 		}
-		if ( isset( $params['resource'] ) && ( ! is_string( $params['resource'] ) || ! self::same_resource( $params['resource'] ) ) ) {
+		if ( ( $data['resource'] ?? '' ) !== self::resource() || ( isset( $params['resource'] ) && ( ! is_string( $params['resource'] ) || ! self::same_resource( $params['resource'] ) ) ) ) {
 			return self::error( 'invalid_target', 'The resource must be this site\'s Site Agent MCP endpoint.' );
 		}
 		$user_id = (int) $data['user_id'];
@@ -755,6 +897,8 @@ final class OAuth {
 			$user_id,
 			$grant_id,
 			array(
+				'resource'  => self::resource(),
+				'blog_id'   => get_current_blog_id(),
 				'client_id' => $data['client_id'],
 				'groups'    => (array) $data['groups'],
 				'created'   => time(),
@@ -762,65 +906,87 @@ final class OAuth {
 			)
 		);
 		$grants                   = self::grants( $user_id );
-		$grants[ $grant_id ]      = $grant;
-		self::save_grants( $user_id, $grants );
+		if ( count( $grants ) >= self::MAX_GRANTS ) {
+			return self::error( 'invalid_grant', 'Too many active connections. Revoke an unused connection in Tools > Site Agent.' );
+		}
+		if ( ! self::insert_record( self::grant_key( $user_id, $grant_id ), $grant ) ) {
+			return self::error( 'temporarily_unavailable', 'The connection could not be saved. Connect again.', 503 );
+		}
 		self::mark_client_used( $data['client_id'] );
 		return self::json( $response );
 	}
 
 	private static function refresh( array $params ): \WP_REST_Response {
-		$token  = is_string( $params['refresh_token'] ?? null ) ? $params['refresh_token'] : '';
-		$where  = self::locate( $token, 'sar' );
-		$grants = $where ? self::grants( $where[0] ) : array();
-		$grant  = $where && isset( $grants[ $where[1] ] ) ? $grants[ $where[1] ] : null;
-		if ( ! $grant || ( $params['client_id'] ?? '' ) !== $grant['client_id'] ) {
+		$token = is_string( $params['refresh_token'] ?? null ) ? $params['refresh_token'] : '';
+		$where = self::locate( $token, 'sar' );
+		if ( ! $where ) {
 			return self::error( 'invalid_grant', 'The refresh token is invalid.' );
 		}
-		$hash = self::hash( $token );
-		if ( '' !== ( $grant['previous_refresh'] ?? '' ) && hash_equals( $grant['previous_refresh'], $hash ) ) {
-			// A rotated-out refresh token came back: treat the grant as stolen and end it.
-			unset( $grants[ $where[1] ] );
-			self::save_grants( $where[0], $grants );
-			return self::error( 'invalid_grant', 'The refresh token was already used. Connect again.' );
-		}
-		if ( ! hash_equals( (string) $grant['refresh_hash'], $hash ) || (int) $grant['refresh_expires'] < time() ) {
-			return self::error( 'invalid_grant', 'The refresh token is invalid or expired.' );
-		}
-		if ( ! user_can( $where[0], 'manage_options' ) || ( is_multisite() && ! is_super_admin( $where[0] ) ) ) {
-			return self::error( 'invalid_grant', 'The approving account is no longer an administrator.' );
-		}
-		$scope = is_string( $params['scope'] ?? null ) ? array_filter( preg_split( '/\s+/', trim( $params['scope'] ) ) ) : array();
-		if ( $scope ) {
-			if ( array_diff( $scope, array_merge( array( self::BASE_SCOPE ), $grant['groups'] ) ) ) {
-				return self::error( 'invalid_scope', 'A refresh can only narrow the granted scope.' );
+		for ( $attempt = 0; $attempt < 8; ++$attempt ) {
+			$before = self::grant_record( $where[0], $where[1] );
+			if ( ! $before || ! empty( $before['revoked'] ) || ! self::client( (string) $before['client_id'] ) || ( $params['client_id'] ?? '' ) !== $before['client_id'] ) {
+				return self::error( 'invalid_grant', 'The refresh token is invalid.' );
 			}
-			$grant['groups'] = array_values( array_intersect( $grant['groups'], $scope ) );
+			if ( self::refresh_replayed( $before, $token ) ) {
+				if ( ! self::revoke_grant( $where[0], $where[1] ) ) {
+					return self::error( 'temporarily_unavailable', 'The connection changed. Try again.', 503 );
+				}
+				return self::error( 'invalid_grant', 'The refresh token was already used. Connect again.' );
+			}
+			if ( ! hash_equals( (string) $before['refresh_hash'], self::hash( $token ) ) || (int) $before['refresh_expires'] <= time() ) {
+				return self::error( 'invalid_grant', 'The refresh token is invalid or expired.' );
+			}
+			if ( ! user_can( $where[0], 'manage_options' ) || ( is_multisite() && ! is_super_admin( $where[0] ) ) ) {
+				return self::error( 'invalid_grant', 'The approving account is no longer an administrator.' );
+			}
+			if ( isset( $params['resource'] ) && ( ! is_string( $params['resource'] ) || ! self::same_resource( $params['resource'] ) ) ) {
+				return self::error( 'invalid_target', 'The resource must be this site\'s Site Agent MCP endpoint.' );
+			}
+			// Never wrap the authenticated counter and accidentally make an old ancestor current again.
+			if ( (int) ( $before['refresh_generation'] ?? -1 ) >= 0xffffffff ) {
+				return self::error( 'invalid_grant', 'Reconnect this application to renew its token family.' );
+			}
+			$grant = $before;
+			$scope = is_string( $params['scope'] ?? null ) ? array_filter( preg_split( '/\s+/', trim( $params['scope'] ) ) ) : array();
+			if ( $scope ) {
+				if ( array_diff( $scope, array_merge( array( self::BASE_SCOPE ), $grant['groups'] ) ) ) {
+					return self::error( 'invalid_scope', 'A refresh can only narrow the granted scope.' );
+				}
+				$grant['groups'] = array_values( array_intersect( $grant['groups'], $scope ) );
+			}
+			list( $grant, $response ) = self::mint( $where[0], $where[1], $grant );
+			if ( self::compare_swap( self::grant_key( $where[0], $where[1] ), $before, $grant ) ) {
+				self::mark_client_used( $grant['client_id'] );
+				return self::json( $response );
+			}
 		}
-		list( $grant, $response ) = self::mint( $where[0], $where[1], $grant );
-		$grants[ $where[1] ]      = $grant;
-		self::save_grants( $where[0], $grants );
-		return self::json( $response );
+		return self::error( 'temporarily_unavailable', 'The connection changed. Try again.', 503 );
 	}
 
 	private static function mark_client_used( string $client_id ): void {
-		$client = self::client( $client_id );
-		if ( $client ) {
-			$client['used'] = time();
-			update_option( self::CLIENTS . $client_id, $client, false );
+		$key = self::CLIENTS . $client_id;
+		for ( $attempt = 0; $attempt < 8; ++$attempt ) {
+			$client = self::record( $key );
+			if ( ! $client || (int) ( $client['used'] ?? 0 ) >= time() - 300 ) {
+				return;
+			}
+			$used         = $client;
+			$used['used'] = time();
+			if ( self::compare_swap( $key, $client, $used ) ) {
+				return;
+			}
 		}
 	}
 
-	/** RFC 7009 revocation. Always answers 200, as the RFC requires for unknown tokens. */
+	/** RFC 7009 revocation. Unknown tokens still answer 200. */
 	public static function revoke( \WP_REST_Request $request ): \WP_REST_Response {
 		$token = (string) $request->get_param( 'token' );
 		$where = self::locate( $token, 'sar' ) ?? self::locate( $token, 'sa' );
 		if ( $where ) {
-			$grants = self::grants( $where[0] );
-			$grant  = $grants[ $where[1] ] ?? null;
-			$hash   = self::hash( $token );
-			if ( $grant && ( hash_equals( (string) $grant['access_hash'], $hash ) || hash_equals( (string) $grant['refresh_hash'], $hash ) ) ) {
-				unset( $grants[ $where[1] ] );
-				self::save_grants( $where[0], $grants );
+			$grant = self::grant_record( $where[0], $where[1] );
+			$hash  = self::hash( $token );
+			if ( $grant && empty( $grant['revoked'] ) && ( hash_equals( (string) $grant['access_hash'], $hash ) || hash_equals( (string) $grant['refresh_hash'], $hash ) || self::refresh_replayed( $grant, $token ) ) && ! self::revoke_grant( $where[0], $where[1] ) ) {
+				return self::error( 'temporarily_unavailable', 'The connection changed. Try again.', 503 );
 			}
 		}
 		return self::json( array() );
@@ -840,11 +1006,28 @@ final class OAuth {
 		if ( ( ! is_ssl() && 'local' !== wp_get_environment_type() ) || ! Url_Auth::is_mcp_route( $request ) || Url_Auth::supplied( $request ) ) {
 			return self::deny( 'oauth_rejected' );
 		}
-		$token  = trim( substr( (string) $request->get_header( 'authorization' ), 7 ) );
-		$where  = self::locate( $token, 'sa' );
-		$grants = $where ? self::grants( $where[0] ) : array();
-		$grant  = $where && isset( $grants[ $where[1] ] ) ? $grants[ $where[1] ] : null;
-		if ( ! $grant || ! hash_equals( (string) $grant['access_hash'], self::hash( $token ) ) || (int) $grant['access_expires'] < time() ) {
+		$token = trim( substr( (string) $request->get_header( 'authorization' ), 7 ) );
+		$where = self::locate( $token, 'sa' );
+		if ( ! $where ) {
+			return self::deny( 'invalid_token' );
+		}
+		$grant = null;
+		for ( $attempt = 0; $attempt < 8; ++$attempt ) {
+			$grant = self::grant_record( $where[0], $where[1] );
+			if ( ! $grant || ! empty( $grant['revoked'] ) || ! self::client( (string) $grant['client_id'] ) || ! hash_equals( (string) $grant['access_hash'], self::hash( $token ) ) || (int) $grant['access_expires'] <= time() ) {
+				return self::deny( 'invalid_token' );
+			}
+			if ( (int) ( $grant['last_used'] ?? 0 ) >= time() - 300 ) {
+				break;
+			}
+			$used              = $grant;
+			$used['last_used'] = time();
+			if ( self::compare_swap( self::grant_key( $where[0], $where[1] ), $grant, $used ) ) {
+				break;
+			}
+			$grant = null;
+		}
+		if ( ! $grant ) {
 			return self::deny( 'invalid_token' );
 		}
 		wp_set_current_user( $where[0] );
@@ -858,11 +1041,7 @@ final class OAuth {
 			'client_name' => $client ? (string) $client['client_name'] : __( 'Removed client', 'site-agent' ),
 			'groups'      => (array) $grant['groups'],
 		);
-		// Record use at most every five minutes, so busy sessions do not rewrite user meta on each call.
-		if ( (int) ( $grant['last_used'] ?? 0 ) < time() - 300 ) {
-			$grants[ $where[1] ]['last_used'] = time();
-			self::save_grants( $where[0], $grants );
-		}
+		self::mark_client_used( (string) $grant['client_id'] );
 		return true;
 	}
 
@@ -894,12 +1073,11 @@ final class OAuth {
 		check_admin_referer( 'site_agent_oauth_revoke' );
 		$grant_id = isset( $_POST['grant'] ) ? sanitize_key( wp_unslash( $_POST['grant'] ) ) : '';
 		$grants   = self::grants( get_current_user_id() );
-		if ( 'all' === $grant_id ) {
-			$grants = array();
-		} else {
-			unset( $grants[ $grant_id ] );
+		foreach ( array_keys( $grants ) as $id ) {
+			if ( ( 'all' === $grant_id || $id === $grant_id ) && ! self::revoke_grant( get_current_user_id(), $id ) ) {
+				wp_die( esc_html__( 'The connection changed. Try again.', 'site-agent' ), '', array( 'response' => 503 ) );
+			}
 		}
-		self::save_grants( get_current_user_id(), $grants );
 		wp_safe_redirect( add_query_arg( 'oauth_revoked', 1, admin_url( 'tools.php?page=site-agent#site-agent-oauth' ) ) );
 		exit;
 	}
