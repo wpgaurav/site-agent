@@ -1,7 +1,7 @@
 # Site Agent 0.5.1
 
-Bug fixes following the 0.5.0 sweep. Delivery verification is recorded below once
-the GitHub and FluentCart release is complete.
+Bug fixes following the 0.5.0 sweep, released October 18, 2026 through GitHub
+and FluentCart. Production installation is a separate action.
 
 - OAuth credentials are site-local and resource-bound. Atomic insert-only and
   expected-value mutations protect revocation and refresh state. Legacy grants migrate
@@ -41,7 +41,7 @@ file-concurrency and package-interruption probes.
 - Composer strict validation, all PHP syntax checks, WordPress coding standards, skill
   validation and whitespace checks passed. Regenerated official runtime matched the
   frozen candidate exactly. All 23 application PHP files parsed under PHP 8.0 grammar;
-  actual PHP 8.0 / WordPress 6.9 execution was not performed locally.
+  actual PHP 8.0 / WordPress 6.9 execution was verified by the release CI matrix.
 - The native WordPress installer accepted the built ZIP on the disposable fixture.
   Authenticated HTTP MCP checks exercised initialization, all eighteen tools' schemas,
   anonymous/contributor denial, all eleven guide reads and fatal-MU-file rollback.
@@ -61,3 +61,47 @@ file-concurrency and package-interruption probes.
 
 The WordPress archive has 387 files; the companion has ten. Production installation
 is separate from this GitHub and FluentCart release.
+
+## Delivery receipt
+
+Published from merge commit `6fe3dacf004a05adfc47548dbb79f84a1f30e7a9` and annotated
+tag `v0.5.1`, after [pull request #8](https://github.com/wpgaurav/site-agent/pull/8).
+The [GitHub release](https://github.com/wpgaurav/site-agent/releases/tag/v0.5.1) is
+published and stable. Both the PR run `39090864131` and exact merge-commit run
+`39090967259` passed all three WordPress 6.9 jobs on PHP 8.0, 8.3 and 8.5. The PHP 8.0
+CI archives matched the canonical extracted file trees. Fresh downloads of both
+published GitHub assets matched the sizes and SHA-256 values above byte-for-byte.
+
+Live identity was confirmed as Site Agent, published `fluent-products` post 1180328,
+slug `site-agent`, free variation 131, with FluentCart and Pro 2.2.0 active. The verified
+GitHub WordPress ZIP was uploaded through the installed R2 driver to the previously
+absent root key `site-agent-0.5.1.zip` in the existing bucket, then downloaded again
+for byte-size and SHA-256 comparison before the updater metadata changed.
+
+A guarded InnoDB transaction re-read and locked the previous metadata and download,
+created download **431**, and set `license_settings.version = 0.5.1` and
+`global_update_file = 431`. It prepended the sanitized release changelog while retaining
+its history. All unrelated license settings, product content, identity, commerce fields,
+variations and metadata were preserved. Download **428** and `site-agent-0.5.0.zip`
+remain for rollback; a fresh R2 read matched the preceding release's SHA-256. A private
+server snapshot preserves the preceding release metadata and download record.
+
+An existing active license and activation were selected internally. The real licensed
+updater passed **13/13 checks, zero failures or skips**: valid new-version metadata,
+direct off-site package, matching bytes and SHA-256, ZIP root and embedded version, and
+invalid activation receiving no package. An additional request required `success: true`
+and the direct R2 service host. No license key, activation hash, customer URL or signed
+package URL was printed. Synthetic verification license 134 remains disabled.
+
+On the explicitly marked disposable fixture, `.maintenance` produced actual HTTP 503
+while native `WP_Upgrader::download_package()` fetched the licensed R2 package and
+verified its size, SHA-256, single root and 0.5.1 header. The maintenance flag was cleared
+in `finally`; production was never put in maintenance mode. Scoped R2 reconciliation
+listed 247 objects, below the unpaginated 1000-object limit, and found no orphaned Site
+Agent objects.
+
+The exact remote staging ZIP, local signed-package metadata and temporary mutation and
+verification scripts were removed after verification. The disposable site was stopped.
+All 21 earlier local release ZIPs retained their checksums. Previous release rows and
+R2 objects remain. This release did not install 0.5.1 on either production site;
+gauravtiwari.org's loaded plugin still reported 0.5.0 during final delivery verification.
