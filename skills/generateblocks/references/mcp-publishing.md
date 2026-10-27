@@ -12,6 +12,7 @@ Generating the markup and putting it into a real post are separate problems. Mos
 - `get-content` returns the raw `post_content` string, never rendered HTML, together with `content_sha256`.
 - `save-content` passes `content` to `wp_insert_post()` or `wp_update_post()` after `wp_slash()`, so backslashes such as `\u002d\u002d` survive. It does not parse and re-serialize blocks, run `wpautop`, or rebuild the markup.
 - WordPress still applies its own save filters. An account without `unfiltered_html` (any account when the site sets `DISALLOW_UNFILTERED_HTML`; Site Agent itself requires an administrator, or a super administrator on multisite) gets `wp_kses` filtering, which thins inline SVG in `generateblocks/shape` blocks and strips `<style>` in Custom HTML. Other plugins hooked to `wp_insert_post_data` or `content_save_pre` can also change content.
+- The connected account is also the saving user for GenerateBlocks' dynamic-tag save gate (2.4+): without `unfiltered_html` or `manage_options` it cannot add dynamic tags, and a post it saves stops rendering existing tags until a trusted user re-saves it. See `references/dynamic-tags.md` section 10.
 - Updates to a published, private or scheduled post are stored as your autosave unless you pass `status`. The autosave is what the editor offers to restore; the live page does not change until the user publishes it or you pass `status`. `get-content` returns the autosave's text in `autosave.content` when you pass `autosave_content: true`.
 - `save-content` uses core APIs, so revisions are created when the post type supports them. Keep your own snapshot anyway.
 
@@ -67,7 +68,7 @@ Without PHP execution, check the comment JSON by eye against the six substitutio
 
 ## Stale CSS after a write
 
-GenerateBlocks collects block CSS when content is saved. Through free 2.4 it is delivered inline or as generated files; free 2.5 local CSS is always inline, and Pro Global Styles have their own delivery path. If a section renders unstyled on the front end but looks right in the editor, re-save from the editor or clear the GenerateBlocks CSS cache before concluding the markup is wrong. Page caches (plugin, host or CDN) can also serve the old page; load the URL with a unique query string to check.
+GenerateBlocks collects block CSS when content is saved. Through free 2.4 it is delivered inline or as generated files. Free 2.5 local CSS is always inline: each block's stored `css` attribute prints verbatim in the `generateblocks-inline-css` style tag, with no per-page file to regenerate, so an unstyled section on 2.5 points at the stored `css` or a page cache. Pro Global Styles have their own delivery path. On 2.4, if a section renders unstyled on the front end but looks right in the editor, re-save from the editor or clear the GenerateBlocks CSS cache before concluding the markup is wrong. Page caches (plugin, host or CDN) can also serve the old page; load the URL with a unique query string to check.
 
 ## Canary write, once per site
 
