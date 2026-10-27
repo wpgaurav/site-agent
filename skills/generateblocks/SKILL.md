@@ -15,7 +15,7 @@ Tool names below omit the `site-agent-` prefix your client shows: `get-content` 
 
 ## Before writing markup
 
-1. Call `site-context`. Confirm the `generateblocks` builder entry and note `version` and `pro_version`. The references record behavior for free 2.4.1 with Pro 2.7.1, and a beta workflow for free 2.5.0-beta.1 with Pro 2.8.0-beta.1. Say so when the site runs something else.
+1. Call `site-context`. Confirm the `generateblocks` builder entry and note `version` and `pro_version`. The references are verified on free 2.5.0 with Pro 2.8.0 through Site Agent (WordPress 7.1.3, 2026-10-27); notes labeled 2.4.1 or Pro 2.7.x describe older sites, and the design-system workflow was first tested on the 2.5.0-beta.1 / 2.8.0-beta.1 pair. Say so when the site runs something else. On 2.5, read the site's breakpoint presets before authoring responsive rules: with `run-wp-cli` enabled, `wp eval 'echo wp_json_encode( generateblocks_get_default_at_rules() );'` (see `references/responsive.md`).
 2. Read [references/authoring-contract.md](references/authoring-contract.md) once. It owns the scope prompt, block IDs, block selection, serialization, CSS parity, responsive basics and validation rules.
 3. Use [references/_index.md](references/_index.md) to pick further references for the task. Do not load the whole library for a routine static layout.
 4. **Local styles are the default.** Ask once about shared Global Styles and design tokens unless the user already chose. Add shared records only after explicit opt-in, and preserve existing references.
@@ -32,7 +32,7 @@ Converting an Elementor, Bricks or HTML source into GenerateBlocks does not auth
 
 ## Scripts mentioned in the references
 
-The references name Python helpers (`scripts/gb_serialize.py`, `scripts/preflight.py`, `scripts/verify_roundtrip.py`). They are not bundled with Site Agent and do not run on the WordPress site. If your client has a local shell and a clone of `github.com/wpgaurav/generateblocks-skills`, use them. Otherwise use the server-side checks in [references/mcp-publishing.md](references/mcp-publishing.md), which run through `execute-php` against the site's own WordPress serializer, and state which checks you could not run.
+The references name Python helpers (`scripts/gb_serialize.py`, `scripts/preflight.py`, `scripts/verify_roundtrip.py`). They are not bundled with Site Agent and do not run on the WordPress site. If your client has a local shell and a clone of `github.com/wpgaurav/generateblocks-skills`, use them; from release v2026.10.27, `build_css()` reproduces the native 2.5 compiler byte for byte. Otherwise use the server-side checks in [references/mcp-publishing.md](references/mcp-publishing.md), which run through `execute-php` against the site's own WordPress serializer, and state which checks you could not run.
 
 ## Upstream references that are not bundled
 

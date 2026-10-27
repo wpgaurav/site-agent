@@ -8,7 +8,7 @@
     },
     "generateblocks-skills": {
       "repository": "https://github.com/wpgaurav/generateblocks-skills",
-      "commit": "b57b6c2438e7e96fe493cef9ac7b6b6c5fd89e46",
+      "commit": "7d19d80c5da0473dbb107872d9237e93fbac3313",
       "license": "MIT"
     },
     "WordPress-skills": {
@@ -211,7 +211,7 @@
     "generateblocks/examples/basic/buttons.html": {
       "source": "generateblocks-skills",
       "path": "skills/generateblocks-layouts/examples/basic/buttons.html",
-      "sha256": "705b984e78a6722b06979c0464f59c0d7f75fbdb060844b77ba98a21819bd40f"
+      "sha256": "607cfe3d8c5dd54deb1a8f4ba6b2ca48c68c3478b6d4566ab024e7b520075772"
     },
     "generateblocks/examples/basic/containers.html": {
       "source": "generateblocks-skills",
@@ -226,12 +226,12 @@
     "generateblocks/examples/compound/cards.html": {
       "source": "generateblocks-skills",
       "path": "skills/generateblocks-layouts/examples/compound/cards.html",
-      "sha256": "0ae16f29ca2a1a6d4bd364d6af654130e2376831a396d250f6b8ee7e0c19d989"
+      "sha256": "4a34fc138ce0d8c2317f065edeb010465260640e37f124d0195957f9a92fafa7"
     },
     "generateblocks/examples/layouts/hero-section.html": {
       "source": "generateblocks-skills",
       "path": "skills/generateblocks-layouts/examples/layouts/hero-section.html",
-      "sha256": "bfff33762c39795e7d316b7435394c0eee3c7684eb5840afd58429b069277ead"
+      "sha256": "d4158fa6b80bdfa34f10638a73bab7ad9b725b83278ec01c8fbeeac92ff36bc0"
     },
     "generateblocks/examples/layouts/query-blog-grid.html": {
       "source": "generateblocks-skills",
@@ -241,12 +241,12 @@
     "generateblocks/examples/svg/icons.html": {
       "source": "generateblocks-skills",
       "path": "skills/generateblocks-layouts/examples/svg/icons.html",
-      "sha256": "201f6319a5edcbfc4aeb6aa30f6325298752c6351c57b5a64a46fd2f66ea664c"
+      "sha256": "b8244f4497fdd7a9709aabd9e39e0bbb8d4bdd0e9fc778c7dfaa1269806e6882"
     },
     "generateblocks/references/_index.md": {
       "source": "generateblocks-skills",
       "path": "skills/generateblocks-layouts/references/_index.md",
-      "sha256": "5da5db9019c54df0d239b485ea38b0fae65674da9fb979aad7ca5d8e7a7517ef"
+      "sha256": "a68c688a51a509079fb74be53d3a5c8f04ad340f2613b6710c8cb715197e925d"
     },
     "generateblocks/references/acf-and-custom-fields.md": {
       "source": "generateblocks-skills",
@@ -261,7 +261,7 @@
     "generateblocks/references/authoring-contract.md": {
       "source": "generateblocks-skills",
       "path": "skills/generateblocks-layouts/references/authoring-contract.md",
-      "sha256": "1d3bcf213d0ad2139c4ffd5667078a227005d7106fd7bd0edd7a246aeca90896"
+      "sha256": "976959230de9e6d6cb67cd2b301112c66ccd0135e31062f892ce09ac029e28d1"
     },
     "generateblocks/references/block-types.md": {
       "source": "generateblocks-skills",
@@ -276,7 +276,7 @@
     "generateblocks/references/css-mode.md": {
       "source": "generateblocks-skills",
       "path": "skills/generateblocks-layouts/references/css-mode.md",
-      "sha256": "52c48f0fc604c21736ccbae777f06db3beba4a8adec8eb4d35f230ba07b6118f"
+      "sha256": "98dadaece3bd44e8ce846cc80d2095517a52599bdcb87dc0408e67e0245a8383"
     },
     "generateblocks/references/css-patterns.md": {
       "source": "generateblocks-skills",
@@ -291,27 +291,27 @@
     "generateblocks/references/design-systems-beta.md": {
       "source": "generateblocks-skills",
       "path": "skills/generateblocks-layouts/references/design-systems-beta.md",
-      "sha256": "592e45f2728d9ce9050e0020ad59131a5bd1d2b1acfa4e0e62942bf537a0e4a4"
+      "sha256": "1e0d51ddc8101e2a1d9a97a6810752e32c9a05afc35a125fd384e323a8743b01"
     },
     "generateblocks/references/dynamic-tags.md": {
       "source": "generateblocks-skills",
       "path": "skills/generateblocks-layouts/references/dynamic-tags.md",
-      "sha256": "655d789f51f934f8a6d273f2b8b8d06ba1fe9fb213da6282fcdbb40009b92b00"
+      "sha256": "2592ecfe816f65754e6a6df648677b5d7a02c77100636353694ad7d67c984985"
     },
     "generateblocks/references/field-notes.md": {
       "source": "generateblocks-skills",
       "path": "skills/generateblocks-layouts/references/field-notes.md",
-      "sha256": "8ed416c20a0a234e420e0253a2bc2938077ca558ad81afac4c6ef85c41934547"
+      "sha256": "b88f5c41fe20723ea8f6c976186326abf47f7324abfda367c018c1758bba7588"
     },
     "generateblocks/references/gb-pro.md": {
       "source": "generateblocks-skills",
       "path": "skills/generateblocks-layouts/references/gb-pro.md",
-      "sha256": "e3dc287ea0827b1bb00ec0633ee8855c8cacd2516849506e537b886a19f0e7ee"
+      "sha256": "078a08ac5ce2143a86ddba3c8c5ad2cf4b7b5adf689ac842452b7783d342e390"
     },
     "generateblocks/references/global-styles.md": {
       "source": "generateblocks-skills",
       "path": "skills/generateblocks-layouts/references/global-styles.md",
-      "sha256": "78583b0bef92bd9b97bd4f16594957169a6f0709578246c51f03a56022815e3d"
+      "sha256": "1275a70fb4c525167aaf80b259efc93119e6a16c22213e0bda2d38fd5321aff0"
     },
     "generateblocks/references/migrations.md": {
       "source": "generateblocks-skills",
@@ -321,27 +321,27 @@
     "generateblocks/references/patterns.md": {
       "source": "generateblocks-skills",
       "path": "skills/generateblocks-layouts/references/patterns.md",
-      "sha256": "50f6e23cf886b4a142525da1ade1b6c575129a20732b7be0376e2391de695c8b"
+      "sha256": "bcf1143a0a922bd5ff25886b7e0671daf7a51fa5048fe2a9036aaf42ec96e83e"
     },
     "generateblocks/references/performance.md": {
       "source": "generateblocks-skills",
       "path": "skills/generateblocks-layouts/references/performance.md",
-      "sha256": "9e6d67778e604caabf18ab7b2c9c9767b6ef904c1c57c6b14f63d1b66d9a4c19"
+      "sha256": "f6b1a6d6e1938c6678aaba71a0de24fdef8b914765cee7cb0caedb4882a46673"
     },
     "generateblocks/references/pro-forms.md": {
       "source": "generateblocks-skills",
       "path": "skills/generateblocks-layouts/references/pro-forms.md",
-      "sha256": "d2f7de265e1271536d49886122d01fd46914edc136baf099eb12f2f148f23cd4"
+      "sha256": "847de0e334f30a3e837057da7427ccf5621785f8321cf3a2790d16e4fd5fd64f"
     },
     "generateblocks/references/pro-interactive.md": {
       "source": "generateblocks-skills",
       "path": "skills/generateblocks-layouts/references/pro-interactive.md",
-      "sha256": "fbf023ae621a7454ea9c392c783ab627bb9563ce2fc0ad8c7ea91dd2d67a9619"
+      "sha256": "dd4a88fdcfee25d3cf50bfa32ba06678dd8970a9db549b42dc241ca26c7de5b6"
     },
     "generateblocks/references/query-block.md": {
       "source": "generateblocks-skills",
       "path": "skills/generateblocks-layouts/references/query-block.md",
-      "sha256": "a42fc3d454e653d67619598e2429b1e81116d470deb7477f81713713e645faf4"
+      "sha256": "47ff932a6292977256d4827d9108f522e558238f49014a8ca1dbe85842d2d1c1"
     },
     "generateblocks/references/query-loops.md": {
       "source": "generateblocks-skills",
@@ -351,22 +351,22 @@
     "generateblocks/references/recovery-rules.md": {
       "source": "generateblocks-skills",
       "path": "skills/generateblocks-layouts/references/recovery-rules.md",
-      "sha256": "ebbaeac1a739235c9addb30296204724513c77ee513a61716db17d0f7f160525"
+      "sha256": "f7b854eab511c9cf119515a72b7f8cbbb45f1cf12f3ecda1d10a1995f636e688"
     },
     "generateblocks/references/responsive-legacy.md": {
       "source": "generateblocks-skills",
       "path": "skills/generateblocks-layouts/references/responsive-legacy.md",
-      "sha256": "dd21281d5fe6f5a94a3460ffcf30ad42f5fc9a45d6fe75e50594cbd001692178"
+      "sha256": "c2134a34e242612bb190d9021d11299b26ed259d9de7b6213304a1c7fbda8d60"
     },
     "generateblocks/references/responsive.md": {
       "source": "generateblocks-skills",
       "path": "skills/generateblocks-layouts/references/responsive.md",
-      "sha256": "91a6ffd48e5d67c8b6ec0e4500d94efba38b8462b669347fffa4e2e483813d82"
+      "sha256": "b1420b595006f1daf83236aec7dbaec4b68c81ac1b9b7932e7a2bdde952419dd"
     },
     "generateblocks/references/styling-scope.md": {
       "source": "generateblocks-skills",
       "path": "skills/generateblocks-layouts/references/styling-scope.md",
-      "sha256": "d8d69a030a2a231f00c229b726a83a10a9f5ad624d2186ef6cc64e249400424e"
+      "sha256": "b73b198eca2d412d1090961749cc6c1d9db9326aef0643039816110182a8d38e"
     },
     "generateblocks/references/svg-icons.md": {
       "source": "generateblocks-skills",
