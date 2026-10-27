@@ -3,7 +3,7 @@ Contributors: wpgaurav
 Tags: mcp, developer-tools, ai, automation
 Requires at least: 6.9
 Requires PHP: 8.0
-Stable tag: 0.5.1
+Stable tag: 0.5.2
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -63,6 +63,10 @@ Disable Site Agent or revoke its Application Password. An emergency SITE_AGENT_D
 Get the free checkout license from https://gauravtiwari.org/product/site-agent/ and activate it under Tools > Site Agent. FluentCart supplies automatic updates through protected HTTPS packages. The Update URI protects against unrelated WordPress.org slug matches. Manual release ZIP updates remain available. Licensing never disables the developer tools.
 
 == Changelog ==
+
+= 0.5.2 =
+* Updated: The bundled GenerateBlocks guide now covers GenerateBlocks 2.5.0 and Pro 2.8.0: inline-only block CSS, site breakpoint presets, the editor Query Loop preview cap, the fixed compiled rule order and the dynamic-tag save rules for the connected account.
+* Updated: Its examples carry CSS in the order GenerateBlocks 2.5 compiles, and the guide reads the installed GenerateBlocks and Pro versions from site-context before writing.
 
 = 0.5.1 =
 * Fixed: OAuth connections are bound to the approving site, and concurrent token use cannot restore revoked credentials or overwrite a completed refresh.
