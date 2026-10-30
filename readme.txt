@@ -3,7 +3,7 @@ Contributors: wpgaurav
 Tags: mcp, developer-tools, ai, automation
 Requires at least: 6.9
 Requires PHP: 8.0
-Stable tag: 0.5.2
+Stable tag: 1.0.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -11,7 +11,7 @@ Connect an MCP client directly to WordPress with independently enabled developer
 
 == Description ==
 
-Site Agent provides WordPress context, content, term and media discovery, content and media writes, source inspection, source editing, PHP execution, and foreground WP-CLI commands. Bundled builder skills explain to the connected client how to work with Gutenberg, GenerateBlocks, Elementor, Bricks and Divi layouts, and an opt-in Bricks tools group serves Bricks Builder's own abilities (Bricks 2.4+) on the same connection. It is distributed independently through gauravtiwari.org.
+Site Agent provides WordPress context, content, term and media discovery, content and media writes, source inspection, source editing, PHP execution, and foreground WP-CLI commands. Bundled builder skills explain to the connected client how to work with Gutenberg, GenerateBlocks, Elementor, Bricks and Divi layouts, an opt-in Bricks tools group serves Bricks Builder's own abilities (Bricks 2.4+) on the same connection, and an opt-in Core Support tools group lets an assistant watch Core Support for new tickets, replies and feature requests, send team alerts and work the roadmap. It is distributed independently through gauravtiwari.org.
 
 Bundled plugin guides cover MailerHive, Core Support, FluentCart, GT Extensions for FluentCart, Stackless for WooCommerce and Page Blocks Builder (PBB). Site context reports their installed versions, active state and matching skills. Active plugins can add their own detailed workflows. Reading guidance never enables developer tools or authorizes publishing, payments or customer messages.
 
@@ -63,6 +63,12 @@ Disable Site Agent or revoke its Application Password. An emergency SITE_AGENT_D
 Get the free checkout license from https://gauravtiwari.org/product/site-agent/ and activate it under Tools > Site Agent. FluentCart supplies automatic updates through protected HTTPS packages. The Update URI protects against unrelated WordPress.org slug matches. Manual release ZIP updates remain available. Licensing never disables the developer tools.
 
 == Changelog ==
+
+= 1.0.0 =
+* Added: An opt-in Core Support tools group that serves Core Support's own abilities on Site Agent's endpoint as core-support-* tools: checking for new tickets, customer replies and feature requests, reading tickets, sending team alerts and working the roadmap. Only the listed abilities are served, behind the group switch, OAuth consent, per-password limits and the audit history.
+* Added: OAuth consent offers "Check Core Support tickets and feature requests, send team alerts and work the roadmap" when the group is on.
+* Changed: Successful read-only Core Support checks stay out of the audit history, so a scheduled watch never crowds it. Failed checks and every change are still recorded.
+* Updated: The bundled Core Support guide explains the new tools and how an assistant should watch for new activity and message only when something is new.
 
 = 0.5.2 =
 * Updated: The bundled GenerateBlocks guide now covers GenerateBlocks 2.5.0 and Pro 2.8.0: inline-only block CSS, site breakpoint presets, the editor Query Loop preview cap, the fixed compiled rule order and the dynamic-tag save rules for the connected account.

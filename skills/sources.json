@@ -8,7 +8,7 @@
     },
     "generateblocks-skills": {
       "repository": "https://github.com/wpgaurav/generateblocks-skills",
-      "commit": "7d19d80c5da0473dbb107872d9237e93fbac3313",
+      "commit": "50a15ec8613f08980686592fdfdeddafed77244e",
       "license": "MIT"
     },
     "WordPress-skills": {
@@ -261,17 +261,17 @@
     "generateblocks/references/authoring-contract.md": {
       "source": "generateblocks-skills",
       "path": "skills/generateblocks-layouts/references/authoring-contract.md",
-      "sha256": "976959230de9e6d6cb67cd2b301112c66ccd0135e31062f892ce09ac029e28d1"
+      "sha256": "53f4d77bdd42fe637efd256fdc1431c9b104532e07f437472554277633c50cd9"
     },
     "generateblocks/references/block-types.md": {
       "source": "generateblocks-skills",
       "path": "skills/generateblocks-layouts/references/block-types.md",
-      "sha256": "e2e10e631a55108720b6e8e955b2bc1dc1829797c72f2eca7e5680754e08aef0"
+      "sha256": "2441f3cc5bea4768cda5154453a14f831e597cca17696b57fdab9e62f249fd6d"
     },
     "generateblocks/references/conditions.md": {
       "source": "generateblocks-skills",
       "path": "skills/generateblocks-layouts/references/conditions.md",
-      "sha256": "754c2103ede4388531964f04e08f2a6174a556a4f4092b94d0ba38739aa6020d"
+      "sha256": "29d5fee07ded20dcaca7065db4f77995d875a217d8c0feec8dcae3508fd48a75"
     },
     "generateblocks/references/css-mode.md": {
       "source": "generateblocks-skills",
@@ -301,7 +301,7 @@
     "generateblocks/references/field-notes.md": {
       "source": "generateblocks-skills",
       "path": "skills/generateblocks-layouts/references/field-notes.md",
-      "sha256": "b88f5c41fe20723ea8f6c976186326abf47f7324abfda367c018c1758bba7588"
+      "sha256": "830951d5a89b8994e1cc8059f00399c57edfa82421ba211e21d678ce0cc8a5f9"
     },
     "generateblocks/references/gb-pro.md": {
       "source": "generateblocks-skills",
@@ -341,7 +341,7 @@
     "generateblocks/references/query-block.md": {
       "source": "generateblocks-skills",
       "path": "skills/generateblocks-layouts/references/query-block.md",
-      "sha256": "47ff932a6292977256d4827d9108f522e558238f49014a8ca1dbe85842d2d1c1"
+      "sha256": "05b510a4c8f6ee8b86094baf050b080bff9cdfe9040b55bcf0568fb79dd40d0a"
     },
     "generateblocks/references/query-loops.md": {
       "source": "generateblocks-skills",
@@ -381,7 +381,7 @@
     "generateblocks/references/troubleshooting.md": {
       "source": "generateblocks-skills",
       "path": "skills/generateblocks-layouts/references/troubleshooting.md",
-      "sha256": "359e6ef9af24d420d1652f59f0064eb3d5f90a53bf05deceacfa0df1717124d2"
+      "sha256": "4f27bd05ee5924b0fc7a9083d139e4dab8c1fd24c574deaa1fd9df822c584b6a"
     },
     "gutenberg/references/block-markup.md": {
       "source": "WordPress-skills",
