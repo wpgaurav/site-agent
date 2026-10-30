@@ -47,3 +47,54 @@ It also adds the missing tests, translation template and readme entries.
 - **End to end with Core Support 1.4.0 on a local site:** `tools/list` showed the 7
   `core-support-*` tools only while the group was on, and `core-support-get-activity` returned a
   synthetic new ticket, customer reply and feature request over the MCP endpoint.
+
+| Local artifact | Bytes | SHA-256 |
+| --- | ---: | --- |
+| `site-agent-1.0.0.zip` | 766429 | `ef337b67bf32b5cd90eaadc2ca8f51bd8bcd8d2fb6f63c027700f4d8d7661cd3` |
+| `site-agent-companion-1.0.0.zip` | 22510 | `4f2f86794a8f374b6178dc45cf53f736baa5da4bc58a3ab3d82058c42a5192af` |
+
+The WordPress archive has 453 files under a single `site-agent` root, and its header and
+constant both say 1.0.0.
+
+## Delivery receipt
+
+Published from merge commit `ff30321` and annotated tag `v1.0.0`, after
+[pull request #12](https://github.com/wpgaurav/site-agent/pull/12). The PR run `41021886466` and
+the merge-commit run `41022132744` passed all three WordPress jobs on PHP 8.0, 8.3 and 8.5. The
+[GitHub release](https://github.com/wpgaurav/site-agent/releases/tag/v1.0.0) is published and
+stable, and it is the repository's latest release, so Core Support 1.4.0's one-click install
+picks it up. Fresh downloads of both assets matched the sizes and SHA-256 values above byte
+for byte.
+
+**Store.** FluentCart post 1180328, free variation 131.
+
+- The server fetched the public GitHub asset and checked it. A 1-byte ranged GET for
+  `site-agent-1.0.0.zip` returned 404 (206 for the 0.5.2 control).
+- Upload went through FluentCart Pro's R2 driver, so the keys stayed on the server. The
+  object read back as 200, 766,429 bytes, same SHA-256.
+- One transaction locked and re-checked the previous state (0.5.2, download 469, changelog
+  starting at 0.5.2), saved it to a private server snapshot, created download **506**
+  (serial 8), set `license_settings.version = 1.0.0` and `global_update_file = 506`, and
+  prepended the 1.0.0 changelog. Download 469 and `site-agent-0.5.2.zip` remain for rollback.
+
+**Licensed check: 13 of 13**, with release-verification license 134. It was enabled with a
+fresh key that never left the server:
+
+- a wrong key is rejected;
+- the key activates and checks valid for this product;
+- the store offers 1.0.0 with `license_status` valid;
+- the package is an HTTPS R2 address off the store's host, with the exact bytes;
+- the activation deactivates;
+- a request with only an invalid activation gets no package.
+
+A valid key sent with a wrong activation hash still gets the package, because FluentCart
+treats the key as the credential.
+
+Afterwards license 134 was disabled with a rotated key and 0 activations, and the synthetic
+site was removed. Customer activations were unchanged (fingerprint `a4a47e50933e3857` before
+and after).
+
+**gauravtiwari.org.** It ran a pre-release test build. It was moved to 1.0.0 by atomic folder
+swap after PHP 8.3 and 8.5 lint, and OPcache was cleared for its 287 PHP files. The backup is
+`~/backups/site-agent-20261030T075352`. Settings were kept, including Core Support tools on, and
+Site Agent serves the 7 Core Support tools there.
