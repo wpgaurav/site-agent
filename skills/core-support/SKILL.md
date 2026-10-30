@@ -21,6 +21,29 @@ the plugin's native REST route through explicitly enabled PHP execution; see
 [ticket operations](references/operations.md). Keep its permission callbacks, actor and
 ownership checks. Don't call the database directly or impersonate a customer.
 
+## Core Support tools
+
+When Core Support registers abilities and **Core Support tools** is switched on in Site Agent (and
+approved for the connection), these tools appear directly. Prefer them to PHP for what they cover:
+
+- `core-support-get-activity` lists new tickets, customer replies and feature requests since a
+  cursor, oldest first, with titles, links and the ticket or request. Message text is included
+  only when Core Support's "Include a message preview" alert setting is on.
+- `core-support-list-tickets` and `core-support-get-ticket` read tickets as an agent.
+- `core-support-notify-team` sends a short message through the team alert channels that are set
+  up (Telegram, Pushover, Discord, Slack, webhooks). It never reaches customers.
+- With Roadmaps on: `core-support-get-roadmap`, `core-support-add-roadmap-item` and
+  `core-support-update-roadmap-item` (move, publish or decline).
+
+### Watching for new support activity
+
+To tell someone about new tickets and replies, create a scheduled routine in the assistant
+(for example every 15 minutes). On the first run, call `core-support-get-activity` without a
+cursor, keep only the returned `cursor` as the baseline and report nothing old. On each later
+run, pass the saved cursor, store the new one, and message the person only when `events` is not
+empty: one line per event with its title and link. Call again while `has_more` is true. Stay
+quiet when nothing is new, and never reply to a customer from a watch routine.
+
 ## Ticket workflow
 
 1. List a narrow status/search/assignment/priority slice, then read the complete matching

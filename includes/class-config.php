@@ -29,6 +29,7 @@ final class Config {
 			'php_execute'   => false,
 			'cli_execute'   => false,
 			'bricks'        => false,
+			'core_support'  => false,
 			'audit_enabled' => true,
 			'delete_data'   => false,
 		);
@@ -63,9 +64,12 @@ final class Config {
 		return defined( 'SITE_AGENT_ALLOW_EXECUTION' ) && ! SITE_AGENT_ALLOW_EXECUTION;
 	}
 
-	/** Whether wp-config.php constants (and, for Bricks tools, an active Bricks MCP) leave a tool group usable, independent of the settings screen. */
+	/** Whether wp-config.php constants (and, for Bricks or Core Support tools, the active plugin) leave a tool group usable, independent of the settings screen. */
 	public static function group_available( string $group ): bool {
 		if ( 'bricks' === $group && ! Bricks::available() ) {
+			return false;
+		}
+		if ( 'core_support' === $group && ! Core_Support::available() ) {
 			return false;
 		}
 		if ( in_array( $group, self::CODE_GROUPS, true ) && self::code_locked() ) {

@@ -623,6 +623,7 @@ final class OAuth {
 			'php_execute'   => __( 'Run PHP with full server privileges', 'site-agent' ),
 			'cli_execute'   => __( 'Run WP-CLI commands', 'site-agent' ),
 			'bricks'        => __( 'Use Bricks Builder tools', 'site-agent' ),
+			'core_support'  => __( 'Check Core Support tickets and feature requests, send team alerts and work the roadmap', 'site-agent' ),
 		);
 		$host   = (string) wp_parse_url( $request['redirect_uri'], PHP_URL_HOST );
 		$body   = '<p>' . sprintf(

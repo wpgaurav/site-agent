@@ -10,7 +10,7 @@ Site Agent is free and open source. The complete release ZIP and a free automati
 
 ## Companion Package
 
-The current source builds `site-agent-companion-0.5.2.zip` from `companion/site-agent/`. It supplies the approved icon, a credential-free MCP connection and a WordPress workflow skill for compatible ChatGPT/Codex hosts. The skill covers site inspection, raw-content audits, draft preparation, hash-checked edits and enabled developer tools.
+The current source builds `site-agent-companion-1.0.0.zip` from `companion/site-agent/`. It supplies the approved icon, a credential-free MCP connection and a WordPress workflow skill for compatible ChatGPT/Codex hosts. The skill covers site inspection, raw-content audits, draft preparation, hash-checked edits and enabled developer tools.
 
 This companion archive is separate from the WordPress installable ZIP and contains no credentials. With OAuth connections on (0.4.0+), an OAuth-capable host signs in through WordPress and needs nothing else. Otherwise, authentication is configured privately through the host with a WordPress Application Password in a Basic Authorization header or an explicitly enabled authenticated URL. ChatGPT web compatibility with credential-bearing URLs has not been verified.
 
@@ -65,6 +65,7 @@ define( 'SITE_AGENT_DISABLED', true );
 | `site-agent-bricks-abilities` | Bricks tools | List Bricks' own abilities, or describe one with its schemas |
 | `site-agent-run-bricks-ability` | Bricks tools | Run a Bricks ability with its parameters |
 | `bricks-*` | Bricks tools | Bricks' fast-path abilities, served under Bricks' own tool names |
+| `core-support-*` | Core Support tools | Core Support's own abilities: new tickets, replies and feature requests since a cursor, tickets, team alerts and the roadmap |
 
 Every tool argument has a schema description, and every tool declares an output schema. Errors report the underlying message and line, because the caller already controls the failing code.
 
@@ -171,7 +172,7 @@ python3 bin/sync-skills.py
 bash bin/build.sh
 ```
 
-Tests refuse to load an installation without a `.site-agent-test-install` marker. Never place that marker on a real site. HTTP smoke tests also verify that the authenticated server reports the same fixture path and marker hash before any mutation. Integration tests modify disposable options, users, posts, and fixture files. The build uses a runtime allowlist and excludes tests, development dependencies, Composer metadata, docs, and screenshots. Both package builders validate temporary ZIPs and checksums before replacing existing artifacts and restore the previous pair if publication fails. Ship `dist/site-agent-0.5.2.zip`, not a GitHub source archive.
+Tests refuse to load an installation without a `.site-agent-test-install` marker. Never place that marker on a real site. HTTP smoke tests also verify that the authenticated server reports the same fixture path and marker hash before any mutation. Integration tests modify disposable options, users, posts, and fixture files. The build uses a runtime allowlist and excludes tests, development dependencies, Composer metadata, docs, and screenshots. Both package builders validate temporary ZIPs and checksums before replacing existing artifacts and restore the previous pair if publication fails. Ship `dist/site-agent-1.0.0.zip`, not a GitHub source archive.
 
 ## License and Contributions
 

@@ -699,6 +699,14 @@ final class Abilities {
 			return;
 		}
 		$instructions = 'WordPress developer access through explicitly enabled tools. Start with site-agent-site-context; read site-agent-list-skills and site-agent-get-skill before builder or plugin workflows. Bundled guidance covers MailerHive, Core Support, FluentCart, GT Extensions for FluentCart, Stackless and Page Blocks Builder (PBB). Prefer matching active-plugin skills for their version-specific commands. Guidance never enables tools or authorizes customer messages, payments or publishing.';
+		$config       = Config::get();
+		if ( ! empty( $config['core_support'] ) && Config::group_available( 'core_support' ) ) {
+			$core_support = Core_Support::names();
+			if ( $core_support ) {
+				$tools         = array_merge( $tools, $core_support );
+				$instructions .= ' Tools named core-support-* are Core Support\'s own abilities. To keep someone told about support, call core-support-get-activity on a schedule with the previous cursor and message them only when it returns events.';
+			}
+		}
 		if ( isset( $definitions['run-bricks-ability'] ) ) {
 			// Bricks' fast-path abilities keep their own tool names, so Bricks' guidance applies as written.
 			$tools         = array_merge( $tools, Bricks::direct() );
@@ -740,6 +748,9 @@ final class Abilities {
 					$name = is_object( $tool ) && method_exists( $tool, 'get' ) ? (string) $tool->get( 'name' ) : '';
 					if ( 0 === strpos( $name, 'bricks-' ) ) {
 						return Permissions::allowed( 'bricks' );
+					}
+					if ( 0 === strpos( $name, 'core-support-' ) ) {
+						return Permissions::allowed( 'core_support' );
 					}
 					$key = 0 === strpos( $name, 'site-agent-' ) ? substr( $name, strlen( 'site-agent-' ) ) : '';
 					return ! isset( $definitions[ $key ] ) || Permissions::allowed( $definitions[ $key ]['group'] );

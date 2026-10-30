@@ -117,6 +117,7 @@ final class Admin {
 			'php_execute'   => array( __( 'PHP execution', 'site-agent' ), __( 'Run PHP inside WordPress with the server process privileges. This is not a sandbox and can modify files, the database, and Site Agent itself.', 'site-agent' ) ),
 			'cli_execute'   => array( __( 'WP-CLI execution', 'site-agent' ), $cli ),
 			'bricks'        => array( __( 'Bricks tools', 'site-agent' ), __( 'Serve Bricks Builder\'s own abilities (Bricks 2.4 or later, with AI/MCP enabled in Bricks > Settings > AI): its fast-path tools directly and the rest through one dispatcher. They can change pages, templates, global classes, variables, theme styles and Bricks settings. Bricks\' own switches and permission checks still apply, and its PHP ability also needs PHP execution.', 'site-agent' ) ),
+			'core_support'  => array( __( 'Core Support tools', 'site-agent' ), __( 'Serve Core Support\'s own abilities: check for new tickets, customer replies and feature requests so an assistant can tell you about them, read tickets, send team alerts, and add, move, publish or decline roadmap items. Core Support\'s own capability checks still apply. Nothing here replies to customers. Successful read-only checks stay out of the audit history, so a scheduled watch never crowds it.', 'site-agent' ) ),
 			'audit_enabled' => array( __( 'Audit history', 'site-agent' ), __( 'Keep the last 100 tool calls: time, user ID, tool, target (post ID, file path or WP-CLI command name), Application Password name, result and duration. Content, code, other arguments, outputs, IP addresses and credential secrets are not logged.', 'site-agent' ) ),
 			'delete_data'   => array( __( 'Delete data on uninstall', 'site-agent' ), __( 'Remove Site Agent settings, password limits, audit history and the update license when deleting the plugin.', 'site-agent' ) ),
 		);
@@ -160,6 +161,8 @@ final class Admin {
 							<p class="description"><?php echo esc_html( $control[1] ); ?></p>
 							<?php if ( 'bricks' === $key && ! Config::group_available( $key ) ) : ?>
 								<p class="description"><strong><?php esc_html_e( 'Unavailable: Bricks abilities are not active. They need the Bricks theme 2.4 or later with AI/MCP enabled in Bricks > Settings > AI.', 'site-agent' ); ?></strong></p>
+							<?php elseif ( 'core_support' === $key && ! Config::group_available( $key ) ) : ?>
+								<p class="description"><strong><?php esc_html_e( 'Unavailable: Core Support is not active, or this version of it has no abilities yet.', 'site-agent' ); ?></strong></p>
 							<?php elseif ( ! Config::group_available( $key ) ) : ?>
 								<p class="description"><strong><?php esc_html_e( 'Blocked by a wp-config.php constant on this site.', 'site-agent' ); ?></strong></p>
 							<?php endif; ?>
