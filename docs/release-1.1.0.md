@@ -68,3 +68,49 @@ The docs said the Core Forms tools need Core Forms 4.11. They actually need 4.12
 
 The WordPress archive has 466 files under a single `site-agent` root, and its header and
 constant both say 1.1.0.
+
+## Delivery receipt
+
+Published from merge commit `d0dc70e` and annotated tag `v1.1.0`, after
+[pull request #14](https://github.com/wpgaurav/site-agent/pull/14). The PR run `44683399498` and
+the merge-commit run `44683642276` passed all three WordPress jobs on PHP 8.0, 8.3 and 8.5. The
+[GitHub release](https://github.com/wpgaurav/site-agent/releases/tag/v1.1.0) is published and
+stable, and it is the repository's latest release. Fresh downloads of both assets matched the
+sizes and SHA-256 values above byte for byte.
+
+**Store.** FluentCart post 1180328, free variation 131.
+
+- Upload went through FluentCart Pro's R2 driver from the server, so the keys stayed there. The
+  stored object read back as 807,689 bytes with the same SHA-256 before any row pointed at it.
+- One transaction, guarded by the previous state (1.0.0, download 506), created download **569**
+  (serial 9), set `license_settings.version = 1.1.0` and `global_update_file = 569`, and prepended
+  the 1.1.0 changelog. Download 506 and `site-agent-1.0.0.zip` remain for rollback.
+- R2 reconcile: both referenced objects kept, 0 orphans.
+
+**Licensed check: 13 of 13**, with release-verification license 134 (customer 0, order 0). It was
+enabled with a fresh key that never left the server, then activated for a reserved example.net
+site. The checks:
+
+- the store offers 1.1.0 with `license_status` valid;
+- the package is an off-site HTTPS R2 address, not the `?fluent-cart=` route;
+- the package has the exact bytes, a single `site-agent` root and version 1.1.0;
+- an invalid activation gets no package.
+
+Afterwards the activation and site were removed, and license 134 was disabled with a rotated key
+and 0 activations. Customer activations were unchanged (fingerprint `d747f8e8b8b848f6` before and
+after).
+
+**gauravtiwari.org** moved from 1.0.0 to 1.1.0.
+
+- The 290 PHP files passed PHP 8.3 and 8.5 lint before an atomic folder swap. OPcache was then
+  cleared for all of them.
+- Backup: `~/backups/site-agent-20261120T055141`.
+- Settings were kept. The three new groups are off there.
+- Site context answers over MCP and reports Core Forms 5.2.0-beta.1 with the `core-forms` and
+  `core-commerce` guides.
+
+**Docs.** On gauravtiwari.org:
+
+- the Site Agent and Core Tables changelogs synced from GitHub and show 1.1.0 and 1.3.0;
+- the Core Forms doc `/docs/core-forms/integrations/site-agent/` now says the tools need Core
+  Forms 5.1 or later, not 4.11.
