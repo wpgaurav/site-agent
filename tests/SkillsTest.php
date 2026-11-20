@@ -65,9 +65,11 @@ final class SkillsTest extends TestCase {
 			$skills['no-skillmd']          = array( 'directory' => $dir . '/references' );
 			return $skills;
 		};
+		// Active plugins on the test site, such as Core Tables, may register skills of their own.
+		$installed = array_keys( Skills::registered() );
 		add_filter( 'site_agent_skills', $filter );
 		try {
-			$this->assertSame( array_merge( Skills::CATALOG, array( 'invoice' ) ), Skills::names() );
+			$this->assertSame( array_merge( Skills::CATALOG, $installed, array( 'invoice' ) ), Skills::names() );
 			$this->assertSame( SITE_AGENT_DIR . 'skills/gutenberg/', Skills::directory( 'gutenberg' ), 'Bundled skills cannot be replaced.' );
 			$listing = Abilities::execute( 'list-skills', array() );
 			$this->assertMatchesOutputSchema( 'list-skills', $listing );
@@ -107,7 +109,7 @@ final class SkillsTest extends TestCase {
 			rmdir( $dir . '/references' );
 			rmdir( $dir );
 		}
-		$this->assertSame( Skills::CATALOG, Skills::names() );
+		$this->assertSame( array_merge( Skills::CATALOG, $installed ), Skills::names() );
 	}
 
 	public function test_partner_plugins_report_their_state_and_skills(): void {
@@ -222,7 +224,7 @@ final class SkillsTest extends TestCase {
 	public function test_skills_need_only_base_access(): void {
 		$listing = Abilities::execute( 'list-skills', array() );
 		$this->assertMatchesOutputSchema( 'list-skills', $listing );
-		$this->assertSame( Skills::CATALOG, array_column( $listing['skills'], 'name' ) );
+		$this->assertSame( array_merge( Skills::CATALOG, array_keys( Skills::registered() ) ), array_column( $listing['skills'], 'name' ) );
 		foreach ( $listing['skills'] as $skill ) {
 			$this->assertContains( 'SKILL.md', $skill['files'], $skill['name'] );
 			$this->assertNotSame( '', $skill['description'], $skill['name'] );

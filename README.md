@@ -74,6 +74,7 @@ define( 'SITE_AGENT_DISABLED', true );
 | `site-agent-core-forms-publish-form` / `-duplicate-form` / `-trash-form` | Core Forms tools | Draft publishing (start, publish, discard), Core Forms' own duplicate, and moving a form to the trash |
 | `site-agent-core-forms-list-submissions` / `-get-submission` / `-update-submission` | Core Forms tools | Read entries and set their status or spam flag |
 | `core-forms-*` | Core Commerce tools | Core Commerce's own abilities: products, plans, releases, orders, licenses, activations, subscriptions, payment routing and client invoices |
+| `core-tables-*` | Core Tables tools | Core Tables' own abilities: find, read, create, edit, publish, embed, export and import tables, plus revisions, trash, refresh sources and appearance defaults where the installed Core Tables registers them |
 
 Every tool argument has a schema description, and every tool declares an output schema. Errors report the underlying message and line, because the caller already controls the failing code.
 
@@ -112,6 +113,10 @@ The Bricks and GenerateBlocks skills are adapted from the author's [bricks-skill
 **Core Commerce tools** (`core_commerce`, off by default) serve Core Commerce's own abilities, registered by Core Forms' Licensing and Client Invoices modules in the `core-forms-commerce` category, as `core-forms-*` tools. Only the 42 abilities listed in `Core_Commerce::SERVED` are served, so a later ability or one another plugin registers under the prefix never reaches a connection that approved the group. Core Commerce keeps its own permission checks, and each call is audited with the record ID only.
 
 The `core-forms` and `core-commerce` skills explain both workflows, wp-config.php constants (`CORE_FORMS_*`, `GT_TURNSTILE_*`, `CORE_FORMS_LICENSE_KEY`), and the REST and WP-CLI fallbacks for connections without these groups.
+
+## Core Tables
+
+**Core Tables tools** (`core_tables`, off by default) serve Core Tables' own abilities, registered in the `core-tables` category, as `core-tables-*` tools. Only the abilities listed in `Core_Tables::SERVED` are served, and only those Core Tables itself opens to MCP: its AI settings (MCP read, and write for changes) still decide exposure, and its capability and ownership checks still run. Names a given Core Tables version doesn't register are simply not served. Core Tables registers its own `core-tables` skill through `site_agent_skills`; Site Agent bundles none for it. Calls are audited with `table N` as the target.
 
 ## Bricks Abilities
 

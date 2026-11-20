@@ -71,6 +71,9 @@ add_action(
 		// Core Commerce's tools on this server: the Core Commerce tools group, password limits and audit.
 		add_filter( 'site_agent_mcp_adapter_pre_tool_call', array( Core_Commerce::class, 'before_call' ), 10, 4 );
 		add_filter( 'site_agent_mcp_adapter_tool_call_result', array( Core_Commerce::class, 'after_call' ), 10, 5 );
+		// Core Tables' tools on this server: the Core Tables tools group, password limits and audit.
+		add_filter( 'site_agent_mcp_adapter_pre_tool_call', array( Core_Tables::class, 'before_call' ), 10, 4 );
+		add_filter( 'site_agent_mcp_adapter_tool_call_result', array( Core_Tables::class, 'after_call' ), 10, 5 );
 		Vendor\WP\MCP\Plugin::instance();
 		add_action( 'wp_abilities_api_categories_init', array( Abilities::class, 'register_category' ) );
 		add_action( 'wp_abilities_api_init', array( Abilities::class, 'register' ) );

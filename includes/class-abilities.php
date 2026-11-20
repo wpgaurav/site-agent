@@ -1085,6 +1085,13 @@ final class Abilities {
 				$instructions .= ' Tools named core-forms-* are Core Commerce\'s own abilities for products, licenses, orders and client invoices: read the core-commerce skill, and ask the merchant before anything that emails a customer, issues, voids or marks an invoice paid, or changes a license.';
 			}
 		}
+		if ( ! empty( $config['core_tables'] ) && Config::group_available( 'core_tables' ) ) {
+			$core_tables = Core_Tables::names();
+			if ( $core_tables ) {
+				$tools         = array_merge( $tools, $core_tables );
+				$instructions .= ' Tools named core-tables-* are Core Tables\' own abilities for tables (datasets): read the core-tables skill, pass the expected_version from the latest read with every change, and ask before publishing, unpublishing, trashing or deleting a table, since every embed changes.';
+			}
+		}
 		if ( isset( $definitions['run-bricks-ability'] ) ) {
 			// Bricks' fast-path abilities keep their own tool names, so Bricks' guidance applies as written.
 			$tools         = array_merge( $tools, Bricks::direct() );
@@ -1132,6 +1139,9 @@ final class Abilities {
 					}
 					if ( 0 === strpos( $name, 'core-forms-' ) ) {
 						return Permissions::allowed( 'core_commerce' );
+					}
+					if ( 0 === strpos( $name, 'core-tables-' ) ) {
+						return Permissions::allowed( 'core_tables' );
 					}
 					$key = 0 === strpos( $name, 'site-agent-' ) ? substr( $name, strlen( 'site-agent-' ) ) : '';
 					return ! isset( $definitions[ $key ] ) || Permissions::allowed( $definitions[ $key ]['group'] );

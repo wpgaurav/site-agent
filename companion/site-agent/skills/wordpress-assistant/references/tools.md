@@ -34,6 +34,7 @@ Reference source: this companion's matching Site Agent source, includes/class-ab
 | site-agent-core-forms-publish-form / duplicate-form / trash-form | form_id (+ action, expected_fingerprint) | Draft publishing, duplicate, move to trash |
 | site-agent-core-forms-list-submissions / get-submission / update-submission | form_id, status, spam, search, dates / submission_id (+ status, spam) | Read and triage entries |
 | core-forms-* | per Core Commerce schema | Core Commerce's own abilities when Core Commerce tools are enabled |
+| core-tables-* | per Core Tables schema | Core Tables' own abilities when Core Tables tools are enabled and Core Tables opens them to MCP |
 
 Content/media/term limit is 1-100. File listing limit is 1-200. Save statuses are draft, pending, publish, private and future; future needs a future date_gmt. Omitted update fields remain unchanged. Updating a published, private or scheduled post without status saves an autosave for human review and returns staged true; pass status (for example publish) only when the user asked to change the live post. Templates and template parts cannot be staged.
 

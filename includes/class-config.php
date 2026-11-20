@@ -32,6 +32,7 @@ final class Config {
 			'core_support'  => false,
 			'core_forms'    => false,
 			'core_commerce' => false,
+			'core_tables'   => false,
 			'audit_enabled' => true,
 			'delete_data'   => false,
 		);
@@ -78,6 +79,9 @@ final class Config {
 			return false;
 		}
 		if ( 'core_commerce' === $group && ! Core_Commerce::available() ) {
+			return false;
+		}
+		if ( 'core_tables' === $group && ! Core_Tables::available() ) {
 			return false;
 		}
 		if ( in_array( $group, self::CODE_GROUPS, true ) && self::code_locked() ) {

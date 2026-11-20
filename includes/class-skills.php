@@ -35,6 +35,11 @@ final class Skills {
 			// Core Commerce ships inside Core Forms.
 			'more'  => array( 'core-commerce' ),
 		),
+		'core-tables/core-tables.php'                 => array(
+			'name' => 'Core Tables',
+			'url'  => 'https://gauravtiwari.org/product/core-tables/',
+			'does' => 'Create, edit, publish, embed and export tables and charts; import from other table plugins; manage revisions, trash and refresh sources.',
+		),
 		'mailerhive/mailerhive.php'                   => array(
 			'name'  => 'MailerHive',
 			'url'   => 'https://gauravtiwari.org/product/mailerhive/',
