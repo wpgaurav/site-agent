@@ -54,15 +54,15 @@ final class SkillsTest extends TestCase {
 		file_put_contents( $dir . '/references/fields.md', '# Fields' );
 		file_put_contents( $dir . '/scripts.py', 'print(1)' );
 		$filter = static function ( $skills ) use ( $dir ) {
-			$skills['invoice']    = array(
+			$skills['invoice']             = array(
 				'directory' => $dir,
 				'plugin'    => 'GT Extensions',
 				'version'   => '2.8.3',
 			);
-			$skills['gutenberg']  = array( 'directory' => $dir );
+			$skills['gutenberg']           = array( 'directory' => $dir );
 			$skills['page-blocks-builder'] = array( 'directory' => $dir );
-			$skills['Bad Name']   = array( 'directory' => $dir );
-			$skills['no-skillmd'] = array( 'directory' => $dir . '/references' );
+			$skills['Bad Name']            = array( 'directory' => $dir );
+			$skills['no-skillmd']          = array( 'directory' => $dir . '/references' );
 			return $skills;
 		};
 		add_filter( 'site_agent_skills', $filter );
@@ -112,7 +112,11 @@ final class SkillsTest extends TestCase {
 
 	public function test_partner_plugins_report_their_state_and_skills(): void {
 		$filter = static function ( $skills ) {
-			$skills['gt-link-manager'] = array( 'directory' => SITE_AGENT_DIR . 'skills/gutenberg', 'plugin' => 'GT Link Manager', 'version' => '1.10.0' );
+			$skills['gt-link-manager'] = array(
+				'directory' => SITE_AGENT_DIR . 'skills/gutenberg',
+				'plugin'    => 'GT Link Manager',
+				'version'   => '1.10.0',
+			);
 			return $skills;
 		};
 		add_filter( 'site_agent_skills', $filter );
@@ -130,25 +134,40 @@ final class SkillsTest extends TestCase {
 	}
 
 	public static function plugin_states(): array {
-		return array( 'active' => array( 'active' ), 'inactive' => array( 'installed' ), 'missing' => array( 'missing' ) );
+		return array(
+			'active'   => array( 'active' ),
+			'inactive' => array( 'installed' ),
+			'missing'  => array( 'missing' ),
+		);
 	}
 
 	/** @dataProvider plugin_states */
 	public function test_plugin_workflows_detect_installed_versions_without_loading_or_enabling_plugins( string $state ): void {
 		get_plugins();
-		$cache = wp_cache_get( 'plugins', 'plugins' );
+		$cache     = wp_cache_get( 'plugins', 'plugins' );
 		$inventory = array();
 		foreach ( Skills::PARTNERS as $file => $partner ) {
 			if ( isset( $partner['skill'] ) && 'missing' !== $state ) {
-				$inventory[ $file ] = array( 'Name' => $partner['name'], 'Version' => '9.8.7' );
+				$inventory[ $file ] = array(
+					'Name'    => $partner['name'],
+					'Version' => '9.8.7',
+				);
 			}
 		}
-		$active = static function () use ( $state, $inventory ) {
+		$active     = static function () use ( $state, $inventory ) {
 			return 'active' === $state ? array_keys( $inventory ) : array();
 		};
 		$registered = static function ( $skills ) {
-			$skills['gtfc-store'] = array( 'directory' => SITE_AGENT_DIR . 'skills/fluentcart', 'plugin' => 'GT Extensions for FluentCart', 'version' => '9.8.7' );
-			$skills['gt-page-blocks'] = array( 'directory' => SITE_AGENT_DIR . 'skills/page-blocks-builder', 'plugin' => 'GT Page Blocks Builder', 'version' => '9.8.7' );
+			$skills['gtfc-store']     = array(
+				'directory' => SITE_AGENT_DIR . 'skills/fluentcart',
+				'plugin'    => 'GT Extensions for FluentCart',
+				'version'   => '9.8.7',
+			);
+			$skills['gt-page-blocks'] = array(
+				'directory' => SITE_AGENT_DIR . 'skills/page-blocks-builder',
+				'plugin'    => 'GT Page Blocks Builder',
+				'version'   => '9.8.7',
+			);
 			return $skills;
 		};
 		wp_cache_set( 'plugins', array( '' => $inventory ), 'plugins' );
@@ -159,7 +178,7 @@ final class SkillsTest extends TestCase {
 		try {
 			$context = Abilities::execute( 'site-context', array() );
 			$this->assertMatchesOutputSchema( 'site-context', $context );
-			$this->assertCount( 6, $context['integrations'] );
+			$this->assertCount( 7, $context['integrations'] );
 			$this->assertSame( array( 'gutenberg' ), array_column( $context['builders'], 'skill' ), 'Plugins do not become page builders.' );
 			$listing = Abilities::execute( 'list-skills', array() );
 			$this->assertMatchesOutputSchema( 'list-skills', $listing );
@@ -185,7 +204,10 @@ final class SkillsTest extends TestCase {
 				$this->assertContains( 'gtfc-store', $integrations['gt-extensions-fluentcart']['skills'] );
 				$this->assertContains( 'gt-page-blocks', $integrations['page-blocks-builder']['skills'] );
 				$this->assertSame( 'GT Page Blocks Builder', $skills['gt-page-blocks']['source'] );
+				$this->assertSame( array( 'core-forms', 'core-commerce' ), $integrations['core-forms']['skills'], 'Core Commerce ships inside Core Forms.' );
 			}
+			$this->assertSame( 'active' === $state, $skills['core-commerce']['detected'] );
+			$this->assertSame( 'missing' === $state ? '' : '9.8.7', $skills['core-commerce']['version'] );
 			$this->assertSame( Config::defaults(), array_replace( Config::get(), array( 'enabled' => false ) ), 'Discovery does not enable developer groups.' );
 			$this->assertNotContains( 'execute-php', $context['enabled_tools'] );
 			$this->assertNotContains( 'run-wp-cli', $context['enabled_tools'] );

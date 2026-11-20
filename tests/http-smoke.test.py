@@ -15,7 +15,7 @@ import urllib.error
 
 ROOT = Path(__file__).resolve().parents[1]
 BUILTINS = [
-    'gutenberg', 'generateblocks', 'elementor', 'bricks', 'divi', 'mailerhive',
+    'gutenberg', 'generateblocks', 'elementor', 'bricks', 'divi', 'core-forms', 'core-commerce', 'mailerhive',
     'core-support', 'fluentcart', 'gt-extensions-fluentcart', 'stackless', 'page-blocks-builder',
 ]
 TOOLS = [
@@ -218,7 +218,7 @@ class HttpSmokeTest(unittest.TestCase):
     def test_all_builtins_and_plugin_skills_pass_and_are_read(self):
         output = self.run_smoke()
         self.assertIn('All HTTP MCP smoke checks passed.', output)
-        self.assertIn('11 built-in skills over MCP, with 1 plugin-registered skills', output)
+        self.assertIn('13 built-in skills over MCP, with 1 plugin-registered skills', output)
         self.assertEqual(self.transport.read_skills, BUILTINS)
         self.assertEqual(len(self.transport.guards), 1)
         self.assertEqual(len(self.transport.mutations), 4)

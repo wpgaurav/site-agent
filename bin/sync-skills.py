@@ -37,7 +37,7 @@ LOCAL_OVERRIDES = {'generateblocks/references/mcp-publishing.md'}
 # Must match Skills::MAX_BYTES and Skills::EXTENSIONS in includes/class-skills.php.
 MAX_BYTES = 65536
 EXTENSIONS = {'.md', '.json', '.html'}
-CATALOG = ['gutenberg', 'generateblocks', 'elementor', 'bricks', 'divi', 'mailerhive', 'core-support', 'fluentcart', 'gt-extensions-fluentcart', 'stackless', 'page-blocks-builder']
+CATALOG = ['gutenberg', 'generateblocks', 'elementor', 'bricks', 'divi', 'core-forms', 'core-commerce', 'mailerhive', 'core-support', 'fluentcart', 'gt-extensions-fluentcart', 'stackless', 'page-blocks-builder']
 FORBIDDEN = re.compile(r'novamira|wpvibe|respira', re.I)
 SEGMENT = re.compile(r'^[a-z0-9_][a-z0-9._-]*$', re.I)  # Same rule as Skills::PATH.
 

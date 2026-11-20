@@ -325,7 +325,7 @@ final class Abilities {
 			),
 			'list-skills'        => array(
 				'label'       => __( 'List skills', 'site-agent' ),
-				'description' => __( 'List bundled builder and plugin skills, plus skills active plugins add. Includes MailerHive, Core Support, FluentCart, GT Extensions for FluentCart, Stackless and Page Blocks Builder (PBB), with installed versions, whether each is active and its files. Read the matching skill before layout or plugin work.', 'site-agent' ),
+				'description' => __( 'List bundled builder and plugin skills, plus skills active plugins add. Includes Core Forms, Core Commerce, MailerHive, Core Support, FluentCart, GT Extensions for FluentCart, Stackless and Page Blocks Builder (PBB), with installed versions, whether each is active and its files. Read the matching skill before layout or plugin work.', 'site-agent' ),
 				'group'       => '',
 				'callback'    => array( Skills::class, 'listing' ),
 				'input'       => array(),
@@ -623,6 +623,374 @@ final class Abilities {
 				),
 				'readonly'    => false,
 			),
+		) + self::core_forms();
+	}
+
+	/**
+	 * Core Forms tools, in the core_forms group. They call Core Forms' own REST API as the current user.
+	 *
+	 * @return array<string, array<string, mixed>>
+	 */
+	private static function core_forms(): array {
+		$form_id     = self::field( 'integer', __( 'Core Forms form ID from site-agent-core-forms-list-forms.', 'site-agent' ), array( 'minimum' => 1 ) );
+		$fingerprint = self::field( 'string', __( 'fingerprint from the latest core-forms-get-form or save result. A stale value is refused with cf_edit_conflict: read the form again and reconcile.', 'site-agent' ), array( 'pattern' => '^[a-f0-9]{64}$' ) );
+		$scalar      = array( 'type' => array( 'string', 'number', 'integer', 'boolean' ) );
+		$attributes  = static function ( string $description ) use ( $scalar ): array {
+			return array(
+				'type'                 => 'object',
+				'description'          => $description,
+				'additionalProperties' => $scalar,
+			);
+		};
+		$columns     = self::field(
+			'integer',
+			__( 'Container columns, 1 to 6.', 'site-agent' ),
+			array(
+				'minimum' => 1,
+				'maximum' => 6,
+			)
+		);
+		$field       = array(
+			'type'                 => 'object',
+			'additionalProperties' => false,
+			'required'             => array( 'name', 'type' ),
+			'properties'           => array(
+				'name'               => self::string( __( 'Unique field name: the submitted key and the [name] data variable in actions. Letters, numbers, _ and -. Multiple-file and multi-select fields get [] automatically.', 'site-agent' ), 100, array( 'pattern' => '^[A-Za-z0-9_-]+(\[\])?$' ) ),
+				'type'               => self::string( __( 'A field type from core-forms-overview field_types, for example text, email, tel, textarea, select, radio, checkbox, file, consent, rating, heading, paragraph, container, fieldset or submit (named _submit, so it is not stored as an answer).', 'site-agent' ), 40 ),
+				'label'              => self::string( __( 'Label. For heading and paragraph fields, the text shown.', 'site-agent' ), 2000 ),
+				'placeholder'        => self::string( __( 'Placeholder. For select, the empty first option.', 'site-agent' ), 500 ),
+				'default_value'      => self::string( __( 'Initial value. For paragraph and html fields, the content.', 'site-agent' ), 20000 ),
+				'default_values'     => self::list_of( array( 'type' => 'string' ) ) + array( 'description' => __( 'Initially selected values of a multiple-choice field.', 'site-agent' ) ),
+				'checked'            => self::field( 'boolean', __( 'Initial state of a single checkbox or consent field.', 'site-agent' ) ),
+				'required'           => self::field( 'boolean', __( 'Whether an answer is required.', 'site-agent' ) ),
+				'description'        => self::string( __( 'Help text shown under the field.', 'site-agent' ), 2000 ),
+				'css_class'          => self::string( __( 'Classes on the field\'s control (for choice groups and containers, on the group).', 'site-agent' ), 500 ),
+				'options'            => self::list_of(
+					self::object(
+						array(
+							'value'    => array( 'type' => 'string' ),
+							'label'    => array( 'type' => 'string' ),
+							'group'    => array( 'type' => 'string' ),
+							'disabled' => array( 'type' => 'boolean' ),
+						),
+						array( 'value' )
+					)
+				) + array( 'description' => __( 'Choices for select, radio and checkbox-group fields. group makes select optgroups.', 'site-agent' ) ),
+				'validation'         => self::field( 'object', __( 'Rules such as {"min": 1, "max": 5, "pattern": "^[0-9]+$"}. A rating uses min and max for its scale.', 'site-agent' ) ),
+				'conditions'         => self::list_of( array( 'type' => 'object' ) ) + array( 'description' => __( 'Show or hide the field from another answer, as the builder stores it: [{"action": "show", "rule": "topic=support"}]. Rules: field=value, field:a|b|c (any of), field=* (any answer).', 'site-agent' ) ),
+				'attributes'         => $attributes( __( 'Extra control attributes, for example {"autocomplete": "email"}. For file fields: {"accept": ".pdf,image/*", "multiple": true, "data-max-files": 3}. A heading uses {"level": 2}.', 'site-agent' ) ),
+				'wrapper_attributes' => $attributes( __( 'Attributes on the field\'s wrapper element, for example {"class": "col-span-2"}. Only id, class, style, title, role, tabindex, dir, lang, hidden, data-* and aria-* are kept.', 'site-agent' ) ),
+				'group'              => self::string( __( 'Step name in a multi-step or conversational layout.', 'site-agent' ), 200 ),
+				'parent'             => self::string( __( 'Name of the container or fieldset this field sits in.', 'site-agent' ), 100 ),
+				'cols_desktop'       => $columns,
+				'cols_tablet'        => $columns,
+				'cols_mobile'        => $columns,
+				'gap'                => self::string( __( 'Container gap, for example 1rem.', 'site-agent' ), 20 ),
+				'position'           => self::field( 'integer', __( 'Order. Defaults to the position in the list.', 'site-agent' ), array( 'minimum' => 0 ) ),
+			),
+		);
+		$form_output = self::object(
+			array(
+				'form_id'     => array( 'type' => 'integer' ),
+				'fingerprint' => array( 'type' => 'string' ),
+				'title'       => array( 'type' => 'string' ),
+				'slug'        => array( 'type' => 'string' ),
+				'shortcode'   => array( 'type' => 'string' ),
+				'fields'      => self::list_of( array( 'type' => 'object' ) ),
+				'actions'     => self::list_of( array( 'type' => 'object' ) ),
+				'settings'    => array( 'type' => 'object' ),
+				'messages'    => array( 'type' => 'object' ),
+				'publishing'  => array( 'type' => 'object' ),
+				'saved'       => self::list_of( array( 'type' => 'string' ) ),
+			),
+			array( 'form_id', 'fingerprint' )
+		);
+		$submission  = array(
+			'status'    => self::field(
+				'string',
+				__( 'Entry status.', 'site-agent' ),
+				array( 'enum' => array( 'new', 'read', 'replied', 'archived' ) )
+			),
+			'spam'      => self::field( 'boolean', __( 'true for entries stored as spam, false for the rest.', 'site-agent' ) ),
+			'search'    => self::string( __( 'Search the submitted answers.', 'site-agent' ), 200 ),
+			'date_from' => self::string( __( 'Submitted on or after this date, YYYY-MM-DD.', 'site-agent' ), 40 ),
+			'date_to'   => self::string( __( 'Submitted on or before this date, YYYY-MM-DD.', 'site-agent' ), 40 ),
+		);
+		$entry       = array(
+			'type'                 => 'object',
+			'additionalProperties' => true,
+		);
+		return array(
+			'core-forms-overview'          => array(
+				'label'       => __( 'Core Forms overview', 'site-agent' ),
+				'description' => __( 'Core Forms version and modules, every action type with the default settings its editor starts from, field types, default form settings and messages, global settings with secrets shown as [stored], and which settings wp-config.php constants supply. Read the core-forms skill and call this first.', 'site-agent' ),
+				'group'       => 'core_forms',
+				'callback'    => array( Core_Forms::class, 'overview' ),
+				'input'       => array(),
+				'required'    => array(),
+				'output'      => self::object(
+					array(
+						'version'      => array( 'type' => 'string' ),
+						'modules'      => self::list_of( array( 'type' => 'object' ) ),
+						'action_types' => self::list_of( array( 'type' => 'object' ) ),
+						'field_types'  => self::list_of( array( 'type' => 'string' ) ),
+						'constants'    => self::list_of( array( 'type' => 'object' ) ),
+					),
+					array( 'version' )
+				),
+				'readonly'    => true,
+			),
+			'core-forms-list-forms'        => array(
+				'label'       => __( 'List Core Forms forms', 'site-agent' ),
+				'description' => __( 'Forms you can manage, by title: ID, slug, status, shortcode, whether a field schema is stored, action types, whether draft publishing is on and the entry count.', 'site-agent' ),
+				'group'       => 'core_forms',
+				'callback'    => array( Core_Forms::class, 'list_forms' ),
+				'input'       => self::paging( 100, 50 ),
+				'required'    => array(),
+				'output'      => self::object(
+					array(
+						'forms' => self::list_of( array( 'type' => 'object' ) ),
+						'total' => array( 'type' => 'integer' ),
+						'pages' => array( 'type' => 'integer' ),
+					),
+					array( 'forms', 'total' )
+				),
+				'readonly'    => true,
+			),
+			'core-forms-get-form'          => array(
+				'label'       => __( 'Read Core Forms form', 'site-agent' ),
+				'description' => __( 'Read a form\'s draft definition: fingerprint (needed for every change), fields (the stored builder schema, or parsed from markup when none is stored), layout, markup, settings, the ordered actions with their index and fingerprint, messages, draft publishing state, schema drift and entry counts. Secrets appear as [stored].', 'site-agent' ),
+				'group'       => 'core_forms',
+				'callback'    => array( Core_Forms::class, 'get_form' ),
+				'input'       => array( 'form_id' => $form_id ),
+				'required'    => array( 'form_id' ),
+				'output'      => $form_output,
+				'readonly'    => true,
+			),
+			'core-forms-save-form'         => array(
+				'label'       => __( 'Save Core Forms form', 'site-agent' ),
+				'description' => __( 'Create a form (omit form_id) or change one (form_id and expected_fingerprint). Prefer fields: the complete field list, rendered into markup by Core Forms\' own renderer and saved with its schema, as the visual builder does; a submit button is added to single-page forms that have none. Or send markup for code-view HTML. Title, slug, settings (merged; field_wrapper_class adds classes to every field wrapper) and messages can change in the same call. Actions change with core-forms-save-actions. With draft publishing on, saves change the draft until core-forms-publish-form.', 'site-agent' ),
+				'group'       => 'core_forms',
+				'callback'    => array( Core_Forms::class, 'save' ),
+				'input'       => array(
+					'form_id'              => self::field( 'integer', __( 'Form to change. Omit to create a form.', 'site-agent' ), array( 'minimum' => 1 ) ),
+					'expected_fingerprint' => $fingerprint,
+					'title'                => self::string( __( 'Form title.', 'site-agent' ), 200 ),
+					'slug'                 => self::string( __( 'Form slug, used in [cf_form slug="..."]. Core Forms keeps slugs unique.', 'site-agent' ), 200 ),
+					'fields'               => self::list_of( $field ) + array(
+						'description' => __( 'The complete field list in order. Replaces the current fields and markup.', 'site-agent' ),
+						'maxItems'    => 300,
+					),
+					'layout'               => self::object(
+						array(
+							'type' => self::field(
+								'string',
+								__( 'single (default), multi-step (fields grouped into steps by their group) or conversational (one question at a time).', 'site-agent' ),
+								array( 'enum' => array( 'single', 'multi-step', 'conversational' ) )
+							),
+						)
+					) + array( 'description' => __( 'Layout with fields. Omit to keep the current layout.', 'site-agent' ) ),
+					'markup'               => self::string( __( 'Complete form HTML without the form tag, as in the code view. Replaces the markup; Core Forms re-checks choice options in a stored schema and reports drift.', 'site-agent' ), 1000000 ),
+					'schema_from_markup'   => self::field( 'boolean', __( 'With markup: also rebuild the stored field schema from it. Use after adding, removing or renaming fields in code; builder-only layout data is replaced.', 'site-agent' ) ),
+					'settings'             => self::field( 'object', __( 'Form settings to change, merged into the current ones. Keys and defaults are in core-forms-overview form_settings, for example save_submissions, redirect_url, hide_after_success, submit_button_text, form_class and field_wrapper_class.', 'site-agent' ) ),
+					'messages'             => array(
+						'type'                 => 'object',
+						'description'          => __( 'Messages to change, keyed as in core-forms-overview messages, for example {"success": "Thanks, we will reply within a day."}.', 'site-agent' ),
+						'additionalProperties' => array(
+							'type'      => 'string',
+							'maxLength' => 5000,
+						),
+					),
+				),
+				'required'    => array(),
+				'output'      => $form_output,
+				'readonly'    => false,
+			),
+			'core-forms-duplicate-form'    => array(
+				'label'       => __( 'Duplicate Core Forms form', 'site-agent' ),
+				'description' => __( 'Copy a form with Core Forms\' own duplicate: fields, markup, settings, actions and messages. The copy has a new slug and no entries or published snapshot.', 'site-agent' ),
+				'group'       => 'core_forms',
+				'callback'    => array( Core_Forms::class, 'duplicate' ),
+				'input'       => array( 'form_id' => $form_id ),
+				'required'    => array( 'form_id' ),
+				'output'      => $form_output,
+				'readonly'    => false,
+				'destructive' => false,
+			),
+			'core-forms-trash-form'        => array(
+				'label'       => __( 'Trash Core Forms form', 'site-agent' ),
+				'description' => __( 'Move a form to the WordPress trash. Its shortcode stops rendering and its entries are kept; it can be restored from the trash. Confirm with the user first.', 'site-agent' ),
+				'group'       => 'core_forms',
+				'callback'    => array( Core_Forms::class, 'trash' ),
+				'input'       => array(
+					'form_id'              => $form_id,
+					'expected_fingerprint' => $fingerprint,
+				),
+				'required'    => array( 'form_id', 'expected_fingerprint' ),
+				'output'      => self::object(
+					array(
+						'form_id' => array( 'type' => 'integer' ),
+						'status'  => array( 'type' => 'string' ),
+					),
+					array( 'form_id', 'status' )
+				),
+				'readonly'    => false,
+			),
+			'core-forms-publish-form'      => array(
+				'label'       => __( 'Publish Core Forms draft', 'site-agent' ),
+				'description' => __( 'Draft publishing keeps visitors on the published form while saves change a draft. start turns it on (snapshotting the current form as live), publish makes the saved draft live, discard returns the draft to the published form. Publishing changes the live form: confirm first.', 'site-agent' ),
+				'group'       => 'core_forms',
+				'callback'    => array( Core_Forms::class, 'publish' ),
+				'input'       => array(
+					'form_id'              => $form_id,
+					'action'               => self::field( 'string', __( 'start, publish or discard.', 'site-agent' ), array( 'enum' => array( 'start', 'publish', 'discard' ) ) ),
+					'expected_fingerprint' => $fingerprint,
+				),
+				'required'    => array( 'form_id', 'action', 'expected_fingerprint' ),
+				'output'      => $form_output,
+				'readonly'    => false,
+			),
+			'core-forms-save-actions'      => array(
+				'label'       => __( 'Save Core Forms actions', 'site-agent' ),
+				'description' => __( 'Replace a form\'s ordered action list (email, autoresponder, webhook and integrations): add, edit, remove or reorder. Keep an unchanged action with {"keep_index": i, "keep_fingerprint": "..."} from core-forms-get-form. Send a new or edited action as its settings object with type (keys from core-forms-overview action_types defaults); leave [stored] values as they are to keep stored secrets. Mapped field names must exist in the form. Data variables such as [email] and [all:label] fill in answers.', 'site-agent' ),
+				'group'       => 'core_forms',
+				'callback'    => array( Core_Forms::class, 'save_actions' ),
+				'input'       => array(
+					'form_id'              => $form_id,
+					'expected_fingerprint' => $fingerprint,
+					'actions'              => array(
+						'type'        => 'array',
+						'description' => __( 'The complete action list in run order. An empty list removes every action.', 'site-agent' ),
+						'maxItems'    => 50,
+						'items'       => array(
+							'type'       => 'object',
+							'properties' => array(
+								'keep_index'       => array(
+									'type'    => 'integer',
+									'minimum' => 0,
+								),
+								'keep_fingerprint' => array(
+									'type'    => 'string',
+									'pattern' => '^[a-f0-9]{64}$',
+								),
+								'type'             => array(
+									'type'      => 'string',
+									'maxLength' => 64,
+								),
+							),
+						),
+					),
+				),
+				'required'    => array( 'form_id', 'expected_fingerprint', 'actions' ),
+				'output'      => $form_output,
+				'readonly'    => false,
+			),
+			'core-forms-test-action'       => array(
+				'label'       => __( 'Test Core Forms action', 'site-agent' ),
+				'description' => __( 'Run one action for real with sample answers through Core Forms\' action test: it sends the email, calls the webhook or contacts the integration. Pass index for a saved action, or action for unsaved settings. Ask the user before sending to a real recipient. Use core-forms-rehearse to check without sending.', 'site-agent' ),
+				'group'       => 'core_forms',
+				'callback'    => array( Core_Forms::class, 'test_action' ),
+				'input'       => array(
+					'form_id'   => $form_id,
+					'index'     => self::field( 'integer', __( 'index of a saved action from core-forms-get-form.', 'site-agent' ), array( 'minimum' => 0 ) ),
+					'action'    => self::field( 'object', __( 'Unsaved action settings with type. [stored] values come from the saved action with the same _cf_action_id.', 'site-agent' ) ),
+					'test_data' => array(
+						'type'                 => 'object',
+						'description'          => __( 'Sample answers keyed by field name. Default: Core Forms\' samples for the form\'s fields.', 'site-agent' ),
+						'additionalProperties' => true,
+					),
+				),
+				'required'    => array( 'form_id' ),
+				'output'      => self::object(
+					array(
+						'success' => array( 'type' => 'boolean' ),
+						'status'  => array( 'type' => array( 'string', 'integer', 'null' ) ),
+						'message' => array( 'type' => array( 'string', 'null' ) ),
+					),
+					array( 'success' )
+				),
+				'readonly'    => false,
+				'destructive' => false,
+			),
+			'core-forms-rehearse'          => array(
+				'label'       => __( 'Rehearse Core Forms submission', 'site-agent' ),
+				'description' => __( 'Check sample answers against the saved draft without storing, sending, subscribing or charging anything: validation result, calculated values, each action\'s would_run or would_skip with its destination, and the planned payment.', 'site-agent' ),
+				'group'       => 'core_forms',
+				'callback'    => array( Core_Forms::class, 'rehearse' ),
+				'input'       => array(
+					'form_id'     => $form_id,
+					'data'        => array(
+						'type'                 => 'object',
+						'description'          => __( 'Answers keyed by field name, for example {"name": "Ada", "email": "ada@example.com"}.', 'site-agent' ),
+						'additionalProperties' => true,
+					),
+					'revision_id' => self::field( 'integer', __( 'Rehearse a saved revision instead of the draft.', 'site-agent' ), array( 'minimum' => 1 ) ),
+				),
+				'required'    => array( 'form_id' ),
+				'output'      => self::object(
+					array(
+						'valid'   => array( 'type' => 'boolean' ),
+						'error'   => array( 'type' => 'string' ),
+						'actions' => self::list_of( array( 'type' => 'object' ) ),
+					),
+					array( 'valid' )
+				),
+				'readonly'    => true,
+			),
+			'core-forms-list-submissions'  => array(
+				'label'       => __( 'List Core Forms entries', 'site-agent' ),
+				'description' => __( 'Entries (submissions) for one form or all forms you can access, newest first: answers, status, spam flag, IP address, user agent, referring URL and time. Contains personal data; share only what the user needs.', 'site-agent' ),
+				'group'       => 'core_forms',
+				'callback'    => array( Core_Forms::class, 'list_submissions' ),
+				'input'       => array(
+					'form_id' => self::field( 'integer', __( 'Only this form\'s entries.', 'site-agent' ), array( 'minimum' => 1 ) ),
+					'limit'   => self::field(
+						'integer',
+						__( 'Entries per page, 1 to 100. Default 20.', 'site-agent' ),
+						array(
+							'minimum' => 1,
+							'maximum' => 100,
+						)
+					),
+					'page'    => self::field( 'integer', __( 'Page number, starting at 1.', 'site-agent' ), array( 'minimum' => 1 ) ),
+					'order'   => self::field( 'string', __( 'desc (default, newest first) or asc.', 'site-agent' ), array( 'enum' => array( 'asc', 'desc' ) ) ),
+				) + $submission,
+				'required'    => array(),
+				'output'      => self::object(
+					array(
+						'submissions' => self::list_of( $entry ),
+						'total'       => array( 'type' => 'integer' ),
+						'pages'       => array( 'type' => 'integer' ),
+					),
+					array( 'submissions', 'total' )
+				),
+				'readonly'    => true,
+			),
+			'core-forms-get-submission'    => array(
+				'label'       => __( 'Read Core Forms entry', 'site-agent' ),
+				'description' => __( 'One entry with its answers, status, spam flag, IP address, user agent, referring URL and time.', 'site-agent' ),
+				'group'       => 'core_forms',
+				'callback'    => array( Core_Forms::class, 'get_submission' ),
+				'input'       => array( 'submission_id' => self::field( 'integer', __( 'Entry ID.', 'site-agent' ), array( 'minimum' => 1 ) ) ),
+				'required'    => array( 'submission_id' ),
+				'output'      => $entry,
+				'readonly'    => true,
+			),
+			'core-forms-update-submission' => array(
+				'label'       => __( 'Update Core Forms entry', 'site-agent' ),
+				'description' => __( 'Triage an entry: set its status (new, read, replied, archived) or mark it as spam or not spam. Answers are not changed.', 'site-agent' ),
+				'group'       => 'core_forms',
+				'callback'    => array( Core_Forms::class, 'update_submission' ),
+				'input'       => array(
+					'submission_id' => self::field( 'integer', __( 'Entry ID.', 'site-agent' ), array( 'minimum' => 1 ) ),
+					'status'        => $submission['status'],
+					'spam'          => self::field( 'boolean', __( 'true to mark as spam, false to mark as not spam.', 'site-agent' ) ),
+				),
+				'required'    => array( 'submission_id' ),
+				'output'      => $entry,
+				'readonly'    => false,
+				'idempotent'  => true,
+			),
 		);
 	}
 
@@ -698,13 +1066,23 @@ final class Abilities {
 		if ( ! $tools ) {
 			return;
 		}
-		$instructions = 'WordPress developer access through explicitly enabled tools. Start with site-agent-site-context; read site-agent-list-skills and site-agent-get-skill before builder or plugin workflows. Bundled guidance covers MailerHive, Core Support, FluentCart, GT Extensions for FluentCart, Stackless and Page Blocks Builder (PBB). Prefer matching active-plugin skills for their version-specific commands. Guidance never enables tools or authorizes customer messages, payments or publishing.';
+		$instructions = 'WordPress developer access through explicitly enabled tools. Start with site-agent-site-context; read site-agent-list-skills and site-agent-get-skill before builder or plugin workflows. Bundled guidance covers Core Forms, Core Commerce, MailerHive, Core Support, FluentCart, GT Extensions for FluentCart, Stackless and Page Blocks Builder (PBB). Prefer matching active-plugin skills for their version-specific commands. Guidance never enables tools or authorizes customer messages, payments or publishing.';
 		$config       = Config::get();
 		if ( ! empty( $config['core_support'] ) && Config::group_available( 'core_support' ) ) {
 			$core_support = Core_Support::names();
 			if ( $core_support ) {
 				$tools         = array_merge( $tools, $core_support );
 				$instructions .= ' Tools named core-support-* are Core Support\'s own abilities. To keep someone told about support, call core-support-get-activity on a schedule with the previous cursor and message them only when it returns events.';
+			}
+		}
+		if ( isset( $definitions['core-forms-get-form'] ) ) {
+			$instructions .= ' Tools named site-agent-core-forms-* work on Core Forms forms, actions and entries through Core Forms\' REST API: read the core-forms skill, start with site-agent-core-forms-overview, and pass the latest fingerprint with every change.';
+		}
+		if ( ! empty( $config['core_commerce'] ) && Config::group_available( 'core_commerce' ) ) {
+			$core_commerce = Core_Commerce::names();
+			if ( $core_commerce ) {
+				$tools         = array_merge( $tools, $core_commerce );
+				$instructions .= ' Tools named core-forms-* are Core Commerce\'s own abilities for products, licenses, orders and client invoices: read the core-commerce skill, and ask the merchant before anything that emails a customer, issues, voids or marks an invoice paid, or changes a license.';
 			}
 		}
 		if ( isset( $definitions['run-bricks-ability'] ) ) {
@@ -751,6 +1129,9 @@ final class Abilities {
 					}
 					if ( 0 === strpos( $name, 'core-support-' ) ) {
 						return Permissions::allowed( 'core_support' );
+					}
+					if ( 0 === strpos( $name, 'core-forms-' ) ) {
+						return Permissions::allowed( 'core_commerce' );
 					}
 					$key = 0 === strpos( $name, 'site-agent-' ) ? substr( $name, strlen( 'site-agent-' ) ) : '';
 					return ! isset( $definitions[ $key ] ) || Permissions::allowed( $definitions[ $key ]['group'] );

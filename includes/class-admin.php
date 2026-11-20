@@ -118,6 +118,8 @@ final class Admin {
 			'cli_execute'   => array( __( 'WP-CLI execution', 'site-agent' ), $cli ),
 			'bricks'        => array( __( 'Bricks tools', 'site-agent' ), __( 'Serve Bricks Builder\'s own abilities (Bricks 2.4 or later, with AI/MCP enabled in Bricks > Settings > AI): its fast-path tools directly and the rest through one dispatcher. They can change pages, templates, global classes, variables, theme styles and Bricks settings. Bricks\' own switches and permission checks still apply, and its PHP ability also needs PHP execution.', 'site-agent' ) ),
 			'core_support'  => array( __( 'Core Support tools', 'site-agent' ), __( 'Serve Core Support\'s own abilities: check for new tickets, customer replies and feature requests so an assistant can tell you about them, read tickets, send team alerts, and add, move, publish or decline roadmap items. Core Support\'s own capability checks still apply. Nothing here replies to customers. Successful read-only checks stay out of the audit history, so a scheduled watch never crowds it.', 'site-agent' ) ),
+			'core_forms'    => array( __( 'Core Forms tools', 'site-agent' ), __( 'Create, edit, duplicate, publish and trash Core Forms forms, build fields with Core Forms\' own renderer, change messages, settings and the ordered action list, rehearse submissions, send a real test of one action, and read or triage entries. Every change goes through Core Forms\' REST API with its permission checks, form version checks and revisions. Stored action and setting secrets are never shown to the assistant.', 'site-agent' ) ),
+			'core_commerce' => array( __( 'Core Commerce tools', 'site-agent' ), __( 'Serve Core Commerce\'s own abilities (Core Forms\' Licensing and Client Invoices modules): products, plans, releases, orders, licenses, activations, subscriptions, payment routing and client invoices. Some can email customers, issue or void invoices, record payments or change licenses; each says when to ask you first. Core Commerce\'s own capability checks still apply.', 'site-agent' ) ),
 			'audit_enabled' => array( __( 'Audit history', 'site-agent' ), __( 'Keep the last 100 tool calls: time, user ID, tool, target (post ID, file path or WP-CLI command name), Application Password name, result and duration. Content, code, other arguments, outputs, IP addresses and credential secrets are not logged.', 'site-agent' ) ),
 			'delete_data'   => array( __( 'Delete data on uninstall', 'site-agent' ), __( 'Remove Site Agent settings, password limits, audit history and the update license when deleting the plugin.', 'site-agent' ) ),
 		);
@@ -163,6 +165,10 @@ final class Admin {
 								<p class="description"><strong><?php esc_html_e( 'Unavailable: Bricks abilities are not active. They need the Bricks theme 2.4 or later with AI/MCP enabled in Bricks > Settings > AI.', 'site-agent' ); ?></strong></p>
 							<?php elseif ( 'core_support' === $key && ! Config::group_available( $key ) ) : ?>
 								<p class="description"><strong><?php esc_html_e( 'Unavailable: Core Support is not active, or this version of it has no abilities yet.', 'site-agent' ); ?></strong></p>
+							<?php elseif ( 'core_forms' === $key && ! Config::group_available( $key ) ) : ?>
+								<p class="description"><strong><?php esc_html_e( 'Unavailable: Core Forms 4.11 or later is not active.', 'site-agent' ); ?></strong></p>
+							<?php elseif ( 'core_commerce' === $key && ! Config::group_available( $key ) ) : ?>
+								<p class="description"><strong><?php esc_html_e( 'Unavailable: Core Forms with Core Commerce abilities is not active.', 'site-agent' ); ?></strong></p>
 							<?php elseif ( ! Config::group_available( $key ) ) : ?>
 								<p class="description"><strong><?php esc_html_e( 'Blocked by a wp-config.php constant on this site.', 'site-agent' ); ?></strong></p>
 							<?php endif; ?>

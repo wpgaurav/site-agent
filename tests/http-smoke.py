@@ -38,11 +38,12 @@ code,body=rpc('initialize',{'protocolVersion':'2025-11-25','capabilities':{},'cl
 assert code==200 and session
 code,body=rpc('tools/list',{})
 tools=body['result']['tools'];names={t['name'] for t in tools}
-# Every Site Agent tool with all groups enabled; Bricks tools appear only on a site running Bricks 2.4+.
+# Every Site Agent tool with all groups enabled; Bricks tools appear only on a site running Bricks 2.4+,
+# and Core Forms tools only on a site running Core Forms 4.11+.
 CORE=['site-context','list-content','get-content','list-terms','list-media','list-skills','get-skill','save-content','upload-media','update-media','list-files','read-file','write-file','create-directory','delete-file','move-file','execute-php','run-wp-cli']
 missing=[n for n in CORE if 'site-agent-'+n not in names];assert not missing,missing
 bricks=sorted(n for n in names if n.startswith('bricks-'))
-assert {n for n in names if n.startswith('site-agent-')}-{'site-agent-'+n for n in CORE}<={'site-agent-bricks-abilities','site-agent-run-bricks-ability'},names
+assert {n for n in names if n.startswith('site-agent-') and not n.startswith('site-agent-core-forms-')}-{'site-agent-'+n for n in CORE}<={'site-agent-bricks-abilities','site-agent-run-bricks-ability'},names
 assert all(t['inputSchema'].get('type')=='object' for t in tools)
 print('PASS initialize and list all',len(CORE),'Site Agent tools','and %d Bricks tools'%len(bricks) if bricks else '')
 def tool(name,args):
@@ -98,7 +99,7 @@ code,body=rpc('tools/list',{},role='contributor');assert code==403
 code,body=rpc('tools/list',{},role=None);assert code==401
 assert last_headers.get('X-Site-Agent-Auth')=='unauthenticated',dict(last_headers)
 print('PASS session does not grant access to contributor or anonymous callers')
-BUILTIN_SKILLS=['gutenberg','generateblocks','elementor','bricks','divi','mailerhive','core-support','fluentcart','gt-extensions-fluentcart','stackless','page-blocks-builder']
+BUILTIN_SKILLS=['gutenberg','generateblocks','elementor','bricks','divi','core-forms','core-commerce','mailerhive','core-support','fluentcart','gt-extensions-fluentcart','stackless','page-blocks-builder']
 body=tool('list-skills',{})
 assert not body.get('isError'),body
 skills=body['structuredContent']['skills']
