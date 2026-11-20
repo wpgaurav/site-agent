@@ -3,7 +3,7 @@ Contributors: wpgaurav
 Tags: mcp, developer-tools, ai, automation
 Requires at least: 6.9
 Requires PHP: 8.0
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -64,12 +64,12 @@ Get the free checkout license from https://gauravtiwari.org/product/site-agent/ 
 
 == Changelog ==
 
-= Unreleased =
-* Added: An opt-in Core Forms tools group (Core Forms 4.11+). An assistant can list, read, create, edit, duplicate, publish and trash forms; build fields from the visual builder's schema with Core Forms' own renderer or edit code-view markup; change settings (including field wrapper classes) and messages; add, edit, remove and reorder actions; rehearse a submission without sending anything; test one action for real; and read and triage entries. Every change goes through Core Forms' REST API with its permission checks, form version checks and revisions.
+= 1.1.0 =
+* Added: An opt-in Core Forms tools group (Core Forms 5.1+). An assistant can list, read, create, edit, duplicate, publish and trash forms; build fields from the visual builder's schema with Core Forms' own renderer or edit code-view markup; change settings (field wrapper classes need Core Forms 5.2) and messages; add, edit, remove and reorder actions; rehearse a submission without sending anything; test one action for real; and read and triage entries. Every change goes through Core Forms' REST API with its permission checks, form version checks and revisions.
 * Added: Stored secrets in Core Forms actions and settings are shown as [stored] and kept when sent back unchanged, so API keys and signing secrets never reach the assistant.
 * Added: An opt-in Core Commerce tools group that serves Core Commerce's own abilities as core-forms-* tools: products, plans, releases, orders, licenses, activations, subscriptions, payment routing and client invoices. Only the listed abilities are served, behind the group switch, OAuth consent, per-password limits and the audit history.
 * Added: Bundled core-forms and core-commerce guides, covering fields, file uploads, conditions, actions and data variables, draft publishing, entries, global settings, wp-config.php constants and the REST and WP-CLI fallbacks. Site context reports Core Forms as a plugin workflow.
-* Added: An opt-in Core Tables tools group that serves Core Tables' own abilities as core-tables-* tools: find, read, create, edit, publish, embed, export and import tables, and manage revisions, trash, refresh sources and appearance defaults where Core Tables registers those abilities. Core Tables' own AI settings and capability checks still decide what is served.
+* Added: An opt-in Core Tables tools group that serves Core Tables' own abilities as core-tables-* tools: find, read, create, edit, publish, embed, export and import tables, and manage revisions, trash, refresh sources and appearance defaults. Core Tables 1.2 registers 11 of these abilities; Core Tables 1.3 adds revisions, trash, refresh sources, appearance defaults, table listing and editing. Core Tables' own AI settings and capability checks still decide what is served.
 * Added: OAuth consent offers the new groups when they are on, and Application Passwords can be limited to them.
 
 = 1.0.0 =

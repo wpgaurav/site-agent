@@ -167,7 +167,7 @@ final class Admin {
 							<?php elseif ( 'core_support' === $key && ! Config::group_available( $key ) ) : ?>
 								<p class="description"><strong><?php esc_html_e( 'Unavailable: Core Support is not active, or this version of it has no abilities yet.', 'site-agent' ); ?></strong></p>
 							<?php elseif ( 'core_forms' === $key && ! Config::group_available( $key ) ) : ?>
-								<p class="description"><strong><?php esc_html_e( 'Unavailable: Core Forms 4.11 or later is not active.', 'site-agent' ); ?></strong></p>
+								<p class="description"><strong><?php esc_html_e( 'Unavailable: Core Forms 5.1 or later is not active.', 'site-agent' ); ?></strong></p>
 							<?php elseif ( 'core_commerce' === $key && ! Config::group_available( $key ) ) : ?>
 								<p class="description"><strong><?php esc_html_e( 'Unavailable: Core Forms with Core Commerce abilities is not active.', 'site-agent' ); ?></strong></p>
 							<?php elseif ( 'core_tables' === $key && ! Config::group_available( $key ) ) : ?>

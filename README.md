@@ -10,7 +10,7 @@ Site Agent is free and open source. The complete release ZIP and a free automati
 
 ## Companion Package
 
-The current source builds `site-agent-companion-1.0.0.zip` from `companion/site-agent/`. It supplies the approved icon, a credential-free MCP connection and a WordPress workflow skill for compatible ChatGPT/Codex hosts. The skill covers site inspection, raw-content audits, draft preparation, hash-checked edits and enabled developer tools.
+The current source builds `site-agent-companion-1.1.0.zip` from `companion/site-agent/`. It supplies the approved icon, a credential-free MCP connection and a WordPress workflow skill for compatible ChatGPT/Codex hosts. The skill covers site inspection, raw-content audits, draft preparation, hash-checked edits and enabled developer tools.
 
 This companion archive is separate from the WordPress installable ZIP and contains no credentials. With OAuth connections on (0.4.0+), an OAuth-capable host signs in through WordPress and needs nothing else. Otherwise, authentication is configured privately through the host with a WordPress Application Password in a Basic Authorization header or an explicitly enabled authenticated URL. ChatGPT web compatibility with credential-bearing URLs has not been verified.
 
@@ -74,7 +74,7 @@ define( 'SITE_AGENT_DISABLED', true );
 | `site-agent-core-forms-publish-form` / `-duplicate-form` / `-trash-form` | Core Forms tools | Draft publishing (start, publish, discard), Core Forms' own duplicate, and moving a form to the trash |
 | `site-agent-core-forms-list-submissions` / `-get-submission` / `-update-submission` | Core Forms tools | Read entries and set their status or spam flag |
 | `core-forms-*` | Core Commerce tools | Core Commerce's own abilities: products, plans, releases, orders, licenses, activations, subscriptions, payment routing and client invoices |
-| `core-tables-*` | Core Tables tools | Core Tables' own abilities: find, read, create, edit, publish, embed, export and import tables, plus revisions, trash, refresh sources and appearance defaults where the installed Core Tables registers them |
+| `core-tables-*` | Core Tables tools | Core Tables' own abilities: find, read, create, edit, publish, embed, export and import tables, plus revisions, trash, refresh sources and appearance defaults with Core Tables 1.3 or later |
 
 Every tool argument has a schema description, and every tool declares an output schema. Errors report the underlying message and line, because the caller already controls the failing code.
 
@@ -108,7 +108,7 @@ The Bricks and GenerateBlocks skills are adapted from the author's [bricks-skill
 
 ## Core Forms and Core Commerce
 
-**Core Forms tools** (`core_forms`, off by default) need Core Forms 4.11 or later. They call Core Forms' own `cf/v1` REST routes inside the request as the signed-in administrator, so Core Forms' capability and form-scope checks, fingerprint conflicts, locks, sanitizing, revisions and field-mapping validation all apply. Site Agent adds what an assistant can't do safely by hand: it renders a field list into markup with Core Forms' own renderer (the multi-step renderer for stepped layouts) and saves both together, as the visual builder does; it saves messages under the same version lock; it refuses new or edited actions whose type isn't registered; it gives new actions a stable `_cf_action_id`; and it never returns stored secrets. Any setting whose key names a secret, token, password or API key is shown as `[stored]`, and sending `[stored]` back keeps the stored value. Trashing keeps a form's entries; there is no permanent-delete or entry-delete tool. Successful calls are audited with `form N` or `entry N` as the target.
+**Core Forms tools** (`core_forms`, off by default) need Core Forms 5.1 or later (field wrapper classes need 5.2). They call Core Forms' own `cf/v1` REST routes inside the request as the signed-in administrator, so Core Forms' capability and form-scope checks, fingerprint conflicts, locks, sanitizing, revisions and field-mapping validation all apply. Site Agent adds what an assistant can't do safely by hand: it renders a field list into markup with Core Forms' own renderer (the multi-step renderer for stepped layouts) and saves both together, as the visual builder does; it saves messages under the same version lock; it refuses new or edited actions whose type isn't registered; it gives new actions a stable `_cf_action_id`; and it never returns stored secrets. Any setting whose key names a secret, token, password or API key is shown as `[stored]`, and sending `[stored]` back keeps the stored value. Trashing keeps a form's entries; there is no permanent-delete or entry-delete tool. Successful calls are audited with `form N` or `entry N` as the target.
 
 **Core Commerce tools** (`core_commerce`, off by default) serve Core Commerce's own abilities, registered by Core Forms' Licensing and Client Invoices modules in the `core-forms-commerce` category, as `core-forms-*` tools. Only the 42 abilities listed in `Core_Commerce::SERVED` are served, so a later ability or one another plugin registers under the prefix never reaches a connection that approved the group. Core Commerce keeps its own permission checks, and each call is audited with the record ID only.
 
@@ -193,7 +193,7 @@ python3 bin/sync-skills.py
 bash bin/build.sh
 ```
 
-Tests refuse to load an installation without a `.site-agent-test-install` marker. Never place that marker on a real site. HTTP smoke tests also verify that the authenticated server reports the same fixture path and marker hash before any mutation. Integration tests modify disposable options, users, posts, and fixture files. The build uses a runtime allowlist and excludes tests, development dependencies, Composer metadata, docs, and screenshots. Both package builders validate temporary ZIPs and checksums before replacing existing artifacts and restore the previous pair if publication fails. Ship `dist/site-agent-1.0.0.zip`, not a GitHub source archive.
+Tests refuse to load an installation without a `.site-agent-test-install` marker. Never place that marker on a real site. HTTP smoke tests also verify that the authenticated server reports the same fixture path and marker hash before any mutation. Integration tests modify disposable options, users, posts, and fixture files. The build uses a runtime allowlist and excludes tests, development dependencies, Composer metadata, docs, and screenshots. Both package builders validate temporary ZIPs and checksums before replacing existing artifacts and restore the previous pair if publication fails. Ship `dist/site-agent-1.1.0.zip`, not a GitHub source archive.
 
 ## License and Contributions
 

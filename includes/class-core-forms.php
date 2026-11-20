@@ -26,7 +26,7 @@ final class Core_Forms {
 	/** Layouts Core Forms' multi-step renderer draws. */
 	const STEPPED = array( 'multi-step', 'conversational' );
 
-	/** Core Forms 4.11 or later is active: versioned definitions, schema rendering and the cf/v1 routes. */
+	/** Core Forms 5.1 or later is active: versioned definitions, schema rendering and the cf/v1 routes. */
 	public static function available(): bool {
 		return function_exists( 'cf_get_form' ) && function_exists( 'cf_duplicate_form' )
 			&& class_exists( '\Core_Forms\FormDefinition' ) && class_exists( '\Core_Forms\Schema\SchemaRenderer' )
@@ -305,7 +305,11 @@ final class Core_Forms {
 		if ( array_key_exists( 'actions', $settings ) ) {
 			return new \WP_Error( 'site_agent_use_save_actions', __( 'Change actions with core-forms-save-actions, which keeps stored secrets and the action order.', 'site-agent' ) );
 		}
-		if ( isset( $settings['field_wrapper_class'] ) && function_exists( 'cf_sanitize_class_list' ) ) {
+		if ( array_key_exists( 'field_wrapper_class', $settings ) ) {
+			// Older Core Forms neither uses nor sanitizes the setting, so it would be stored as sent.
+			if ( ! function_exists( 'cf_sanitize_class_list' ) ) {
+				return new \WP_Error( 'site_agent_core_forms_version', __( 'Field wrapper classes need Core Forms 5.2 or later. Save the form without field_wrapper_class.', 'site-agent' ) );
+			}
 			$settings['field_wrapper_class'] = cf_sanitize_class_list( sanitize_text_field( (string) $settings['field_wrapper_class'] ) );
 		}
 		foreach ( $settings as $key => $value ) {

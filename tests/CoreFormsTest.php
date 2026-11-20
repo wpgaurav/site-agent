@@ -204,10 +204,7 @@ namespace {
 							),
 						),
 					),
-					'settings' => array(
-						'field_wrapper_class' => 'mb-4 "><script> md:w-1/2',
-						'submit_button_text'  => 'Send it',
-					),
+					'settings' => array( 'submit_button_text' => 'Send it' ) + self::wrapper_setting(),
 					'messages' => array( 'success' => 'Thanks from the test.' ),
 				)
 			);
@@ -289,6 +286,11 @@ namespace {
 			$this->assertSame( 'denied', end( $rows )['error'] );
 		}
 
+		/** Field wrapper classes exist from Core Forms 5.2; older versions refuse the setting. */
+		private static function wrapper_setting(): array {
+			return function_exists( 'cf_sanitize_class_list' ) ? array( 'field_wrapper_class' => 'mb-4 "><script> md:w-1/2' ) : array();
+		}
+
 		public function test_a_form_is_built_from_fields_with_core_forms_renderer(): void {
 			$this->needs_core_forms();
 			$form = $this->create_form();
@@ -303,9 +305,22 @@ namespace {
 			$this->assertStringContainsString( 'class="col-half"', $form['markup'] );
 			$this->assertStringContainsString( 'data-show-if="topic=support"', $form['markup'] );
 			$this->assertStringContainsString( '>Send it</button>', $form['markup'] );
-			$this->assertSame( 'mb-4 md:w-1/2', $form['settings']['field_wrapper_class'] );
 			$this->assertSame( 'Thanks from the test.', $form['messages']['success'] );
 			$this->assertSame( $form, array( 'saved' => $form['saved'] ) + $this->call( 'core-forms-get-form', array( 'form_id' => $form['form_id'] ) ) );
+			if ( ! function_exists( 'cf_sanitize_class_list' ) ) {
+				$refused = Abilities::execute(
+					'core-forms-save-form',
+					array(
+						'form_id'              => $form['form_id'],
+						'expected_fingerprint' => $form['fingerprint'],
+						'settings'             => array( 'field_wrapper_class' => 'mb-4 "><script>' ),
+					)
+				);
+				$this->assertSame( 'site_agent_core_forms_version', $refused->get_error_code(), 'Core Forms before 5.2 would store the classes unsanitized.' );
+				$this->assertArrayNotHasKey( 'field_wrapper_class', $this->call( 'core-forms-get-form', array( 'form_id' => $form['form_id'] ) )['settings'] );
+				return;
+			}
+			$this->assertSame( 'mb-4 md:w-1/2', $form['settings']['field_wrapper_class'] );
 
 			// The rendered form keeps the field wrapper classes on every wrapper.
 			$html = cf_get_form( $form['form_id'] )->get_html();
@@ -708,9 +723,16 @@ namespace {
 			$this->assertSame( CORE_FORMS_VERSION, $overview['version'] );
 			$this->assertContains( 'email', array_column( $overview['action_types'], 'type' ) );
 			$this->assertContains( 'file', $overview['field_types'] );
-			$this->assertArrayHasKey( 'field_wrapper_class', $overview['form_settings'] );
-			$this->assertContains( 'cloudflare_turnstile.secret_key', array_column( $overview['constants'], 'setting' ) );
-			$this->assertContains( array( 'CORE_FORMS_LICENSE_KEY' ), array_column( $overview['constants'], 'constants' ) );
+			if ( function_exists( 'cf_sanitize_class_list' ) ) {
+				$this->assertArrayHasKey( 'field_wrapper_class', $overview['form_settings'] );
+			}
+			if ( class_exists( '\\Core_Forms\\Credentials' ) ) {
+				// wp-config.php keys arrived with Core Forms 5.2.
+				$this->assertContains( 'cloudflare_turnstile.secret_key', array_column( $overview['constants'], 'setting' ) );
+				$this->assertContains( array( 'CORE_FORMS_LICENSE_KEY' ), array_column( $overview['constants'], 'constants' ) );
+			} else {
+				$this->assertSame( array(), $overview['constants'] );
+			}
 			foreach ( array( 'google_recaptcha', 'cloudflare_turnstile' ) as $group ) {
 				$secret = $overview['settings'][ $group ]['secret_key'] ?? '';
 				$this->assertContains( $secret, array( '', Core_Forms::STORED ) );

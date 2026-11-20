@@ -15,8 +15,8 @@ safely; use the Core Forms tools below.
 ## Establish the installation
 
 1. Call `site-agent-site-context`. Confirm `core-forms/core-forms.php` is active and note its
-   version. This guide was checked against Core Forms 5.2.0-beta.1; the tools need 4.11 or
-   later. Core Commerce (products, licenses, orders, invoices) is the
+   version. This guide was checked against Core Forms 5.1.4 and 5.2.0-beta.1; the tools need 5.1 or
+   later, and field wrapper classes need 5.2. Core Commerce (products, licenses, orders, invoices) is the
    [core-commerce](../core-commerce/SKILL.md) skill.
 2. Check `enabled_tools` for `core-forms-*` tools. If they are missing, ask the user to turn
    on **Core Forms tools** in Tools > Site Agent and to approve that group when the client
@@ -24,7 +24,7 @@ safely; use the Core Forms tools below.
 3. Call `site-agent-core-forms-overview` once per task. It returns enabled modules, every
    registered action type with the default settings its editor starts from, field types,
    default form settings and messages, global settings (secrets as `[stored]`) and which
-   settings come from wp-config.php constants. Use those keys; don't guess them.
+   settings come from wp-config.php constants (Core Forms 5.2+). Use those keys; don't guess them.
 
 ## Tools
 
@@ -96,7 +96,8 @@ tied to unfinished payment or delivery; use it only on an explicit request (see
 ## Boundaries
 
 - Secrets in actions and settings show as `[stored]`. Send `[stored]` back to keep them. Never
-  ask the user to paste API keys or passwords into chat; recommend wp-config.php constants.
+  ask the user to paste API keys or passwords into chat; on Core Forms 5.2 or later, recommend
+  wp-config.php constants.
 - Turning modules on or off, changing global settings and payment settings affect every form;
   do them only on request. Payment forms charge real money in live mode.
 - A successful save, rehearsal or test proves configuration, not inbox delivery or a
