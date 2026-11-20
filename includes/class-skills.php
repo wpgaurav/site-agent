@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 /** Bundled and plugin-registered skills, served as read-only guidance. */
 final class Skills {
 	/** Bundled skill names in listing order. bin/sync-skills.py checks the directories against this list. */
-	const CATALOG    = array( 'gutenberg', 'generateblocks', 'elementor', 'bricks', 'divi', 'mailerhive', 'core-support', 'fluentcart', 'gt-extensions-fluentcart', 'stackless', 'page-blocks-builder' );
+	const CATALOG    = array( 'gutenberg', 'generateblocks', 'elementor', 'bricks', 'divi', 'core-forms', 'core-commerce', 'mailerhive', 'core-support', 'fluentcart', 'gt-extensions-fluentcart', 'stackless', 'page-blocks-builder' );
 	const MAX_BYTES  = 65536;
 	const EXTENSIONS = array( 'md', 'json', 'html' );
 	const PATH       = '^[A-Za-z0-9_][A-Za-z0-9._-]*(/[A-Za-z0-9_][A-Za-z0-9._-]*)*$';
@@ -27,6 +27,19 @@ final class Skills {
 	 * Keyed by plugin file: name, product URL and what an agent can do with them.
 	 */
 	const PARTNERS = array(
+		'core-forms/core-forms.php'                   => array(
+			'name'  => 'Core Forms',
+			'url'   => 'https://core-forms.com/',
+			'does'  => 'Create and edit forms, fields, messages and actions; rehearse and test them; read and triage entries.',
+			'skill' => 'core-forms',
+			// Core Commerce ships inside Core Forms.
+			'more'  => array( 'core-commerce' ),
+		),
+		'core-tables/core-tables.php'                 => array(
+			'name' => 'Core Tables',
+			'url'  => 'https://gauravtiwari.org/product/core-tables/',
+			'does' => 'Create, edit, publish, embed and export tables and charts; import from other table plugins; manage revisions, trash and refresh sources.',
+		),
 		'mailerhive/mailerhive.php'                   => array(
 			'name'  => 'MailerHive',
 			'url'   => 'https://gauravtiwari.org/product/mailerhive/',
@@ -256,7 +269,7 @@ final class Skills {
 			$skills = array();
 			$state  = isset( $installed[ $file ] ) ? ( is_plugin_active( $file ) ? 'active' : 'installed' ) : 'missing';
 			if ( 'active' === $state && isset( $partner['skill'] ) ) {
-				$skills[] = $partner['skill'];
+				$skills = array_merge( array( $partner['skill'] ), $partner['more'] ?? array() );
 			}
 			foreach ( $registered as $skill => $registration ) {
 				if ( $partner['name'] === $registration['plugin'] ) {
@@ -287,8 +300,14 @@ final class Skills {
 
 	public static function listing(): array {
 		$detected = self::detected();
-		$plugins  = array_column( self::integrations(), null, 'skill' );
-		$skills   = array();
+		$plugins  = array();
+		foreach ( self::partners() as $partner ) {
+			// A plugin's own skill and the ones it ships alongside, such as Core Commerce in Core Forms.
+			foreach ( isset( $partner['skill'] ) ? array_merge( array( $partner['skill'] ), $partner['more'] ?? array() ) : array() as $name ) {
+				$plugins[ $name ] = $partner;
+			}
+		}
+		$skills = array();
 		foreach ( self::CATALOG as $skill ) {
 			$skills[] = array(
 				'name'        => $skill,

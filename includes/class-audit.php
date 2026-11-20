@@ -85,9 +85,11 @@ final class Audit {
 			return 'wp ' . implode( ' ', $words );
 		}
 		foreach ( array(
-			'post_id' => 'post',
-			'postId'  => 'post',
-			'id'      => 'attachment',
+			'post_id'       => 'post',
+			'postId'        => 'post',
+			'form_id'       => 'form',
+			'submission_id' => 'entry',
+			'id'            => 'attachment',
 		) as $key => $label ) {
 			if ( isset( $input[ $key ] ) && is_int( $input[ $key ] ) ) {
 				return $label . ' ' . $input[ $key ];

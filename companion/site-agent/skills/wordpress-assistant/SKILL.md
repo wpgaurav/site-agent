@@ -1,6 +1,6 @@
 ---
 name: wordpress-assistant
-description: Inspect and manage a WordPress site connected through Site Agent. Use for content, media, drafts, builder edits, and plugin workflows for MailerHive, Core Support, FluentCart, GT Extensions for FluentCart, Stackless and Page Blocks Builder (PBB), with live capability discovery and verification.
+description: Inspect and manage a WordPress site connected through Site Agent. Use for content, media, drafts, builder edits, and plugin workflows for Core Forms, Core Commerce, MailerHive, Core Support, FluentCart, GT Extensions for FluentCart, Stackless and Page Blocks Builder (PBB), with live capability discovery and verification.
 ---
 
 # Site Agent
@@ -39,7 +39,7 @@ On Bricks 2.4+ sites with Bricks tools enabled, the connection also lists Bricks
 
 ## Plugin workflows
 
-Before working on MailerHive, Core Support, FluentCart, GT Extensions for FluentCart, Stackless or Page Blocks Builder (PBB), inspect site-context.integrations and call list-skills, then get-skill for the matching guide. The bundled skill names are mailerhive, core-support, fluentcart, gt-extensions-fluentcart, stackless and page-blocks-builder. They remain readable when the plugin is missing; detected and integration state describe the actual installation, not permission or API availability.
+Before working on Core Forms, Core Commerce, MailerHive, Core Support, FluentCart, GT Extensions for FluentCart, Stackless or Page Blocks Builder (PBB), inspect site-context.integrations and call list-skills, then get-skill for the matching guide. The bundled skill names are core-forms, core-commerce, mailerhive, core-support, fluentcart, gt-extensions-fluentcart, stackless and page-blocks-builder. They remain readable when the plugin is missing; detected and integration state describe the actual installation, not permission or API availability.
 
 Prefer the installed plugin's additional workflow skill when present: gtfc-store/invoice/quote, stackless-store/invoice/quote or gt-page-blocks. They describe its native agent commands. The bundled guides explain record ownership, source paths, older-version fallbacks and verification. PHP-backed workflows still need execute-php explicitly enabled for this connection, even for reads. Never enable it or use another entry point to bypass a refusal.
 

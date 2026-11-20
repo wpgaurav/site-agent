@@ -37,6 +37,8 @@ dependencies or customer data copied into the package.
 | `gt-extensions-fluentcart` | GT Extensions 2.12.x, revision `f94a0d8` | `gtfc_agent`, agent skill registrations and module gates |
 | `stackless` | Stackless 1.5.1, revision `56f76dc`, plus optional theme source | `stackless_agent`, live command listing, module functions and registered skills |
 | `page-blocks-builder` | PBB 4.2.0, revision `ebf43ce` | `gt_pb_agent`, `pbb/v1`, working-content hashes/autosaves, library ownership and templates |
+| `core-forms` | Core Forms 5.1.4 (`dac6dde`) and 5.2.0-beta.1 (`07adea6`) | `cf/v1` forms, schema, editor-state, publishing, rehearsal, submissions and action-test routes; `FormDefinition`, `SchemaRenderer`, `ActionSettings`, `Credentials`, `core-forms` CLI |
+| `core-commerce` | Core Forms 5.1.4 and 5.2.0-beta.1, same revisions | `core-forms/*` abilities in `LicenseAbilities` and `ClientInvoiceApi`, `LicenseApi`, `core-forms license` and `commerce` CLI |
 
 Core Support's checkout has unrelated ongoing changes; they were inspected only, not
 edited. Installed source and live discovery take precedence over these reference versions.

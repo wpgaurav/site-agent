@@ -30,6 +30,9 @@ final class Config {
 			'cli_execute'   => false,
 			'bricks'        => false,
 			'core_support'  => false,
+			'core_forms'    => false,
+			'core_commerce' => false,
+			'core_tables'   => false,
 			'audit_enabled' => true,
 			'delete_data'   => false,
 		);
@@ -64,12 +67,21 @@ final class Config {
 		return defined( 'SITE_AGENT_ALLOW_EXECUTION' ) && ! SITE_AGENT_ALLOW_EXECUTION;
 	}
 
-	/** Whether wp-config.php constants (and, for Bricks or Core Support tools, the active plugin) leave a tool group usable, independent of the settings screen. */
+	/** Whether wp-config.php constants (and, for plugin tool groups, the active plugin) leave a tool group usable, independent of the settings screen. */
 	public static function group_available( string $group ): bool {
 		if ( 'bricks' === $group && ! Bricks::available() ) {
 			return false;
 		}
 		if ( 'core_support' === $group && ! Core_Support::available() ) {
+			return false;
+		}
+		if ( 'core_forms' === $group && ! Core_Forms::available() ) {
+			return false;
+		}
+		if ( 'core_commerce' === $group && ! Core_Commerce::available() ) {
+			return false;
+		}
+		if ( 'core_tables' === $group && ! Core_Tables::available() ) {
 			return false;
 		}
 		if ( in_array( $group, self::CODE_GROUPS, true ) && self::code_locked() ) {

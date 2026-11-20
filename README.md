@@ -10,7 +10,7 @@ Site Agent is free and open source. The complete release ZIP and a free automati
 
 ## Companion Package
 
-The current source builds `site-agent-companion-1.0.0.zip` from `companion/site-agent/`. It supplies the approved icon, a credential-free MCP connection and a WordPress workflow skill for compatible ChatGPT/Codex hosts. The skill covers site inspection, raw-content audits, draft preparation, hash-checked edits and enabled developer tools.
+The current source builds `site-agent-companion-1.1.0.zip` from `companion/site-agent/`. It supplies the approved icon, a credential-free MCP connection and a WordPress workflow skill for compatible ChatGPT/Codex hosts. The skill covers site inspection, raw-content audits, draft preparation, hash-checked edits and enabled developer tools.
 
 This companion archive is separate from the WordPress installable ZIP and contains no credentials. With OAuth connections on (0.4.0+), an OAuth-capable host signs in through WordPress and needs nothing else. Otherwise, authentication is configured privately through the host with a WordPress Application Password in a Basic Authorization header or an explicitly enabled authenticated URL. ChatGPT web compatibility with credential-bearing URLs has not been verified.
 
@@ -66,6 +66,15 @@ define( 'SITE_AGENT_DISABLED', true );
 | `site-agent-run-bricks-ability` | Bricks tools | Run a Bricks ability with its parameters |
 | `bricks-*` | Bricks tools | Bricks' fast-path abilities, served under Bricks' own tool names |
 | `core-support-*` | Core Support tools | Core Support's own abilities: new tickets, replies and feature requests since a cursor, tickets, team alerts and the roadmap |
+| `site-agent-core-forms-overview` | Core Forms tools | Core Forms version, modules, action types with their default settings, field types, default form settings and messages, global settings (secrets hidden) and active wp-config.php constants |
+| `site-agent-core-forms-list-forms` / `-get-form` | Core Forms tools | Forms with shortcode, actions and entry counts; one form's draft definition with its fingerprint, fields, markup, settings, actions and messages |
+| `site-agent-core-forms-save-form` | Core Forms tools | Create a form or change it under its fingerprint: fields rendered by Core Forms' own renderer and saved with their schema, or code-view markup; title, slug, settings and messages |
+| `site-agent-core-forms-save-actions` | Core Forms tools | Replace the ordered action list; unchanged actions kept by reference, stored secrets kept as `[stored]`, mapped field names checked by Core Forms |
+| `site-agent-core-forms-rehearse` / `-test-action` | Core Forms tools | Plan a submission without storing or sending anything; run one action for real with sample answers |
+| `site-agent-core-forms-publish-form` / `-duplicate-form` / `-trash-form` | Core Forms tools | Draft publishing (start, publish, discard), Core Forms' own duplicate, and moving a form to the trash |
+| `site-agent-core-forms-list-submissions` / `-get-submission` / `-update-submission` | Core Forms tools | Read entries and set their status or spam flag |
+| `core-forms-*` | Core Commerce tools | Core Commerce's own abilities: products, plans, releases, orders, licenses, activations, subscriptions, payment routing and client invoices |
+| `core-tables-*` | Core Tables tools | Core Tables' own abilities: find, read, create, edit, publish, embed, export and import tables, plus revisions, trash, refresh sources and appearance defaults with Core Tables 1.3 or later |
 
 Every tool argument has a schema description, and every tool declares an output schema. Errors report the underlying message and line, because the caller already controls the failing code.
 
@@ -87,15 +96,27 @@ The settings page shows diagnostics for HTTPS detection (including proxies that 
 
 ## Builder and Plugin Skills
 
-Site Agent bundles eleven read-only skills under `skills/`: Gutenberg, GenerateBlocks, Elementor, Bricks, Divi, MailerHive, Core Support, FluentCart, GT Extensions for FluentCart, Stackless for WooCommerce and Page Blocks Builder (PBB). An MCP client reads them with `site-agent-list-skills` and `site-agent-get-skill`; they need only the base Enable Site Agent switch and contain no site data. The builder guides explain layout storage and verification. Plugin guides explain their records, native agent APIs or REST/CLI routes, module dependencies and verification.
+Site Agent bundles thirteen read-only skills under `skills/`: Gutenberg, GenerateBlocks, Elementor, Bricks, Divi, Core Forms, Core Commerce, MailerHive, Core Support, FluentCart, GT Extensions for FluentCart, Stackless for WooCommerce and Page Blocks Builder (PBB). An MCP client reads them with `site-agent-list-skills` and `site-agent-get-skill`; they need only the base Enable Site Agent switch and contain no site data. The builder guides explain layout storage and verification. Plugin guides explain their records, native agent APIs or REST/CLI routes, module dependencies and verification.
 
-`site-context.integrations` reports the six plugin workflows separately from `builders`, including plugin file, version, active/installed/missing state and associated skills. Guides remain available when a plugin is missing or inactive; a listed skill does not grant API access. PHP and WP-CLI workflows still require their respective opt-ins and connection permissions. The guides preserve native validation and distinguish drafts, publication, payment operations and customer messages. No new execution entry point or automatically enabled group is added.
+`site-context.integrations` reports the seven plugin workflows separately from `builders`, including plugin file, version, active/installed/missing state and associated skills. Guides remain available when a plugin is missing or inactive; a listed skill does not grant API access. PHP and WP-CLI workflows still require their respective opt-ins and connection permissions. The guides preserve native validation and distinguish drafts, publication, payment operations and customer messages. No new execution entry point or automatically enabled group is added.
 
 Active plugins can supply more specific skills: GT Extensions provides `gtfc-store`, `gtfc-invoice` and `gtfc-quote`; Stackless provides corresponding `stackless-*` skills when its modules allow them; PBB provides `gt-page-blocks`. Read these for the installed version's detailed commands. The bundled guides use different names so these registrations continue to work. See [the integration source and verification notes](docs/plugin-workflows.md).
 
 `site-agent-site-context` lists the active builders, and `site-agent-get-content` reports a post's `builder`: `gutenberg`, `generateblocks`, `elementor`, `bricks`, `divi` or `classic`. Bricks counts when its editor mode is `bricks`, or when it has layout data and the mode is not `wordpress` (how Bricks itself decides). GenerateBlocks counts for its free and Pro blocks and for its own `gblocks_*` records such as global styles. Elementor, Bricks and Divi 4 keep the visible layout outside the block markup that `save-content` writes. Their skills either produce paste or import files for the builder's own interface or, when the user asks for a direct change, use the opt-in PHP or WP-CLI tools with a snapshot, a hash check and a read-back. Because PHP code and return values are limited to 64 KiB, the skills read outlines and single elements and send element-level patches instead of whole layouts. Skills are guidance for the client, not a safety layer; the tool groups and their limits still decide what a connection can do.
 
 The Bricks and GenerateBlocks skills are adapted from the author's [bricks-skills](https://github.com/wpgaurav/bricks-skills) and [generateblocks-skills](https://github.com/wpgaurav/generateblocks-skills) repositories, and the Gutenberg block reference from [WordPress-skills](https://github.com/wpgaurav/WordPress-skills). `skills/sources.json` pins each source commit and the SHA-256 of every imported file. `python3 bin/sync-skills.py` validates the bundled skills offline, and `--pull` re-imports the pinned files.
+
+## Core Forms and Core Commerce
+
+**Core Forms tools** (`core_forms`, off by default) need Core Forms 5.1 or later (field wrapper classes need 5.2). They call Core Forms' own `cf/v1` REST routes inside the request as the signed-in administrator, so Core Forms' capability and form-scope checks, fingerprint conflicts, locks, sanitizing, revisions and field-mapping validation all apply. Site Agent adds what an assistant can't do safely by hand: it renders a field list into markup with Core Forms' own renderer (the multi-step renderer for stepped layouts) and saves both together, as the visual builder does; it saves messages under the same version lock; it refuses new or edited actions whose type isn't registered; it gives new actions a stable `_cf_action_id`; and it never returns stored secrets. Any setting whose key names a secret, token, password or API key is shown as `[stored]`, and sending `[stored]` back keeps the stored value. Trashing keeps a form's entries; there is no permanent-delete or entry-delete tool. Successful calls are audited with `form N` or `entry N` as the target.
+
+**Core Commerce tools** (`core_commerce`, off by default) serve Core Commerce's own abilities, registered by Core Forms' Licensing and Client Invoices modules in the `core-forms-commerce` category, as `core-forms-*` tools. Only the 42 abilities listed in `Core_Commerce::SERVED` are served, so a later ability or one another plugin registers under the prefix never reaches a connection that approved the group. Core Commerce keeps its own permission checks, and each call is audited with the record ID only.
+
+The `core-forms` and `core-commerce` skills explain both workflows, wp-config.php constants (`CORE_FORMS_*`, `GT_TURNSTILE_*`, `CORE_FORMS_LICENSE_KEY`), and the REST and WP-CLI fallbacks for connections without these groups.
+
+## Core Tables
+
+**Core Tables tools** (`core_tables`, off by default) serve Core Tables' own abilities, registered in the `core-tables` category, as `core-tables-*` tools. Only the abilities listed in `Core_Tables::SERVED` are served, and only those Core Tables itself opens to MCP: its AI settings (MCP read, and write for changes) still decide exposure, and its capability and ownership checks still run. Names a given Core Tables version doesn't register are simply not served. Core Tables registers its own `core-tables` skill through `site_agent_skills`; Site Agent bundles none for it. Calls are audited with `table N` as the target.
 
 ## Bricks Abilities
 
@@ -172,7 +193,7 @@ python3 bin/sync-skills.py
 bash bin/build.sh
 ```
 
-Tests refuse to load an installation without a `.site-agent-test-install` marker. Never place that marker on a real site. HTTP smoke tests also verify that the authenticated server reports the same fixture path and marker hash before any mutation. Integration tests modify disposable options, users, posts, and fixture files. The build uses a runtime allowlist and excludes tests, development dependencies, Composer metadata, docs, and screenshots. Both package builders validate temporary ZIPs and checksums before replacing existing artifacts and restore the previous pair if publication fails. Ship `dist/site-agent-1.0.0.zip`, not a GitHub source archive.
+Tests refuse to load an installation without a `.site-agent-test-install` marker. Never place that marker on a real site. HTTP smoke tests also verify that the authenticated server reports the same fixture path and marker hash before any mutation. Integration tests modify disposable options, users, posts, and fixture files. The build uses a runtime allowlist and excludes tests, development dependencies, Composer metadata, docs, and screenshots. Both package builders validate temporary ZIPs and checksums before replacing existing artifacts and restore the previous pair if publication fails. Ship `dist/site-agent-1.1.0.zip`, not a GitHub source archive.
 
 ## License and Contributions
 
